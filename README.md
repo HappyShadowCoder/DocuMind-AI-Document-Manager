@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DocuMind — AI Document Manager
 
-## Getting Started
+What it is
+-----------
+DocuMind is an AI-powered document management system that helps teams store, search, and interact with documents using OCR and large language models. The app is built with Next.js (frontend), Prisma (ORM), and provides PDF-chat, OCR ingestion, folder organization, and user/auth admin features.
 
-First, run the development server:
+Features
+--------
+- Upload and store documents (PDF, images, text)
+- OCR processing and text extraction
+- Chat and search inside PDFs and other files using LLMs
+- Folder-based organization and access control
+- User authentication and admin panel
+- Background processing and concurrency controls
+- Prisma-based models and migrations
+
+Requirements
+------------
+- Node.js 18+ (LTS recommended)
+- npm (or yarn/pnpm)
+- PostgreSQL (recommended) or other supported database
+- Environment variables for database and LLM/OCR providers
+
+Setup (local development)
+--------------------------
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/HappyShadowCoder/DocuMind-AI-Document-Manager.git
+cd DocuMind-AI-Document-Manager
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies (root and frontend):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run install:Code --if-present
+# or explicitly:
+npm install --prefix Code
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Create environment file:
 
-## Learn More
+```bash
+cp .env.example .env
+# then edit `.env` and set the values below
+```
 
-To learn more about Next.js, take a look at the following resources:
+Important environment variables
+- `DATABASE_URL` — Postgres connection string
+- `NEXTAUTH_SECRET` or `SESSION_SECRET` — session secret for auth
+- `OCR_API_KEY` — optional external OCR service key
+- `NEXT_PUBLIC_BASE_URL` — (optional) public base URL for frontend
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Generate Prisma client and run migrations:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx prisma generate --schema=prisma/schema.prisma
+npx prisma migrate dev --name init --schema=prisma/schema.prisma
+node prisma/seed.ts # optional: seed initial data
+```
 
-## Deploy on Vercel
+5. Start development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev --prefix frontend
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Project layout
+--------------
+- `Code/` — Next.js application and frontend source
+- `prisma/` — Prisma schema and seed scripts
+- `public/uploads/` — uploaded files storage
+- `Code/src/lib/` — helpers (OCR, pdf-chat, prisma client)
+
+Deploy
+------
+- Build the frontend: `npm run build --prefix Code`
+- Start: `npm start --prefix frontend` (or use a platform like Vercel/Render)
+- Ensure production environment variables and database are configured
+
+Contributing
+------------
+1. Fork the repository and create a feature branch
+2. Run the app locally and add tests for new behavior
+3. Open a pull request with a clear description of changes
+
+License
+-------
+Add a `LICENSE` file (e.g., MIT) for open-source distribution.
+
+If you want, I can also:
+- create a `.env.example` with the recommended variables
+- commit these changes to a branch and push to your GitHub repo
+- create a `LICENSE` file
+

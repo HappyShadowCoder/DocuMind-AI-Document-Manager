@@ -1,0 +1,119 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [citext(schema: "public"), vector]
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  email              String     @unique
+  fullName           String?
+  role               Role       @default(user)
+  passwordHash       String
+  storageLimitBytes  BigInt     @default(5368709120)
+  mustChangePassword Boolean    @default(false)
+  aiProvider         AiProvider @default(ollama)
+  openAiApiKey       String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  files              File[]     @relation("UserFiles")
+  folders            Folder[]   @relation("UserFolders")
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  parentId  String?
+  shared    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ownerId   String
+  files     File[]
+  owner     User     @relation("UserFolders", fields: [ownerId], references: [id], onDelete: Cascade)
+  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderToFolder")
+
+  @@index([ownerId])
+  @@index([parentId])
+}
+
+model File {
+  id                String           @id @default(cuid())
+  name              String
+  type              String
+  sizeBytes         BigInt
+  path              String
+  shared            Boolean          @default(false)
+  ownerId           String
+  folderId          String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  processingStatus  ProcessingStatus @default(idle)
+  processingError   String?
+  summary           String?
+  processedAt       DateTime?
+  chunkCount        Int              @default(0)
+  embeddingProvider AiProvider?
+  isScanned         Boolean          @default(false)
+  ocrEngineUsed     String?
+  chatMessages      ChatMessage[]
+  chunks            DocumentChunk[]
+  folder            Folder?          @relation(fields: [folderId], references: [id])
+  owner             User             @relation("UserFiles", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([folderId])
+}
+
+model DocumentChunk {
+  id         String                @id @default(cuid())
+  fileId     String
+  chunkIndex Int
+  pageNumber Int
+  content    String
+  tokenCount Int?
+  /// Fixed 768-dimension vector column for pgvector storage
+  embedding  Unsupported("vector")
+  createdAt  DateTime              @default(now())
+  file       File                  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([fileId, chunkIndex])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  fileId    String
+  content   String
+  createdAt DateTime @default(now())
+  role      String
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum AiProvider {
+  ollama
+  openai
+}
+
+enum ProcessingStatus {
+  idle
+  processing
+  ready
+  failed
+}
+
+enum ChatRole {
+  user
+  assistant
+  system
+}
