@@ -85,12 +85,3 @@ Contributing
 2. Run the app locally and add tests for new behavior
 3. Open a pull request with a clear description of changes
 
-License
--------
-Add a `LICENSE` file (e.g., MIT) for open-source distribution.
-
-If you want, I can also:
-- create a `.env.example` with the recommended variables
-- commit these changes to a branch and push to your GitHub repo
-- create a `LICENSE` file
-
