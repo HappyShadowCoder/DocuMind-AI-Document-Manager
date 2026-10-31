@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="w-full border-t border-slate-200 bg-[#FAFAFA] text-slate-900 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
       <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          
+
           {/* Brand & Description */}
           <div className="md:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3 group inline-flex">
@@ -16,7 +16,7 @@ export function Footer() {
                 <div className="h-2.5 w-2.5 rounded-full bg-[#FAFAFA] dark:bg-slate-950" />
               </div>
               <span className="font-display text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
-                Knowledge Spatial
+                Office Doc Manager
               </span>
             </Link>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
@@ -70,7 +70,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <p>© {new Date().getFullYear()} Knowledge Spatial All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Office Doc Manager All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link href="/terms" className="hover:underline">Terms of Service</Link>

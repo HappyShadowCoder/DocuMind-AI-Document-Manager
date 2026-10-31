@@ -22,6 +22,12 @@ import {
   Share2,
   Wifi,
   Cpu,
+  Sparkles,
+  Key,
+  Eye,
+  EyeOff,
+  Zap,
+  ExternalLink,
 } from "lucide-react";
 
 export interface AdminUser {
@@ -123,6 +129,18 @@ export default function AdminPanel() {
   const [llmSaving, setLlmSaving] = useState(false);
   const [llmError, setLlmError] = useState<string | null>(null);
 
+  // AI Provider & OpenAI Key Settings State
+  const [aiProvider, setAiProvider] = useState<"ollama" | "openai">("ollama");
+  const [aiApiKey, setAiApiKey] = useState("");
+  const [hasAiApiKey, setHasAiApiKey] = useState(false);
+  const [envKeyConfigured, setEnvKeyConfigured] = useState(false);
+  const [showAiApiKey, setShowAiApiKey] = useState(false);
+  const [aiLoading, setAiLoading] = useState(true);
+  const [aiSaving, setAiSaving] = useState(false);
+  const [aiTesting, setAiTesting] = useState(false);
+  const [aiTestResult, setAiTestResult] = useState<{ valid: boolean; message?: string; error?: string } | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   // Fetch local network IP from server API or construct network link
   useEffect(() => {
     async function resolveNetworkUrl() {
@@ -210,6 +228,71 @@ export default function AdminPanel() {
     }
   }
 
+  // Fetch AI provider and OpenAI API key settings
+  async function fetchAiSettings() {
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/settings/ai");
+      if (res.ok) {
+        const data = await res.json();
+        setAiProvider(data.provider || "ollama");
+        setAiApiKey(data.apiKey || "");
+        setHasAiApiKey(Boolean(data.hasApiKey));
+        setEnvKeyConfigured(Boolean(data.envKeyConfigured));
+      }
+    } catch (err) {
+      console.error("Failed to load AI settings:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function handleTestAiKey() {
+    setAiTesting(true);
+    setAiTestResult(null);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/settings/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "test", apiKey: aiApiKey }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.valid) {
+        setAiTestResult({ valid: true, message: data.message || "Valid OpenAI API key!" });
+      } else {
+        setAiTestResult({ valid: false, error: data.error || "OpenAI rejected key." });
+      }
+    } catch (err: any) {
+      setAiTestResult({ valid: false, error: err.message || "Network error" });
+    } finally {
+      setAiTesting(false);
+    }
+  }
+
+  async function handleSaveAiSettings() {
+    setAiSaving(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/settings/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: aiProvider, apiKey: aiApiKey }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setAiError(data.error || "Failed to save AI settings.");
+        return;
+      }
+      setHasAiApiKey(data.hasApiKey);
+      setToastMessage(data.message || "AI settings successfully updated!");
+    } catch (err: any) {
+      setAiError(err.message || "Network error occurred while saving.");
+    } finally {
+      setAiSaving(false);
+    }
+  }
+
   async function fetchUsersAndMetrics(showRefreshSpinner = false) {
     if (showRefreshSpinner) setRefreshing(true);
     setError(null);
@@ -254,6 +337,7 @@ export default function AdminPanel() {
     }
 
     loadData();
+    fetchAiSettings();
     return () => {
       ignore = true;
     };
@@ -517,6 +601,212 @@ export default function AdminPanel() {
               )}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* AI ENGINE & MODEL SETTINGS (Ollama vs OpenAI) */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-slate-900">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  AI Engine & Model Provider
+                </h3>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                  aiProvider === "openai"
+                    ? "bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300"
+                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                }`}>
+                  Active: {aiProvider}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                Toggle between offline local Ollama and cloud OpenAI (GPT-4o-mini) for document intelligence and AI chat.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSaveAiSettings}
+              disabled={aiSaving || aiLoading}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+            >
+              {aiSaving ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Check className="h-3.5 w-3.5" />
+              )}
+              Save AI Settings
+            </button>
+          </div>
+        </div>
+
+        {/* Provider Toggle Buttons */}
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Ollama Card */}
+          <div
+            onClick={() => {
+              setAiProvider("ollama");
+              setAiError(null);
+            }}
+            className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+              aiProvider === "ollama"
+                ? "border-blue-600 bg-blue-50/50 shadow-sm ring-2 ring-blue-500/20 dark:border-blue-500 dark:bg-blue-950/30"
+                : "border-slate-200 bg-slate-50/50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                  <Cpu className="h-4 w-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Offline (Ollama)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    llama3.1:8b • Local host machine
+                  </p>
+                </div>
+              </div>
+              {aiProvider === "ollama" && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white text-xs">
+                  ✓
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* OpenAI Card */}
+          <div
+            onClick={() => {
+              setAiProvider("openai");
+              setAiError(null);
+            }}
+            className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+              aiProvider === "openai"
+                ? "border-blue-600 bg-blue-50/50 shadow-sm ring-2 ring-blue-500/20 dark:border-blue-500 dark:bg-blue-950/30"
+                : "border-slate-200 bg-slate-50/50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Cloud (OpenAI)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    gpt-4o-mini • High reasoning accuracy
+                  </p>
+                </div>
+              </div>
+              {aiProvider === "openai" && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white text-xs">
+                  ✓
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* OpenAI Key Input */}
+        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <Key className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
+              <span>OpenAI API Key</span>
+              {envKeyConfigured && !aiApiKey && (
+                <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                  Detected in .env
+                </span>
+              )}
+              {hasAiApiKey && !envKeyConfigured && (
+                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                  Saved in Profile
+                </span>
+              )}
+            </label>
+            <a
+              href="https://platform.openai.com/api-keys"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Get Key <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+
+          <div className="mt-2.5 flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type={showAiApiKey ? "text" : "password"}
+                value={aiApiKey}
+                onChange={(e) => {
+                  setAiApiKey(e.target.value);
+                  setAiTestResult(null);
+                }}
+                placeholder={
+                  hasAiApiKey
+                    ? "•••••••••••••••••••••••• (Key saved, type to replace)"
+                    : "sk-proj-..."
+                }
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+              />
+              <button
+                type="button"
+                onClick={() => setShowAiApiKey(!showAiApiKey)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                {showAiApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleTestAiKey}
+              disabled={aiTesting || (!aiApiKey.trim() && !hasAiApiKey && !envKeyConfigured)}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {aiTesting ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Zap className="h-3.5 w-3.5 text-amber-500" />
+              )}
+              Test Key
+            </button>
+          </div>
+
+          {aiTestResult && (
+            <div
+              className={`mt-2.5 flex items-start gap-2 rounded-xl p-2.5 text-xs ${
+                aiTestResult.valid
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+                  : "border border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+              }`}
+            >
+              {aiTestResult.valid ? (
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+              )}
+              <span>{aiTestResult.message || aiTestResult.error}</span>
+            </div>
+          )}
+
+          {aiError && (
+            <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>{aiError}</span>
+            </div>
+          )}
         </div>
       </div>
 

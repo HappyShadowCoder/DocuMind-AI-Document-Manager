@@ -22,7 +22,9 @@ import {
   Info,
   BookOpen,
   Search,
+  Sparkles,
 } from "lucide-react";
+import AiSettingsModal from "@/components/settings/ai-settings-modal";
 
 interface UserSession {
   id: string;
@@ -46,6 +48,7 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -261,6 +264,16 @@ export default function Navbar() {
                         <button
                           onClick={() => {
                             setDropdownOpen(false);
+                            setAiSettingsOpen(true);
+                          }}
+                          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                        >
+                          <Sparkles className="h-4 w-4 text-violet-500" />
+                          AI Engine & Settings
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
                             setDetailsModalOpen(true);
                           }}
                           className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -404,6 +417,17 @@ export default function Navbar() {
                       Admin Panel
                     </Link>
                   )}
+
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setAiSettingsOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    <Sparkles className="h-5 w-5 text-violet-500" />
+                    AI Engine & Settings
+                  </button>
 
                   <button
                     onClick={() => {
@@ -555,9 +579,20 @@ export default function Navbar() {
                   <Cpu className="h-4 w-4 text-blue-500" />
                   <span>AI Engine</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-900 uppercase dark:text-white">
-                  {user.aiProvider || "Ollama"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold uppercase text-slate-900 dark:text-white">
+                    {user.aiProvider || "Ollama"}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      setAiSettingsOpen(true);
+                    }}
+                    className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-900/60"
+                  >
+                    Configure
+                  </button>
+                </div>
               </div>
 
               {user.createdAt && (
@@ -585,6 +620,14 @@ export default function Navbar() {
           </div>
         </div>
       )}
+      {/* AI Settings Modal */}
+      <AiSettingsModal
+        isOpen={aiSettingsOpen}
+        onClose={() => setAiSettingsOpen(false)}
+        onSaved={(newProvider) => {
+          setUser((prev) => (prev ? { ...prev, aiProvider: newProvider } : prev));
+        }}
+      />
     </>
   );
 }

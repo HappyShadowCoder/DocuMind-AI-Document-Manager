@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyJwt } from "@/lib/auth";
 import { getAiSettingsForUser, streamChatCompletion } from "@/lib/ai";
 import { retrieveFolderDocumentContext } from "@/lib/pdf-processing";
-import { appendSourcePages, buildPdfChatMessages } from "@/lib/pdf-chat";
+import { appendSourcePages, buildFolderChatMessages } from "@/lib/pdf-chat";
 import { tryAcquireLlmSlot, releaseLlmSlot } from "@/lib/llm-concurrency";
+import {
+  prepareSemanticCacheContext,
+  lookupSemanticCache,
+  storeSemanticCache,
+  streamCachedAnswer,
+} from "@/lib/semantic-cache";
 
 function sanitizeRecord<T>(data: T): T {
   return JSON.parse(
@@ -24,6 +31,17 @@ export async function GET(
     const folder = await prisma.folder.findUnique({ where: { id: folderId } });
     if (!folder) {
       return NextResponse.json({ error: "Folder not found." }, { status: 404 });
+    }
+
+    // Block non-admin users from accessing admin-only shared folder chats
+    if (folder.shared && folder.accessLevel === "admin") {
+      const token = _request.cookies.get("auth_token")?.value;
+      const payload = token ? await verifyJwt(token) : null;
+      const isOwner = payload?.id === folder.ownerId;
+      const isAdmin = payload?.role === "admin";
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json({ error: "Forbidden: You do not have permission to access this folder." }, { status: 403 });
+      }
     }
 
     const pdfFiles = await prisma.file.findMany({
@@ -84,9 +102,24 @@ export async function POST(
       return NextResponse.json({ error: "Folder not found." }, { status: 404 });
     }
 
+    const token = request.cookies.get("auth_token")?.value;
+    const payload = token ? await verifyJwt(token) : null;
+
+    // Block non-admin users from chatting with admin-only shared folders
+    if (folderRecord.shared && folderRecord.accessLevel === "admin") {
+      const isOwner = payload?.id === folderRecord.ownerId;
+      const isAdmin = payload?.role === "admin";
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json({ error: "Forbidden: You do not have permission to access this folder." }, { status: 403 });
+      }
+    }
+
     const pdfFiles = await prisma.file.findMany({
       where: { folderId, type: "pdf", processingStatus: "ready" },
       orderBy: { updatedAt: "asc" },
+      include: {
+        documentMetadata: true,
+      },
     });
 
     if (pdfFiles.length === 0) {
@@ -104,43 +137,272 @@ export async function POST(
     }
     slotReleased = false;
 
-    const settings = await getAiSettingsForUser(folderRecord.ownerId);
-    const { contextText, sourcePages } = await retrieveFolderDocumentContext(
-      folderId,
-      userMessageText,
-      settings
+    const fileIds = pdfFiles.map((f) => f.id);
+
+    const pageCounts = await prisma.documentChunk.groupBy({
+      by: ["fileId"],
+      where: { fileId: { in: fileIds } },
+      _max: { pageNumber: true },
+    });
+
+    const pageCountByFileId = new Map(
+      pageCounts.map((pc) => [pc.fileId, pc._max.pageNumber || 1])
     );
 
-    const chatMessages = buildPdfChatMessages(
+    const filesInventory = pdfFiles.map((file) => {
+      const meta = file.documentMetadata;
+      const actsAndSections = Array.isArray(meta?.actsAndSections)
+        ? (meta.actsAndSections as string[])
+        : null;
+      return {
+        id: file.id,
+        fileName: file.name,
+        totalPagesCount: pageCountByFileId.get(file.id) || 1,
+        firNumber: meta?.firNumber,
+        firDate: meta?.firDate ? meta.firDate.toISOString().split("T")[0] : null,
+        district: meta?.district,
+        subDivision: meta?.subDivision,
+        policeStation: meta?.policeStation,
+        propertyLoss: meta?.propertyLoss,
+        actsAndSections,
+        zeroFirReference: meta?.zeroFirReference,
+      };
+    });
+
+    const chatUserId = (payload?.id as string) || folderRecord.ownerId;
+    const settings = await getAiSettingsForUser(chatUserId);
+
+    // Pre-compute embedding + fingerprint in parallel with context retrieval
+    const [{ embedding: questionEmbedding, docFingerprint }, { contextText, sourcePages }] =
+      await Promise.all([
+        prepareSemanticCacheContext(userMessageText, "FOLDER", folderId, settings),
+        retrieveFolderDocumentContext(folderId, userMessageText, settings),
+      ]);
+
+    const requestedSessionId = typeof body?.sessionId === "string" ? body.sessionId : null;
+
+    let chatSession = requestedSessionId
+      ? await prisma.chatSession.findFirst({
+          where: {
+            id: requestedSessionId,
+            entityType: "FOLDER",
+            entityId: folderId,
+          },
+        })
+      : null;
+
+function generateChatTitle(query: string): string {
+  let clean = query.replace(/[#*`_]/g, "").replace(/\s+/g, " ").trim();
+  clean = clean.replace(
+    /^(can you please|could you please|please|can you|could you|tell me about|what is|show me|find all|list all|give me|check)\s+/i,
+    ""
+  );
+  if (!clean) return "New Chat";
+  const capped = clean.charAt(0).toUpperCase() + clean.slice(1);
+  if (capped.length <= 36) return capped;
+  const truncated = capped.slice(0, 36);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
+}
+
+    if (!chatSession) {
+      chatSession = await prisma.chatSession.create({
+        data: {
+          entityType: "FOLDER",
+          entityId: folderId,
+          title: generateChatTitle(userMessageText),
+        },
+      });
+    } else if (chatSession.title === "New Chat" || !chatSession.title) {
+      const derivedTitle = generateChatTitle(userMessageText);
+      await prisma.chatSession.update({
+        where: { id: chatSession.id },
+        data: { title: derivedTitle },
+      });
+      chatSession.title = derivedTitle;
+    }
+
+    await prisma.chatMessage.create({
+      data: {
+        sessionId: chatSession.id,
+        role: "user",
+        content: userMessageText,
+        sources: [],
+      },
+    });
+
+    const recentMessages = await prisma.chatMessage.findMany({
+      where: { sessionId: chatSession.id },
+      orderBy: { createdAt: "asc" },
+      take: 10,
+      select: { role: true, content: true },
+    });
+
+    // -----------------------------------------------------------------------
+    // Semantic cache lookup (after recentMessages so we know conversational depth)
+    const priorTurns = Math.max(0, recentMessages.length - 1);
+    const cacheHit = await lookupSemanticCache(
+      userMessageText,
+      questionEmbedding,
+      "FOLDER",
+      folderId,
+      docFingerprint,
+      settings,
+      priorTurns
+    );
+
+    if (cacheHit) {
+      await prisma.chatMessage.create({
+        data: {
+          sessionId: chatSession.id,
+          role: "assistant",
+          content: cacheHit.answerText,
+          sources: cacheHit.sourcePages,
+        },
+      });
+      await prisma.chatSession.update({
+        where: { id: chatSession.id },
+        data: { updatedAt: new Date() },
+      });
+      releaseSlotOnce();
+
+      const encoder = new TextEncoder();
+      const cachedAnswer = cacheHit.answerText;
+      const cachedSources = cacheHit.sourcePages;
+      const stream = new ReadableStream({
+        start(controller) {
+          streamCachedAnswer(cachedAnswer, controller, encoder);
+          if (cachedSources.length > 0 && !cachedAnswer.includes("[[SOURCES:")) {
+            controller.enqueue(
+              encoder.encode(`\n\n[[SOURCES:${cachedSources.join(",")}]]`)
+            );
+          }
+          controller.close();
+        },
+      });
+      return new NextResponse(stream, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Transfer-Encoding": "chunked",
+          "X-Session-Id": chatSession.id,
+          "X-Cache": "HIT",
+        },
+      });
+    }
+    // -----------------------------------------------------------------------
+
+    const chatMessages = buildFolderChatMessages(
       folderRecord.name,
+      filesInventory,
       contextText,
       userMessageText,
-      []
+      recentMessages
     );
 
     const encoder = new TextEncoder();
+    const abortController = new AbortController();
+    let isCancelled = false;
+
+    const handleAbort = () => {
+      isCancelled = true;
+      if (!abortController.signal.aborted) {
+        abortController.abort();
+      }
+      releaseSlotOnce();
+    };
+
+    if (request.signal.aborted) {
+      handleAbort();
+    } else {
+      request.signal.addEventListener("abort", handleAbort);
+    }
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
           let fullAssistantResponse = "";
 
-          for await (const delta of streamChatCompletion(chatMessages, settings)) {
+          for await (const delta of streamChatCompletion(chatMessages, settings, abortController.signal)) {
+            if (isCancelled || abortController.signal.aborted) break;
             fullAssistantResponse += delta;
-            controller.enqueue(encoder.encode(delta));
+            try {
+              controller.enqueue(encoder.encode(delta));
+            } catch {
+              isCancelled = true;
+              abortController.abort();
+              break;
+            }
           }
 
-          const responseWithSources = appendSourcePages(fullAssistantResponse, sourcePages);
-          if (sourcePages.length > 0 && !fullAssistantResponse.includes("[[SOURCES:")) {
-            controller.enqueue(encoder.encode(`\n\n[[SOURCES:${sourcePages.join(",")}]]`));
+          if (isCancelled || abortController.signal.aborted) {
+            if (fullAssistantResponse && !fullAssistantResponse.endsWith("*[Response terminated by user]*")) {
+              fullAssistantResponse += "\n\n*[Response terminated by user]*";
+            }
           }
 
-          controller.close();
-        } catch (err) {
-          console.error("Error during folder chat streaming pipeline:", err);
-          controller.error(err);
+          const numericSourcePages = sourcePages.map(Number);
+          const responseWithSources = appendSourcePages(fullAssistantResponse, numericSourcePages);
+          if (sourcePages.length > 0 && !fullAssistantResponse.includes("[[SOURCES:") && !isCancelled) {
+            try {
+              controller.enqueue(encoder.encode(`\n\n[[SOURCES:${sourcePages.join(",")}]]`));
+            } catch {
+              isCancelled = true;
+            }
+          }
+
+          if (chatSession?.id && fullAssistantResponse) {
+            await prisma.chatMessage.create({
+              data: {
+                sessionId: chatSession.id,
+                role: "assistant",
+                content: responseWithSources || "No response generated.",
+                sources: sourcePages.map(String),
+              },
+            });
+
+            await prisma.chatSession.update({
+              where: { id: chatSession.id },
+              data: { updatedAt: new Date() },
+            });
+
+            // Store in semantic cache (fire-and-forget)
+            if (!isCancelled) {
+              storeSemanticCache(
+                userMessageText,
+                questionEmbedding,
+                responseWithSources || fullAssistantResponse,
+                sourcePages.map(String),
+                "FOLDER",
+                folderId,
+                docFingerprint,
+                settings
+              ).catch(() => {});
+            }
+          }
+
+          if (!isCancelled) {
+            try {
+              controller.close();
+            } catch {}
+          }
+        } catch (err: any) {
+          if (isCancelled || abortController.signal.aborted || err?.name === "AbortError") {
+            console.log("Folder chat stream cancelled/aborted by client.");
+          } else {
+            console.error("Error during folder chat streaming pipeline:", err);
+            if (!isCancelled) {
+              try {
+                controller.error(err);
+              } catch {}
+            }
+          }
         } finally {
+          request.signal.removeEventListener("abort", handleAbort);
           releaseSlotOnce();
         }
+      },
+      cancel() {
+        handleAbort();
       },
     });
 
@@ -148,6 +410,7 @@ export async function POST(
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Transfer-Encoding": "chunked",
+        "X-Session-Id": chatSession.id,
       },
     });
   } catch (error: unknown) {

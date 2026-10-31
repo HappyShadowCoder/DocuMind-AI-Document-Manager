@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Inter, Calistoga, JetBrains_Mono } from "next/font/google";
 import { ArrowRight, FileText, Lock, Share2, Search, Sparkles } from "lucide-react";
@@ -37,6 +37,16 @@ const floatAnimation = {
 export default function DocumentManagementHome() {
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => {
+        if (res.ok) {
+          window.location.replace("/dashboard");
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Subtle parallax as the hero scrolls out of view
   const { scrollYProgress } = useScroll({

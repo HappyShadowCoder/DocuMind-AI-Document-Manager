@@ -16,8 +16,12 @@ export interface PdfExtractionResult {
 const MIN_VALID_TEXT_LENGTH = 100;
 
 async function loadPdfJs() {
-  const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
-  return pdfjsLib;
+  try {
+    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    return pdfjsLib;
+  } catch {
+    return await import("pdfjs-dist/build/pdf.mjs");
+  }
 }
 
 async function loadTesseract() {
@@ -72,12 +76,31 @@ async function extractNativePdfText(filePath: string): Promise<PdfPageText[]> {
 
 async function renderPdfPageAsPng(page: any): Promise<Buffer> {
   const { createCanvas } = await import("@napi-rs/canvas");
-  const viewport = page.getViewport({ scale: 2 });
+  // Render at 2.5x scale (180 DPI) for crisp character edges on fine print, stamps, and handwriting
+  const viewport = page.getViewport({ scale: 2.5 });
   const canvas = createCanvas(viewport.width, viewport.height);
   const context = canvas.getContext("2d");
 
   const renderTask = page.render({ canvasContext: context, viewport });
   await renderTask.promise;
+
+  // Enhance contrast: convert to grayscale and stretch dynamic range to make faint text/handwriting legible
+  try {
+    const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const gray = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+      // Contrast stretch: whiten light background (>195), darken ink (<75)
+      const enhanced =
+        gray > 195 ? 255 : gray < 75 ? 0 : Math.max(0, Math.min(255, (gray - 60) * 1.6));
+      d[i] = enhanced;
+      d[i + 1] = enhanced;
+      d[i + 2] = enhanced;
+    }
+    context.putImageData(imgData, 0, 0);
+  } catch {
+    // Canvas pixel manipulation fallback
+  }
 
   return canvas.toBuffer("image/png");
 }
@@ -111,11 +134,18 @@ async function extractTextWithOcr(filePath: string): Promise<PdfPageText[]> {
     if (typeof workerAny.loadLanguage === "function") await workerAny.loadLanguage("eng");
     if (typeof workerAny.initialize === "function") await workerAny.initialize("eng");
 
+    // Preserve column formatting in tables
+    if (typeof worker.setParameters === "function") {
+      await worker.setParameters({
+        preserve_interword_spaces: "1",
+      });
+    }
+
     const pages: PdfPageText[] = [];
     for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber += 1) {
       const page = await pdfDocument.getPage(pageNumber);
       const imageBuffer = await renderPdfPageAsPng(page);
-      const { data } = await (worker as any).recognize(imageBuffer, { tessedit_pageseg_mode: "1" });
+      const { data } = await (worker as any).recognize(imageBuffer, { tessedit_pageseg_mode: "3" });
       const pageText = normalizeText(data.text || "");
 
       pages.push({ pageNumber, text: pageText });

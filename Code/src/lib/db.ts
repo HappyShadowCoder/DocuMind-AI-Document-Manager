@@ -1,4 +1,4 @@
-import { Pool } from "../../node_modules/@types/pg";
+import { Pool } from "pg";
 
 // In a local network app, the database is running on the same Admin machine.
 // You should set DATABASE_URL in your .env.local file:

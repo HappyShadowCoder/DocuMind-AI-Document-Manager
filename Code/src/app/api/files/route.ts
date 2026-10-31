@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
 
     if (category === "shared") {
       whereClause.shared = true;
+      // Non-admin users can only see accessLevel='all' shared files
+      if (payload.role !== "admin") {
+        whereClause.accessLevel = "all";
+      }
     } else if (category === "my-files") {
       whereClause.ownerId = payload.id;
       whereClause.shared = false;
@@ -48,6 +52,7 @@ export async function GET(request: NextRequest) {
       path: file.path,
       updatedAt: file.updatedAt.toISOString(),
       shared: file.shared,
+      accessLevel: file.accessLevel,
       owner: {
         name: file.owner?.fullName || file.owner?.email || "Unknown User",
       },

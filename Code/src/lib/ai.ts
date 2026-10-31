@@ -39,25 +39,34 @@ const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
  * validates it.
  */
 export async function getAiSettingsForUser(userId: string): Promise<AiSettings> {
-  // Querying using explicit raw mapping to avoid TypeScript stale client type issues
-  const user = (await prisma.user.findUnique({
-    where: { id: userId },
-  })) as Record<string, unknown> | null;
-
-  if (!user) {
-    throw new Error("User not found while resolving AI settings.");
+  if (!userId) {
+    return { provider: "ollama", openAiApiKey: null };
   }
 
-  const aiProvider = (user.aiProvider as AiProviderName) || "ollama";
-  const openAiApiKey = (user.openAiApiKey as string | null) || null;
+  try {
+    const user = (await prisma.user.findUnique({
+      where: { id: userId },
+    })) as Record<string, unknown> | null;
 
-  if (aiProvider === "openai" && !openAiApiKey) {
-    throw new Error(
-      "Cloud (OpenAI) is selected in Settings but no OpenAI API key has been saved. Add a key in Settings or switch back to Offline (Ollama)."
-    );
+    if (!user) {
+      return { provider: "ollama", openAiApiKey: null };
+    }
+
+    const aiProvider = (user.aiProvider as AiProviderName) || "ollama";
+    const openAiApiKey =
+      (user.openAiApiKey as string | null) || process.env.OPENAI_API_KEY || null;
+
+    if (aiProvider === "openai" && !openAiApiKey) {
+      throw new Error(
+        "Cloud (OpenAI) is selected in Settings but no OpenAI API key has been saved. Add a key in Settings or switch back to Offline (Ollama)."
+      );
+    }
+
+    return { provider: aiProvider, openAiApiKey };
+  } catch (err: any) {
+    if (err.message?.includes("OpenAI API key")) throw err;
+    return { provider: "ollama", openAiApiKey: null };
   }
-
-  return { provider: aiProvider, openAiApiKey };
 }
 
 // ---------------------------------------------------------------------------
@@ -160,23 +169,44 @@ async function embedWithOpenAI(texts: string[], apiKey: string): Promise<number[
 // Chat completion (streaming)
 // ---------------------------------------------------------------------------
 
-export async function* streamChatCompletion(messages: ChatTurn[], settings: AiSettings): AsyncGenerator<string> {
+export async function* streamChatCompletion(
+  messages: ChatTurn[],
+  settings: AiSettings,
+  signal?: AbortSignal
+): AsyncGenerator<string> {
   if (settings.provider === "openai") {
-    yield* streamOpenAiChat(messages, settings.openAiApiKey!);
+    yield* streamOpenAiChat(messages, settings.openAiApiKey!, signal);
   } else {
-    yield* streamOllamaChat(messages);
+    yield* streamOllamaChat(messages, signal);
   }
 }
 
-async function* streamOllamaChat(messages: ChatTurn[]): AsyncGenerator<string> {
+async function* streamOllamaChat(messages: ChatTurn[], signal?: AbortSignal): AsyncGenerator<string> {
+  if (signal?.aborted) return;
   let res: Response;
   try {
     res = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: OLLAMA_CHAT_MODEL, messages, stream: true }),
+      signal,
+      body: JSON.stringify({
+        model: OLLAMA_CHAT_MODEL,
+        messages,
+        stream: true,
+        keep_alive: "24h",
+        options: {
+          temperature: 0.3,
+          repeat_penalty: 1.18,
+          repeat_last_n: 64,
+          top_p: 0.9,
+          num_ctx: 8192,
+        },
+      }),
     });
   } catch (error: any) {
+    if (signal?.aborted || error?.name === "AbortError") {
+      return;
+    }
     throw new Error(
       `Failed to connect to Ollama at ${OLLAMA_BASE_URL}: ${error?.message || "Connection refused"}. Make sure Ollama is running on your host machine.`
     );
@@ -190,72 +220,158 @@ async function* streamOllamaChat(messages: ChatTurn[]): AsyncGenerator<string> {
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let fullStreamed = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        await reader.cancel().catch(() => {});
+        return;
+      }
 
-    let newlineIndex: number;
-    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-      const line = buffer.slice(0, newlineIndex).trim();
-      buffer = buffer.slice(newlineIndex + 1);
-      if (!line) continue;
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
 
-      const parsed = JSON.parse(line) as { message?: { content?: string }; done?: boolean };
-      if (parsed.message?.content) yield parsed.message.content;
-      if (parsed.done) return;
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+        if (signal?.aborted) {
+          await reader.cancel().catch(() => {});
+          return;
+        }
+
+        const line = buffer.slice(0, newlineIndex).trim();
+        buffer = buffer.slice(newlineIndex + 1);
+        if (!line) continue;
+
+        let parsed: { message?: { content?: string }; done?: boolean };
+        try {
+          parsed = JSON.parse(line);
+        } catch {
+          continue;
+        }
+
+        if (parsed.message?.content) {
+          const chunk = parsed.message.content;
+          fullStreamed += chunk;
+
+          // Repetition loop detector: only stop if natural language text repeats 3 times (ignore table dashes/separators)
+          if (fullStreamed.length > 200) {
+            const tail = fullStreamed.slice(-300);
+            const match = tail.match(/([^\n]{30,}?)\1\1/);
+            if (match && /[a-zA-Z]{4,}/.test(match[1]) && !/^[|\-:\s]+$/.test(match[1])) {
+              console.warn("Repetition loop detected in Ollama stream, gracefully terminating generation.");
+              await reader.cancel().catch(() => {});
+              return;
+            }
+          }
+
+          yield chunk;
+        }
+        if (parsed.done) return;
+      }
     }
+  } catch (err: any) {
+    if (signal?.aborted || err?.name === "AbortError") {
+      return;
+    }
+    throw err;
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {}
   }
 }
 
-async function* streamOpenAiChat(messages: ChatTurn[], apiKey: string): AsyncGenerator<string> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: OPENAI_CHAT_MODEL,
-      messages,
-      stream: true,
-      temperature: 0.2,
-    }),
-  });
+async function* streamOpenAiChat(
+  messages: ChatTurn[],
+  apiKey: string,
+  signal?: AbortSignal
+): AsyncGenerator<string> {
+  if (signal?.aborted) return;
+  let res: Response;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      signal,
+      body: JSON.stringify({
+        model: OPENAI_CHAT_MODEL,
+        messages,
+        stream: true,
+        temperature: 0.2,
+      }),
+    });
+  } catch (error: any) {
+    if (signal?.aborted || error?.name === "AbortError") {
+      return;
+    }
+    throw error;
+  }
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => "");
-    throw new Error(`OpenAI chat request failed (${res.status}): ${body || res.statusText}`);
+    let errorMsg = `OpenAI chat request failed (${res.status}): ${body || res.statusText}`;
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed?.error?.message) {
+        errorMsg = `OpenAI error (${res.status}): ${parsed.error.message}`;
+      }
+    } catch {}
+    throw new Error(errorMsg);
   }
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        await reader.cancel().catch(() => {});
+        return;
+      }
 
-    let newlineIndex: number;
-    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-      const line = buffer.slice(0, newlineIndex).trim();
-      buffer = buffer.slice(newlineIndex + 1);
-      if (!line.startsWith("data:")) continue;
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
 
-      const payload = line.slice(5).trim();
-      if (payload === "[DONE]") return;
-      if (!payload) continue;
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+        if (signal?.aborted) {
+          await reader.cancel().catch(() => {});
+          return;
+        }
 
-      try {
-        const parsed = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[] };
-        const delta = parsed.choices?.[0]?.delta?.content;
-        if (delta) yield delta;
-      } catch {
-        // Ignore malformed keep-alive lines.
+        const line = buffer.slice(0, newlineIndex).trim();
+        buffer = buffer.slice(newlineIndex + 1);
+        if (!line.startsWith("data:")) continue;
+
+        const payload = line.slice(5).trim();
+        if (payload === "[DONE]") return;
+        if (!payload) continue;
+
+        try {
+          const parsed = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[] };
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) yield delta;
+        } catch {
+          // Ignore malformed keep-alive lines.
+        }
       }
     }
+  } catch (err: any) {
+    if (signal?.aborted || err?.name === "AbortError") {
+      return;
+    }
+    throw err;
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {}
   }
 }
 

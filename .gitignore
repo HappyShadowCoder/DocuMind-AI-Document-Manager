@@ -41,4 +41,8 @@ coverage/
 
 ### Uploads / tmp
 public/uploads/
+Code/public/uploads/
+**/public/uploads/*
 /tmp/
+.tmp-seed/
+*.zip

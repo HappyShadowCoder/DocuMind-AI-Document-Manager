@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyJwt } from "@/lib/auth";
 import { processPdfFile } from "@/lib/pdf-processing";
+import { invalidateScopeCache, invalidateOnDocumentChange } from "@/lib/semantic-cache";
 
 export async function GET(
   request: NextRequest,
@@ -44,12 +45,23 @@ export async function GET(
     }
 
     const isOwner = folder.ownerId === payload.id;
+    const isAdmin = payload.role === "admin";
     if (!isOwner && !folder.shared) {
       return NextResponse.json({ error: "Forbidden: You do not have permission to access this folder." }, { status: 403 });
     }
 
+    // Block non-admin users from accessing admin-only shared folders
+    if (folder.shared && folder.accessLevel === "admin" && !isAdmin && !isOwner) {
+      return NextResponse.json({ error: "Forbidden: You do not have permission to access this folder." }, { status: 403 });
+    }
+
     const files = await prisma.file.findMany({
-      where: { folderId, type: "pdf" },
+      where: {
+        folderId,
+        type: "pdf",
+        // Non-admin users can only see files with accessLevel 'all'
+        ...(!isAdmin && !isOwner ? { accessLevel: "all" } : {}),
+      },
       orderBy: { updatedAt: "desc" },
     });
 
@@ -63,6 +75,7 @@ export async function GET(
           },
           fileCount: folder._count?.files ?? 0,
           shared: folder.shared,
+          accessLevel: folder.accessLevel,
           createdAt: folder.createdAt.toISOString(),
           updatedAt: folder.updatedAt.toISOString(),
         },
@@ -195,25 +208,93 @@ export async function DELETE(
 
     const folder = await prisma.folder.findUnique({
       where: { id: folderId },
+      include: {
+        files: {
+          select: { id: true, path: true },
+        },
+      },
     });
 
     if (!folder) {
       return NextResponse.json({ error: "Folder not found." }, { status: 404 });
     }
 
-    if (folder.ownerId !== payload.id) {
+    // Only the owner can delete. Admins are allowed too.
+    const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { role: true } });
+    const isOwner = folder.ownerId === payload.id;
+    const isAdmin = user?.role === "admin";
+
+    if (!isOwner && !isAdmin) {
       return NextResponse.json(
         { error: "Forbidden: You do not have permission to delete this folder." },
         { status: 403 }
       );
     }
 
+    const fileIds = folder.files.map((f) => f.id);
+
+    // 1. Delete all physical files from disk
+    for (const file of folder.files) {
+      if (file.path) {
+        try {
+          const { resolveStoredFilePath } = await import("@/lib/file-path");
+          const absoluteFilePath = resolveStoredFilePath(file.path);
+          const { promises: fs } = await import("fs");
+          await fs.unlink(absoluteFilePath);
+        } catch (err: unknown) {
+          const e = err as { code?: string };
+          if (e?.code !== "ENOENT") {
+            console.warn(`Could not delete physical file for file id ${file.id}:`, err);
+          }
+        }
+      }
+    }
+
+    if (fileIds.length > 0) {
+      // 2. Delete all DB content related to files in this folder
+      await prisma.$transaction([
+        // Chat sessions for folder
+        prisma.chatSession.deleteMany({
+          where: { entityType: "FOLDER", entityId: folderId },
+        }),
+        // Chat messages for all files
+        prisma.chatMessage.deleteMany({
+          where: { fileId: { in: fileIds } },
+        }),
+        // Document chunks (embeddings) for all files
+        prisma.documentChunk.deleteMany({
+          where: { fileId: { in: fileIds } },
+        }),
+        // Document metadata for all files
+        prisma.documentMetadata.deleteMany({
+          where: { fileId: { in: fileIds } },
+        }),
+        // The file records themselves
+        prisma.file.deleteMany({
+          where: { id: { in: fileIds } },
+        }),
+      ]);
+    } else {
+      // Still delete folder-level chat sessions even if no files
+      await prisma.chatSession.deleteMany({
+        where: { entityType: "FOLDER", entityId: folderId },
+      });
+    }
+
+    // 3. Delete the folder record itself
     await prisma.folder.delete({
       where: { id: folderId },
     });
 
+    // Invalidate semantic cache: FOLDER scope + GLOBAL scope (files gone)
+    invalidateScopeCache("FOLDER", folderId).catch(() => {});
+    // For each deleted file, clean up FILE scope cache entries
+    for (const file of fileIds) {
+      invalidateOnDocumentChange(file, null).catch(() => {});
+    }
+
     return NextResponse.json(
-      { message: "Folder deleted successfully." },
+      { message: "Folder and all its contents deleted successfully." },
       { status: 200 }
     );
   } catch (error) {

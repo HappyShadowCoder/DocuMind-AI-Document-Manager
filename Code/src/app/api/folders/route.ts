@@ -26,11 +26,13 @@ export async function GET(request: NextRequest) {
     let folders = [];
 
     if (category === "shared") {
-      // Fetch only folders explicitly marked as shared in your schema + include owner info
+      // Fetch shared folders; non-admin users only see accessLevel='all'
+      const isAdmin = payload.role === "admin";
       folders = await prisma.folder.findMany({
         where: {
           parentId: parentId,
           shared: true,
+          ...(!isAdmin ? { accessLevel: "all" } : {}),
         },
         include: {
           owner: {
@@ -114,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { name, parentId, folderId, category, shared, isShared } = body;
+    const { name, parentId, folderId, category, shared, isShared, accessLevel } = body;
 
     if (!name || typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
@@ -129,6 +131,7 @@ export async function POST(request: NextRequest) {
         ? targetParentId
         : null;
 
+    let parentFolderAccessLevel: string | null = null;
     if (sanitizedParentId) {
       const parentFolder = await prisma.folder.findUnique({
         where: { id: sanitizedParentId },
@@ -140,11 +143,21 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
+      parentFolderAccessLevel = parentFolder.accessLevel;
     }
 
     // Determine if the folder should be created as shared
     const isFolderShared =
       Boolean(shared) || Boolean(isShared) || category === "shared";
+
+    // Determine access level: inherit from parent if admin, or use explicit value
+    let resolvedAccessLevel: "all" | "admin" = "all";
+    if (parentFolderAccessLevel === "admin") {
+      // Inherit admin-only from parent
+      resolvedAccessLevel = "admin";
+    } else if (accessLevel === "admin" && dbUser.role === "admin") {
+      resolvedAccessLevel = "admin";
+    }
 
     const newFolder = await prisma.folder.create({
       data: {
@@ -152,6 +165,7 @@ export async function POST(request: NextRequest) {
         ownerId: dbUser.id,
         parentId: sanitizedParentId,
         shared: isFolderShared,
+        accessLevel: resolvedAccessLevel,
       },
       include: {
         owner: {

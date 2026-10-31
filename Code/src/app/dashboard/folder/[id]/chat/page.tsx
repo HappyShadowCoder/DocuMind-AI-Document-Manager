@@ -1,3 +1,4 @@
+// app/dashboard/folder/[id]/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -7,18 +8,24 @@ import {
   ArrowLeft,
   Loader2,
   Send,
-  FileText,
-  Bot,
+  Square,
   User,
+  Bot,
+  Folder,
+  FileText,
   AlertCircle,
+  MessageSquare,
+  Zap,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ThinkingBlock, parseThinkingAndContent } from "@/components/chat/thinking-block";
 
 const PdfViewer = dynamic(() => import("@/app/dashboard/pdf/[id]/PdfViewer"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center p-8 text-gray-500">
+    <div className="flex items-center justify-center p-8 text-slate-500">
       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading PDF viewer...
     </div>
   ),
@@ -51,6 +58,7 @@ interface DisplayMessage {
   content: string;
   sources: string[] | null;
   streaming?: boolean;
+  isCached?: boolean;
 }
 
 function visiblePortion(raw: string): string {
@@ -86,11 +94,22 @@ export default function FolderChatPage() {
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewerWidth, setViewerWidth] = useState(740);
+  
+  // UI State
+  const [activeMobileTab, setActiveMobileTab] = useState<"document" | "chat">("chat");
+  const [viewerWidth, setViewerWidth] = useState(760);
   const [autoIndexAttempted, setAutoIndexAttempted] = useState(false);
 
   const viewerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
 
   const selectedFile = useMemo(
     () => pdfFiles.find((file) => file.id === selectedFileId) ?? pdfFiles[0] ?? null,
@@ -104,12 +123,12 @@ export default function FolderChatPage() {
 
   useEffect(() => {
     function updateWidth() {
-      if (viewerRef.current) setViewerWidth(Math.max(240, viewerRef.current.clientWidth - 32));
+      if (viewerRef.current) setViewerWidth(Math.max(280, viewerRef.current.clientWidth - 32));
     }
     updateWidth();
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
-  }, []);
+  }, [activeMobileTab]);
 
   useEffect(() => {
     let canceled = false;
@@ -166,7 +185,7 @@ export default function FolderChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isSending]);
 
   async function handleSend() {
     const trimmed = input.trim();
@@ -188,6 +207,9 @@ export default function FolderChatPage() {
       { id: assistantId, role: "assistant", content: "", sources: null, streaming: true },
     ]);
 
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       const body = {
         message: trimmed,
@@ -200,6 +222,7 @@ export default function FolderChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
+        signal: abortController.signal,
         body: JSON.stringify(body),
       });
 
@@ -208,6 +231,7 @@ export default function FolderChatPage() {
         throw new Error(errorData.error || "Failed to communicate with the AI.");
       }
 
+      const isCacheHit = res.headers.get("X-Cache") === "HIT";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let incremental = "";
@@ -225,6 +249,7 @@ export default function FolderChatPage() {
                   content: visiblePortion(incremental),
                   sources: extractSources(incremental),
                   streaming: true,
+                  isCached: isCacheHit,
                 }
               : message
           )
@@ -239,11 +264,28 @@ export default function FolderChatPage() {
                 content: visiblePortion(incremental),
                 sources: extractSources(incremental),
                 streaming: false,
+                isCached: isCacheHit,
               }
             : message
         )
       );
     } catch (error) {
+      if (error instanceof Error && (error.name === "AbortError" || abortController.signal.aborted)) {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === assistantId
+              ? {
+                  ...message,
+                  content: message.content
+                    ? `${message.content}\n\n*[Response terminated by user]*`
+                    : "*[Response terminated by user]*",
+                  streaming: false,
+                }
+              : message
+          )
+        );
+        return;
+      }
       setMessages((prev) =>
         prev.map((message) =>
           message.id === assistantId
@@ -258,6 +300,7 @@ export default function FolderChatPage() {
       console.error(error);
     } finally {
       setIsSending(false);
+      abortControllerRef.current = null;
     }
   }
 
@@ -307,215 +350,297 @@ export default function FolderChatPage() {
     setSelectedFileId(event.target.value);
   }
 
-  const viewerUrl = selectedFile?.path || "";
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
-      <div className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div>
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </button>
-            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
-              {folder ? `AI Chat: ${folder.name}` : "Folder AI Chat"}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-              Ask questions against all the PDF documents in this folder.
-            </p>
+    <div className="fixed inset-0 z-50 flex h-[100dvh] w-full flex-col overflow-hidden bg-[#FAFAFA] text-slate-900 dark:bg-slate-950 dark:text-white">
+      {/* Top Header Navigation */}
+      <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <button
+            onClick={() => router.back()}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
+            <Folder className="h-4 w-4 text-[#0052FF] dark:text-[#4D7CFF]" />
           </div>
-          <div className="rounded-3xl bg-white px-4 py-3 shadow-sm dark:bg-slate-900">
-            <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Documents indexed</p>
-            <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">
-              {pdfFiles.length}
+          <div className="flex flex-col overflow-hidden">
+            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+              {folder ? folder.name : "Loading folder…"}
+            </p>
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+              {pdfFiles.length} Document{pdfFiles.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
 
-        {loadError ? (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
-            <p className="font-semibold">Unable to load folder chat.</p>
-            <p>{loadError}</p>
+        {/* Mobile view selector */}
+        <div className="flex flex-shrink-0 items-center gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800 md:hidden">
+          <button
+            onClick={() => setActiveMobileTab("document")}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
+              activeMobileTab === "document"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white"
+                : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            }`}
+          >
+            <FileText className="h-3.5 w-3.5" /> PDF
+          </button>
+          <button
+            onClick={() => setActiveMobileTab("chat")}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
+              activeMobileTab === "chat"
+                ? "bg-[#0052FF] text-white shadow-sm"
+                : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            }`}
+          >
+            <MessageSquare className="h-3.5 w-3.5" /> Chat
+          </button>
+        </div>
+      </div>
+
+      {loadError ? (
+        <div className="flex flex-1 items-center justify-center p-8 bg-white dark:bg-slate-900">
+          <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-500/20 dark:bg-red-500/10">
+            <AlertCircle className="mx-auto mb-3 h-6 w-6 text-red-600 dark:text-red-400" />
+            <p className="font-semibold text-red-800 dark:text-red-300">Unable to load folder chat</p>
+            <p className="mt-1 text-sm text-red-700 dark:text-red-300/80">{loadError}</p>
           </div>
-        ) : isLoading ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-slate-500" />
+        </div>
+      ) : isLoading ? (
+        <div className="flex flex-1 items-center justify-center p-8 bg-white dark:bg-slate-900">
+          <div className="flex flex-col items-center text-center">
+            <Loader2 className="mb-4 h-8 w-8 animate-spin text-slate-400 dark:text-slate-600" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading folder content and document index…</p>
           </div>
-        ) : (
-          <div className="grid gap-6 xl:grid-cols-[minmax(420px,1.2fr)_1.2fr]">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Document viewer</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Select a PDF and preview it here while the AI uses all documents.
-                  </p>
-                </div>
-                <div className="min-w-[220px]">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Selected PDF
-                  </label>
-                  <select
-                    value={selectedFile?.id || ""}
-                    onChange={handleSelectFile}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col min-h-0 w-full overflow-hidden md:grid md:grid-cols-2">
+          
+          {/* Left Pane: Document Viewer */}
+          <div
+            ref={viewerRef}
+            className={`overflow-y-auto bg-slate-100 p-4 dark:bg-slate-900/40 md:border-r md:border-slate-200 md:dark:border-slate-800 ${
+              activeMobileTab === "document" ? "flex flex-1 h-full w-full flex-col" : "hidden md:block"
+            }`}
+          >
+            {/* Viewer Header / Selector */}
+            <div className="mb-4">
+              <select
+                value={selectedFile?.id || ""}
+                onChange={handleSelectFile}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              >
+                {pdfFiles.length === 0 && <option value="">No PDFs in this folder</option>}
+                {pdfFiles.map((file) => (
+                  <option key={file.id} value={file.id}>
+                    {file.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Viewer Body */}
+            {selectedFile ? (
+              <PdfViewer url={selectedFile.path} width={viewerWidth} />
+            ) : (
+              <div className="flex h-40 items-center justify-center text-sm text-slate-400">
+                No PDF document available to preview.
+              </div>
+            )}
+          </div>
+
+          {/* Right Pane: Chat */}
+          <div
+            className={`flex-1 min-h-0 flex-col bg-white dark:bg-slate-900 ${
+              activeMobileTab === "chat" ? "flex h-full w-full" : "hidden md:flex"
+            }`}
+          >
+            {/* Chat Status Header */}
+            <div className="border-b border-slate-200 p-3 dark:border-slate-800">
+              <div className="flex items-center justify-between px-2">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <Bot className="inline mb-0.5 mr-1 h-3.5 w-3.5" /> AI trained on {folder?.fileCount ?? 0} files
+                </p>
+                {!hasReadyFiles && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Indexing
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 space-y-4 overflow-y-auto p-4">
+              {messages.length === 0 ? (
+                 <div className="flex h-full flex-col items-center justify-center text-center text-slate-500 dark:text-slate-400">
+                   <Bot className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-600" />
+                   <p className="text-sm font-medium">Start a conversation!</p>
+                   <p className="mt-1 max-w-xs text-xs">Your AI is ready to answer questions based on all the documents in this folder.</p>
+                 </div>
+              ) : (
+                messages.map((m) => (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className={`flex gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`}
                   >
-                    {pdfFiles.map((file) => (
-                      <option key={file.id} value={file.id}>
-                        {file.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div ref={viewerRef} className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
-                {selectedFile ? (
-                  <PdfViewer url={selectedFile.path} width={viewerWidth} />
-                ) : (
-                  <div className="flex min-h-[320px] items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-                    No PDF document available to preview.
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-                <span>{folder?.fileCount ?? 0} total file(s) in folder</span>
-                {hasReadyFiles ? (
-                  <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700 dark:bg-emerald-800 dark:text-emerald-200">
-                    Ready documents included
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700 dark:bg-amber-800 dark:text-amber-200">
-                    No ready documents indexed yet
-                  </span>
-                )}
-              </div>
-            </section>
-
-            <section className="flex min-h-[680px] flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-xl transition-shadow duration-200 dark:border-slate-800 dark:bg-slate-950">
-              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Chat with your documents</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Ask questions using the combined content from all PDFs in this folder.
-                  </p>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-900 dark:text-slate-300">
-                  <Bot className="h-4 w-4" />
-                  RAG across documents
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-inner dark:border-slate-800 dark:bg-slate-900">
-                <div className="h-full min-h-[220px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 dark:scrollbar-thumb-slate-700 dark:scrollbar-track-slate-800 space-y-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className={`rounded-[28px] border px-5 py-4 shadow-sm ${message.role === "user" ? "border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white" : "border-slate-200 bg-slate-100 text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"}`}>
-                      <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                          {message.role === "user" ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
-                        </span>
-                        <span>{message.role === "user" ? "You" : "Assistant"}</span>
-                      </div>
-                      <div className="prose prose-sm max-w-none break-words text-slate-900 dark:prose-invert dark:text-slate-100">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            table: ({ node, ...props }) => (
-                              <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
-                                <table className="min-w-full border-collapse text-left text-sm" {...props} />
-                              </div>
-                            ),
-                            thead: ({ node, ...props }) => (
-                              <thead className="bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100" {...props} />
-                            ),
-                            th: ({ node, ...props }) => (
-                              <th className="border border-slate-200 px-3 py-2 font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100" {...props} />
-                            ),
-                            tr: ({ node, ...props }) => (
-                              <tr className="even:bg-slate-50 odd:bg-white dark:even:bg-slate-900 dark:odd:bg-slate-950" {...props} />
-                            ),
-                            td: ({ node, ...props }) => (
-                              <td className="border border-slate-200 px-3 py-2 text-slate-900 dark:border-slate-700 dark:text-slate-100" {...props} />
-                            ),
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
-                      </div>
-                      {message.sources && message.sources.length > 0 && (
-                        <div className="mt-3 rounded-2xl bg-slate-100 px-3 py-2 text-xs text-slate-600 dark:bg-slate-950 dark:text-slate-400">
-                          Sources: {message.sources.join(", ")}
-                        </div>
-                      )}
-                      {message.streaming && (
-                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Streaming response…
-                        </div>
-                      )}
+                    <div
+                      className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${
+                        m.role === "user"
+                          ? "bg-[#0052FF] text-white"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                      }`}
+                    >
+                      {m.role === "user" ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
                     </div>
-                  ))}
-                </div>
-              </div>
+                    {(() => {
+                      const parsed = m.role !== "user"
+                        ? parseThinkingAndContent(m.content, m.streaming)
+                        : { thought: "", answer: m.content, isThinking: false };
+                      return (
+                        <div
+                          className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                            m.role === "user"
+                              ? "bg-[#0052FF] text-white"
+                              : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200"
+                          }`}
+                        >
+                          {m.role !== "user" && m.isCached && (
+                            <div className="mb-2 flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                <Zap className="h-2.5 w-2.5 fill-emerald-500 text-emerald-500 animate-pulse" />
+                                <span>Semantic Cache Hit &bull; Instant</span>
+                              </span>
+                            </div>
+                          )}
+                          {m.role !== "user" && (
+                            <ThinkingBlock
+                              thought={parsed.thought}
+                              isThinking={parsed.isThinking}
+                              isStreaming={m.streaming}
+                            />
+                          )}
+                          <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5">
+                            {parsed.answer ? (
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  table: ({ children }) => (
+                                    <div className="my-3 overflow-x-auto rounded-lg border border-slate-300 dark:border-slate-700">
+                                      <table className="w-full border-collapse text-left text-xs sm:text-sm">
+                                        {children}
+                                      </table>
+                                    </div>
+                                  ),
+                                  thead: ({ children }) => (
+                                    <thead className="bg-slate-200/70 font-semibold text-slate-900 dark:bg-slate-700/60 dark:text-slate-100">
+                                      {children}
+                                    </thead>
+                                  ),
+                                  tbody: ({ children }) => (
+                                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700 bg-white/50 dark:bg-slate-900/50">
+                                      {children}
+                                    </tbody>
+                                  ),
+                                  th: ({ children }) => (
+                                    <th className="border-b border-slate-300 dark:border-slate-700 px-3 py-2 font-semibold">
+                                      {children}
+                                    </th>
+                                  ),
+                                  td: ({ children }) => (
+                                    <td className="px-3 py-2 text-slate-700 dark:text-slate-300 border-r border-slate-200 dark:border-slate-800 last:border-r-0">
+                                      {children}
+                                    </td>
+                                  ),
+                                }}
+                              >
+                                {parsed.answer}
+                              </ReactMarkdown>
+                            ) : m.streaming && !parsed.isThinking ? (
+                              "…"
+                            ) : null}
+                          </div>
+                          {m.sources && m.sources.length > 0 && (
+                            <p className="mt-1.5 text-xs opacity-70">
+                              Source file{m.sources.length > 1 ? "s" : ""}: {m.sources.join(", ")}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </motion.div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
 
-              <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
-                <label htmlFor="folder-chat-input" className="sr-only">Ask a question</label>
-                <textarea
-                  id="folder-chat-input"
-                  rows={3}
+            {/* Input Area */}
+            <div className="border-t border-slate-200 p-3 dark:border-slate-800">
+              {/* Indexing Progress Indicator */}
+              {!hasReadyFiles && isIndexing && indexingProgress && (
+                <div className="mb-3 space-y-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950 dark:text-amber-300">
+                  <div className="flex justify-between">
+                    <p>Indexing: <span className="font-semibold">{indexingProgress.fileName}</span></p>
+                    <p>({indexingProgress.current}/{indexingProgress.total})</p>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-amber-200 dark:bg-amber-800">
+                    <div
+                      className="h-full rounded-full bg-amber-600 transition-all duration-300 dark:bg-amber-500"
+                      style={{
+                        width: `${Math.round((indexingProgress.current / indexingProgress.total) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question about these documents..."
-                  className="w-full resize-none rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                  placeholder="Ask a question about these documents…"
+                  disabled={isSending || !hasReadyFiles}
+                  className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition-all focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
                 />
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    The AI uses the combined context of all indexed PDFs in this folder.
-                  </p>
+                {isSending ? (
                   <button
                     type="button"
-                    onClick={handleSend}
-                    disabled={isSending || input.trim().length === 0 || !hasReadyFiles}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#0052FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0147d1] disabled:cursor-not-allowed disabled:bg-slate-400"
+                    onClick={handleStopGeneration}
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white shadow-md shadow-rose-600/30 transition-all duration-150 hover:bg-rose-700 hover:scale-105 active:scale-95"
+                    title="Stop generation"
+                    aria-label="Stop generation"
                   >
-                    {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Send
+                    <Square className="h-4 w-4 fill-current" />
                   </button>
-                </div>
-                {!hasReadyFiles && (
-                  <div className="mt-3 space-y-3 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-                    {isIndexing && indexingProgress ? (
-                      <>
-                        <p>
-                          Automatically indexing PDFs — processing <span className="font-semibold">{indexingProgress.fileName}</span> ({indexingProgress.current}/{indexingProgress.total})
-                        </p>
-                        <div className="h-2 overflow-hidden rounded-full bg-amber-200 dark:bg-amber-700">
-                          <div
-                            className="h-full rounded-full bg-amber-600 transition-all duration-300"
-                            style={{
-                              width: `${Math.round((indexingProgress.current / indexingProgress.total) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <p>
-                        Automatically indexing PDFs now. This may take a moment if the documents need OCR.
-                      </p>
-                    )}
-                  </div>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || !hasReadyFiles}
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-[#0052FF] to-[#4D7CFF] text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Send"
+                    title="Send"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
                 )}
-              </div>
-            </section>
+              </form>
+              <p className="mt-2 text-center text-[11px] text-slate-400 dark:text-slate-500">
+                Answers are restricted to the content of the PDFs in this folder.
+              </p>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

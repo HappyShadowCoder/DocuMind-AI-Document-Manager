@@ -5,7 +5,9 @@ import { promises as fs } from "fs";
 import path from "path";
 import { prisma } from "@/lib/prisma";
 import { processPdfFile } from "@/lib/pdf-processing";
+import { verifyJwt } from "@/lib/auth";
 import { resolveStoredFilePath } from "@/lib/file-path";
+import { invalidateOnDocumentChange } from "@/lib/semantic-cache";
 
 // Helper function to safely serialize BigInt fields to numbers or strings
 function sanitizeRecord<T>(data: T): T {
@@ -40,6 +42,23 @@ export async function GET(
         { error: "File not found in database." },
         { status: 404 }
       );
+    }
+
+    // Capture folderId before deleting
+    const folderId = fileRecord.folderId;
+
+    // Check access level for admin-only shared files
+    if (fileRecord.shared && fileRecord.accessLevel === "admin") {
+      const token = request.cookies.get("auth_token")?.value;
+      const payload = token ? await verifyJwt(token) : null;
+      const isOwner = payload?.id === fileRecord.ownerId;
+      const isAdmin = payload?.role === "admin";
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json(
+          { error: "Forbidden: You do not have permission to access this file." },
+          { status: 403 }
+        );
+      }
     }
 
     const safeFileRecord = sanitizeRecord(fileRecord);
@@ -84,6 +103,9 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    // Capture folderId before deleting
+    const folderId = fileRecord.folderId;
 
     if (fileRecord.processingStatus === "ready" && fileRecord.chunkCount > 0) {
       const safeFileRecord = sanitizeRecord(fileRecord);
@@ -153,6 +175,9 @@ export async function DELETE(
       );
     }
 
+    // Capture folderId before deleting
+    const folderId = fileRecord.folderId;
+
     // 1. Delete physical file from disk (handles absolute or relative paths)
     if (fileRecord.path) {
       const absoluteFilePath = resolveStoredFilePath(fileRecord.path);
@@ -169,6 +194,10 @@ export async function DELETE(
 
     // 2. Execute explicit database transaction to clean up all related models
     await prisma.$transaction([
+      // Delete related chat sessions (FILE-scoped)
+      prisma.chatSession.deleteMany({
+        where: { entityType: "FILE", entityId: id },
+      }),
       // Explicitly delete related chat messages
       prisma.chatMessage.deleteMany({
         where: { fileId: id },
@@ -177,11 +206,18 @@ export async function DELETE(
       prisma.documentChunk.deleteMany({
         where: { fileId: id },
       }),
+      // Explicitly delete FIR metadata
+      prisma.documentMetadata.deleteMany({
+        where: { fileId: id },
+      }),
       // Delete primary file record
       prisma.file.delete({
         where: { id },
       }),
     ]);
+
+    // Invalidate semantic cache entries tied to this file/folder/global
+    invalidateOnDocumentChange(id, folderId).catch(() => {});
 
     return NextResponse.json(
       { message: "File and all associated data deleted successfully." },

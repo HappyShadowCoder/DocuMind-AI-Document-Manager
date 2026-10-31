@@ -139,6 +139,7 @@ exports.Prisma.FolderScalarFieldEnum = {
   name: 'name',
   parentId: 'parentId',
   shared: 'shared',
+  accessLevel: 'accessLevel',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   ownerId: 'ownerId'
@@ -151,6 +152,7 @@ exports.Prisma.FileScalarFieldEnum = {
   sizeBytes: 'sizeBytes',
   path: 'path',
   shared: 'shared',
+  accessLevel: 'accessLevel',
   ownerId: 'ownerId',
   folderId: 'folderId',
   createdAt: 'createdAt',
@@ -175,17 +177,62 @@ exports.Prisma.DocumentChunkScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ChatSessionScalarFieldEnum = {
+  id: 'id',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ChatMessageScalarFieldEnum = {
   id: 'id',
+  sessionId: 'sessionId',
   fileId: 'fileId',
   content: 'content',
   createdAt: 'createdAt',
-  role: 'role'
+  role: 'role',
+  sources: 'sources'
+};
+
+exports.Prisma.DocumentMetadataScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  state: 'state',
+  firNumber: 'firNumber',
+  firDate: 'firDate',
+  district: 'district',
+  subDivision: 'subDivision',
+  policeStation: 'policeStation',
+  propertyLoss: 'propertyLoss',
+  actsAndSections: 'actsAndSections',
+  zeroFirReference: 'zeroFirReference',
+  rawJson: 'rawJson'
+};
+
+exports.Prisma.SemanticCacheScalarFieldEnum = {
+  id: 'id',
+  scopeType: 'scopeType',
+  scopeId: 'scopeId',
+  docFingerprint: 'docFingerprint',
+  questionHash: 'questionHash',
+  answerText: 'answerText',
+  sourcePages: 'sourcePages',
+  aiProvider: 'aiProvider',
+  hitCount: 'hitCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -197,6 +244,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
 exports.Role = exports.$Enums.Role = {
   admin: 'admin',
   user: 'user'
@@ -207,6 +260,11 @@ exports.AiProvider = exports.$Enums.AiProvider = {
   openai: 'openai'
 };
 
+exports.AccessLevel = exports.$Enums.AccessLevel = {
+  all: 'all',
+  admin: 'admin'
+};
+
 exports.ProcessingStatus = exports.$Enums.ProcessingStatus = {
   idle: 'idle',
   processing: 'processing',
@@ -214,12 +272,33 @@ exports.ProcessingStatus = exports.$Enums.ProcessingStatus = {
   failed: 'failed'
 };
 
+exports.ChatEntityType = exports.$Enums.ChatEntityType = {
+  FILE: 'FILE',
+  FOLDER: 'FOLDER',
+  GLOBAL: 'GLOBAL'
+};
+
+exports.ChatRole = exports.$Enums.ChatRole = {
+  user: 'user',
+  assistant: 'assistant',
+  system: 'system'
+};
+
+exports.CacheScope = exports.$Enums.CacheScope = {
+  FILE: 'FILE',
+  FOLDER: 'FOLDER',
+  GLOBAL: 'GLOBAL'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Folder: 'Folder',
   File: 'File',
   DocumentChunk: 'DocumentChunk',
-  ChatMessage: 'ChatMessage'
+  ChatSession: 'ChatSession',
+  ChatMessage: 'ChatMessage',
+  DocumentMetadata: 'DocumentMetadata',
+  SemanticCache: 'SemanticCache'
 };
 
 /**

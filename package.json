@@ -1,0 +1,16 @@
+{
+  "name": "documind-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DocuMind - AI Document Management System",
+  "scripts": {
+    "setup": "./setup.sh",
+    "dev": "npm run dev --prefix Code",
+    "build": "npm run build --prefix Code",
+    "start": "npm start --prefix Code",
+    "db:seed": "npm run db:seed --prefix Code",
+    "db:push": "npx --prefix Code prisma db push",
+    "lint": "npm run lint --prefix Code",
+    "bundle:zip": "zip -r documind-shareable.zip . -x '*/node_modules/*' -x '*/.next/*' -x '*/.git/*' -x '.git/*' -x '*/.DS_Store' -x '.DS_Store' -x 'Code.zip' -x 'documind-shareable.zip' -x 'Code/.env' -x 'Code/.tmp-seed/*' -x 'Code/tsconfig.tsbuildinfo'"
+  }
+}

@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
   SlidersHorizontal,
@@ -38,9 +38,17 @@ import {
   UserCheck,
   X,
   ExternalLink,
+  Eye,
+  MessageSquare,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import AdminPanel from "@/components/admin/admin-panel";
 import { normalizeFileType } from "@/lib/file-types";
+import FirSearchPanel from "@/components/search/fir-search-panel";
+import ProcessingStatusBar from "@/components/processing-status-bar";
+import GlobalChatPanel from "@/components/chat/global-chat-panel";
+
 
 // =========================================================
 // Types
@@ -72,6 +80,7 @@ interface FileItem {
   updatedAt: string;
   owner?: FileOwner;
   shared: boolean;
+  accessLevel?: "all" | "admin";
 }
 
 interface FolderItem {
@@ -81,6 +90,7 @@ interface FolderItem {
   owner?: FileOwner;
   createdAt: string;
   shared: boolean;
+  accessLevel?: "all" | "admin";
   fileCount?: number;
 }
 
@@ -94,8 +104,8 @@ interface QuickFolder {
 
 type ViewMode = "grid" | "list";
 type FileFilter = "all" | FileType;
-type StorageCategory = "dashboard" | "my-files" | "shared" | "admin";
-type ExplorerCategory = Exclude<StorageCategory, "dashboard" | "admin">;
+type StorageCategory = "dashboard" | "my-files" | "shared" | "global-chat" | "admin" | "fir-search";
+type ExplorerCategory = Exclude<StorageCategory, "dashboard" | "admin" | "fir-search" | "global-chat">;
 
 interface DashboardStats {
   totalFiles: number;
@@ -288,21 +298,32 @@ function DoughnutChart({
 }
 
 function ContextMenu({
+  file,
+  onOpenChat,
+  onOpenView,
   onDownload,
   onShare,
   onDelete,
   onClose,
 }: {
+  file?: FileItem;
+  onOpenChat?: () => void;
+  onOpenView?: () => void;
   onDownload: () => void;
   onShare: () => void;
   onDelete: () => void;
   onClose: () => void;
 }) {
-  const items = [
+  const items: { label: string; icon: React.ElementType; onClick: () => void; danger: boolean }[] = [];
+  if (file && file.type === "pdf") {
+    if (onOpenChat) items.push({ label: "Chat Mode", icon: MessageSquare, onClick: onOpenChat, danger: false });
+    if (onOpenView) items.push({ label: "View Mode", icon: Eye, onClick: onOpenView, danger: false });
+  }
+  items.push(
     { label: "Download", icon: Download, onClick: onDownload, danger: false },
     { label: "Share", icon: Share, onClick: onShare, danger: false },
-    { label: "Delete", icon: Trash2, onClick: onDelete, danger: true },
-  ];
+    { label: "Delete", icon: Trash2, onClick: onDelete, danger: true }
+  );
 
   return (
     <div
@@ -335,15 +356,19 @@ function ContextMenu({
 // Main Dashboard Page
 // =========================================================
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const categoryFromUrl = (searchParams.get("category") as StorageCategory) || "dashboard";
+  const folderIdFromUrl = searchParams.get("folderId") || null;
 
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  const [category, setCategory] = useState<StorageCategory>("dashboard");
+  const [category, setCategory] = useState<StorageCategory>(categoryFromUrl);
 
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(folderIdFromUrl);
   const [folderPath, setFolderPath] = useState<FolderItem[]>([]);
   const currentFolder = folderPath[folderPath.length - 1] ?? null;
 
@@ -360,6 +385,7 @@ export default function DashboardPage() {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [pdfModeDropdownId, setPdfModeDropdownId] = useState<string | null>(null);
   const [isDraggingOverWindow, setIsDraggingOverWindow] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -367,18 +393,26 @@ export default function DashboardPage() {
 
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderAccessLevel, setNewFolderAccessLevel] = useState<"all" | "admin">("all");
   const [creatingFolder, setCreatingFolder] = useState(false);
+
+  const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
+  const [uploadAccessLevel, setUploadAccessLevel] = useState<"all" | "admin">("all");
+  const [isUploadAccessModalOpen, setIsUploadAccessModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<
     { kind: "file"; item: FileItem } | { kind: "folder"; item: FolderItem } | null
   >(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pdfModeMenuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const newFolderInputRef = useRef<HTMLInputElement>(null);
 
@@ -395,25 +429,13 @@ export default function DashboardPage() {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (!res.ok) {
-          setUser({
-            id: "user_placeholder_id",
-            email: "admin@office-pc.local",
-            fullName: "Office Administrator",
-            role: "admin",
-            storageLimitBytes: 5 * 1024 * 1024 * 1024,
-          });
+          if (isMounted) router.push("/login");
           return;
         }
         const data = await res.json();
         if (isMounted) setUser(data.user ?? data);
       } catch {
-        setUser({
-          id: "user_placeholder_id",
-          email: "admin@office-pc.local",
-          fullName: "Office Administrator",
-          role: "admin",
-          storageLimitBytes: 5 * 1024 * 1024 * 1024,
-        });
+        if (isMounted) router.push("/login");
       } finally {
         if (isMounted) setLoadingUser(false);
       }
@@ -422,7 +444,7 @@ export default function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [router]);
 
   // -----------------------------------------------------
   // 2. Fetch overview stats for the Dashboard tab
@@ -484,6 +506,47 @@ export default function DashboardPage() {
     }
   }, [category, currentFolderId]);
 
+  const updateUrlParams = (cat: StorageCategory, fId: string | null) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("category", cat);
+    if (fId) {
+      params.set("folderId", fId);
+    } else {
+      params.delete("folderId");
+    }
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  };
+
+  useEffect(() => {
+    const cat = (searchParams.get("category") as StorageCategory) || "dashboard";
+    const fId = searchParams.get("folderId") || null;
+    if (cat !== category) setCategory(cat);
+    if (fId !== currentFolderId) setCurrentFolderId(fId);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (currentFolderId && folderPath.length === 0) {
+      fetch(`/api/folders/${currentFolderId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.folder) {
+            setFolderPath([
+              {
+                id: data.folder.id,
+                name: data.folder.name,
+                parentId: null,
+                shared: data.folder.shared,
+                fileCount: data.folder.fileCount,
+                createdAt: data.folder.createdAt,
+              },
+            ]);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentFolderId]);
+
   function handleCategoryChange(next: StorageCategory) {
     setCategory(next);
     setCurrentFolderId(null);
@@ -491,6 +554,7 @@ export default function DashboardPage() {
     setSearchQuery("");
     setActiveFilter("all");
     setOpenMenuId(null);
+    updateUrlParams(next, null);
     if (next === "dashboard") {
       setDashboardOpenKey((k) => k + 1);
     }
@@ -500,17 +564,21 @@ export default function DashboardPage() {
     setFolderPath((prev) => [...prev, folder]);
     setCurrentFolderId(folder.id);
     setSearchQuery("");
+    updateUrlParams(category, folder.id);
   }
 
   function handleBreadcrumbClick(index: number) {
     if (index === -1) {
       setFolderPath([]);
       setCurrentFolderId(null);
+      updateUrlParams(category, null);
       return;
     }
     setFolderPath((prev) => {
       const next = prev.slice(0, index + 1);
-      setCurrentFolderId(next[next.length - 1]?.id ?? null);
+      const targetId = next[next.length - 1]?.id ?? null;
+      setCurrentFolderId(targetId);
+      updateUrlParams(category, targetId);
       return next;
     });
   }
@@ -524,6 +592,7 @@ export default function DashboardPage() {
       if (e.key === "Escape") {
         setIsFilterOpen(false);
         setOpenMenuId(null);
+        setPdfModeDropdownId(null);
         setIsNewFolderModalOpen(false);
         setDeleteTarget(null);
         setPreviewFile(null);
@@ -540,6 +609,9 @@ export default function DashboardPage() {
       }
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenuId(null);
+      }
+      if (pdfModeMenuRef.current && !pdfModeMenuRef.current.contains(e.target as Node)) {
+        setPdfModeDropdownId(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -578,7 +650,7 @@ export default function DashboardPage() {
       setIsDraggingOverWindow(false);
       const dropped = e.dataTransfer?.files;
       if (dropped && dropped.length > 0 && isExplorer) {
-        uploadFiles(dropped);
+        handleFilesSelected(dropped);
       }
     }
 
@@ -592,7 +664,7 @@ export default function DashboardPage() {
       window.removeEventListener("dragleave", handleDragLeave);
       window.removeEventListener("drop", handleDrop);
     };
-  }, [isExplorer, currentFolderId, category]);
+  }, [isExplorer, currentFolderId, category, user, folderPath]);
 
   useEffect(() => {
     if (!toast) return;
@@ -611,10 +683,25 @@ export default function DashboardPage() {
       .sort((a, b) => new Date(b?.updatedAt || 0).getTime() - new Date(a?.updatedAt || 0).getTime());
   }, [files, activeFilter, searchQuery]);
 
-  const uploadFiles = async (fileList: FileList) => {
+  const handleFilesSelected = (selectedFiles: FileList | File[]) => {
+    const fileArray = Array.from(selectedFiles);
+    if (fileArray.length === 0) return;
+
+    if (category === "shared" && user?.role === "admin") {
+      setPendingUploadFiles(fileArray);
+      const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
+      setUploadAccessLevel(currentFolder?.accessLevel === "admin" ? "admin" : "all");
+      setIsUploadAccessModalOpen(true);
+    } else {
+      uploadFiles(fileArray, "all");
+    }
+  };
+
+  const uploadFiles = async (fileList: FileList | File[], accessLevel: "all" | "admin" = "all") => {
     if (!isExplorer) return;
     const fileArray = Array.from(fileList);
     let uploadedCount = 0;
+    setIsUploading(true);
 
     for (const file of fileArray) {
       const formData = new FormData();
@@ -622,6 +709,9 @@ export default function DashboardPage() {
       if (currentFolderId) formData.append("folderId", currentFolderId);
 
       formData.append("shared", category === "shared" ? "true" : "false");
+      if (category === "shared") {
+        formData.append("accessLevel", accessLevel);
+      }
 
       try {
         setToast(`Uploading ${file.name}…`);
@@ -648,6 +738,7 @@ export default function DashboardPage() {
                   name: user?.fullName || user?.email || "You",
                 },
                 shared: uploaded.shared,
+                accessLevel: uploaded.accessLevel,
               },
               ...prev.filter((existing) => existing?.id !== uploaded.id),
             ]);
@@ -664,14 +755,17 @@ export default function DashboardPage() {
       }
     }
 
+    setIsUploading(false);
+
     if (uploadedCount > 0) {
       fetchExplorerContent(category as ExplorerCategory, currentFolderId);
       fetchStats();
     }
   };
 
-  const handleOpenPdf = (file: FileItem) => {
-    router.push(`/dashboard/pdf/${file.id}`);
+  const handleOpenPdf = (file: FileItem, mode: "chat" | "view" = "chat") => {
+    const folderParam = currentFolderId ? `&folderId=${currentFolderId}` : "";
+    router.push(`/dashboard/pdf/${file.id}?mode=${mode}${folderParam}`);
   };
 
   const handleOpenFolderChat = (folder: FolderItem) => {
@@ -683,11 +777,14 @@ export default function DashboardPage() {
   };
 
   const handleDeleteFolder = (folder: FolderItem) => {
+    setDeleteConfirmText("");
     setDeleteTarget({ kind: "folder", item: folder });
   };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    // For folders, require the name to be typed exactly
+    if (deleteTarget.kind === "folder" && deleteConfirmText.trim() !== deleteTarget.item.name) return;
     setIsDeleting(true);
     try {
       if (deleteTarget.kind === "file") {
@@ -698,17 +795,19 @@ export default function DashboardPage() {
           setToast(`${file.name} deleted.`);
           fetchStats();
         } else {
-          setToast("Failed to delete file.");
+          const data = await res.json().catch(() => ({}));
+          setToast(data.error || "Failed to delete file.");
         }
       } else {
         const folder = deleteTarget.item;
         const res = await fetch(`/api/folders/${folder.id}`, { method: "DELETE" });
         if (res.ok) {
           setFolders((prev) => prev.filter((f) => f?.id !== folder.id));
-          setToast(`Folder "${folder.name}" deleted.`);
+          setToast(`Folder "${folder.name}" and all its contents deleted.`);
           fetchStats();
         } else {
-          setToast("Failed to delete folder.");
+          const data = await res.json().catch(() => ({}));
+          setToast(data.error || "Failed to delete folder.");
         }
       }
     } catch {
@@ -716,6 +815,7 @@ export default function DashboardPage() {
     } finally {
       setIsDeleting(false);
       setDeleteTarget(null);
+      setDeleteConfirmText("");
     }
   };
 
@@ -749,11 +849,13 @@ export default function DashboardPage() {
           name,
           parentId: currentFolderId || undefined,
           shared: category === "shared",
+          accessLevel: category === "shared" && user?.role === "admin" ? newFolderAccessLevel : undefined,
         }),
       });
       if (res.ok) {
         setToast(`Folder "${name}" created`);
         setNewFolderName("");
+        setNewFolderAccessLevel("all");
         setIsNewFolderModalOpen(false);
         fetchExplorerContent(category as ExplorerCategory, currentFolderId);
       } else {
@@ -798,7 +900,7 @@ export default function DashboardPage() {
         multiple
         className="hidden"
         onChange={(e) => {
-          if (e.target.files && e.target.files.length > 0) uploadFiles(e.target.files);
+          if (e.target.files && e.target.files.length > 0) handleFilesSelected(e.target.files);
           e.target.value = "";
         }}
       />
@@ -852,8 +954,46 @@ export default function DashboardPage() {
                 if (e.key === "Enter") handleCreateFolder();
               }}
               placeholder="Folder name"
-              className="mb-5 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+              className="mb-4 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
             />
+
+            {category === "shared" && user?.role === "admin" && (
+              <div className="mb-5">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Access Level
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewFolderAccessLevel("all")}
+                    className={`flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left transition-all ${
+                      newFolderAccessLevel === "all"
+                        ? "border-[#0052FF] bg-blue-50/60 text-[#0052FF] ring-2 ring-[#0052FF]/20 dark:bg-blue-500/10 dark:text-[#4D7CFF]"
+                        : "border-slate-200 bg-transparent text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
+                    }`}
+                  >
+                    <span className="text-xs font-bold">All Users</span>
+                    <span className="text-[10px] leading-tight opacity-75">All users can see</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewFolderAccessLevel("admin")}
+                    className={`flex flex-col items-start gap-1 rounded-xl border p-2.5 text-left transition-all ${
+                      newFolderAccessLevel === "admin"
+                        ? "border-amber-500 bg-amber-50/60 text-amber-600 ring-2 ring-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400"
+                        : "border-slate-200 bg-transparent text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-bold">
+                      <Shield className="h-3 w-3 text-amber-500" />
+                      <span>Admin Only</span>
+                    </div>
+                    <span className="text-[10px] leading-tight opacity-75">Admins only</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsNewFolderModalOpen(false)}
@@ -874,21 +1014,145 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {deleteTarget && (
+      {/* Upload Access Level Modal for Admin in Shared Section */}
+      {isUploadAccessModalOpen && (
         <div
           className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
+          onClick={() => !isUploading && setIsUploadAccessModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF] dark:bg-blue-500/10 dark:text-[#4D7CFF]">
+                  <UploadCloud className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg text-slate-900 dark:text-white">Upload to Shared</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {pendingUploadFiles.length} file{pendingUploadFiles.length > 1 ? "s" : ""} selected
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isUploading) {
+                    setIsUploadAccessModalOpen(false);
+                    setPendingUploadFiles([]);
+                  }
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* List preview of files */}
+            <div className="mb-4 max-h-32 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/50">
+              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                {pendingUploadFiles.map((f, idx) => (
+                  <li key={idx} className="flex items-center justify-between truncate">
+                    <span className="truncate pr-2 font-medium">{f.name}</span>
+                    <span className="flex-shrink-0 text-[10px] text-slate-400">{formatBytes(f.size)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mb-5">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Who can access {pendingUploadFiles.length > 1 ? "these files" : "this file"}?
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setUploadAccessLevel("all")}
+                  className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
+                    uploadAccessLevel === "all"
+                      ? "border-[#0052FF] bg-blue-50/50 text-[#0052FF] shadow-sm ring-2 ring-[#0052FF]/20 dark:bg-blue-500/10 dark:text-[#4D7CFF]"
+                      : "border-slate-200 bg-transparent text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-xs font-bold">
+                    <Share2 className="h-3.5 w-3.5" />
+                    <span>All Users</span>
+                  </div>
+                  <span className="text-[11px] leading-snug opacity-75">Visible to anyone with access to Shared</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadAccessLevel("admin")}
+                  className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
+                    uploadAccessLevel === "admin"
+                      ? "border-amber-500 bg-amber-50/50 text-amber-600 shadow-sm ring-2 ring-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400"
+                      : "border-slate-200 bg-transparent text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 text-xs font-bold">
+                    <Shield className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Admin Only</span>
+                  </div>
+                  <span className="text-[11px] leading-snug opacity-75">Only administrators can view or access</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setPendingUploadFiles([]);
+                  setIsUploadAccessModalOpen(false);
+                }}
+                disabled={isUploading}
+                className="flex h-10 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  const filesToUpload = pendingUploadFiles;
+                  const level = uploadAccessLevel;
+                  setIsUploadAccessModalOpen(false);
+                  setPendingUploadFiles([]);
+                  await uploadFiles(filesToUpload, level);
+                }}
+                disabled={isUploading}
+                className="flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0052FF] to-[#4D7CFF] px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,82,255,0.3)] disabled:pointer-events-none disabled:opacity-50"
+              >
+                {isUploading ? "Uploading…" : "Upload"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
           onClick={() => !isDeleting && setDeleteTarget(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900"
+            className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-2xl dark:border-red-900/40 dark:bg-slate-900"
           >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-lg text-slate-900 dark:text-white">
-                Delete {deleteTarget.kind === "folder" ? "folder" : "file"}?
-              </h3>
+            {/* Header */}
+            <div className="mb-1 flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30">
+                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-900 dark:text-white">
+                  Delete {deleteTarget.kind === "folder" ? "Folder" : "File"}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  This action is permanent and cannot be undone.
+                </p>
+              </div>
               <button
-                onClick={() => setDeleteTarget(null)}
+                onClick={() => { setDeleteTarget(null); setDeleteConfirmText(""); }}
                 disabled={isDeleting}
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                 aria-label="Close"
@@ -896,21 +1160,42 @@ export default function DashboardPage() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mb-5 text-sm text-slate-500 dark:text-slate-400">
+
+            <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
               {deleteTarget.kind === "folder" ? (
                 <>
-                  Are you sure you want to delete <span className="font-medium text-slate-700 dark:text-slate-300">"{deleteTarget.item.name}"</span>
-                  {" "}and everything inside it? This can't be undone.
+                  Deleting <span className="font-semibold">&ldquo;{deleteTarget.item.name}&rdquo;</span> will permanently remove the folder, all its documents, all AI chat history, embeddings, and extracted metadata.
                 </>
               ) : (
                 <>
-                  Are you sure you want to delete <span className="font-medium text-slate-700 dark:text-slate-300">"{deleteTarget.item.name}"</span>? This can't be undone.
+                  Deleting <span className="font-semibold">&ldquo;{deleteTarget.item.name}&rdquo;</span> will permanently remove the document, its AI chat history, embeddings, and extracted metadata.
                 </>
               )}
-            </p>
-            <div className="flex justify-end gap-2">
+            </div>
+
+            {/* Folder name confirmation input */}
+            {deleteTarget.kind === "folder" && (
+              <div className="mt-4">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Type the folder name to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && deleteConfirmText.trim() === deleteTarget.item.name) confirmDelete();
+                  }}
+                  placeholder={deleteTarget.item.name}
+                  autoFocus
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-mono text-slate-900 placeholder-slate-300 transition-colors focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-600"
+                />
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end gap-2">
               <button
-                onClick={() => setDeleteTarget(null)}
+                onClick={() => { setDeleteTarget(null); setDeleteConfirmText(""); }}
                 disabled={isDeleting}
                 className="flex h-10 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
               >
@@ -918,10 +1203,14 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={confirmDelete}
-                disabled={isDeleting}
-                className="flex h-10 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-red-700 disabled:opacity-50"
+                disabled={
+                  isDeleting ||
+                  (deleteTarget.kind === "folder" && deleteConfirmText.trim() !== deleteTarget.item.name)
+                }
+                className="flex h-10 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {isDeleting ? "Deleting…" : "Delete"}
+                <Trash2 className="h-3.5 w-3.5" />
+                {isDeleting ? "Deleting…" : `Delete ${deleteTarget.kind === "folder" ? "Folder" : "File"}`}
               </button>
             </div>
           </div>
@@ -979,15 +1268,26 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center gap-4 text-center">
                   <FileText className="h-16 w-16 text-red-500" />
                   <p className="text-sm text-slate-600 dark:text-slate-400">PDF Document</p>
-                  <button
-                    onClick={() => {
-                      setPreviewFile(null);
-                      handleOpenPdf(previewFile);
-                    }}
-                    className="flex items-center gap-2 rounded-xl bg-[#0052FF] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#0042CC]"
-                  >
-                    Open PDF Reader <ExternalLink className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      onClick={() => {
+                        setPreviewFile(null);
+                        handleOpenPdf(previewFile, "chat");
+                      }}
+                      className="flex items-center gap-2 rounded-xl bg-[#0052FF] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#0042CC]"
+                    >
+                      <MessageSquare className="h-4 w-4" /> Chat Mode
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPreviewFile(null);
+                        handleOpenPdf(previewFile, "view");
+                      }}
+                      className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <Eye className="h-4 w-4 text-[#0052FF]" /> View Mode
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 text-center">
@@ -1015,14 +1315,26 @@ export default function DashboardPage() {
       )}
 
       {/* Main Container */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main
+        className={`mx-auto transition-all duration-300 ${
+          category === "global-chat"
+            ? "max-w-[1700px] px-3 sm:px-6 py-3"
+            : "max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
+        }`}
+      >
         {/* Navigation Tabs */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4 dark:border-slate-800">
+        <div
+          className={`flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800 ${
+            category === "global-chat" ? "mb-3" : "mb-8"
+          }`}
+        >
           <nav className="flex gap-2">
             {[
               { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
               { id: "my-files", label: "My Files", icon: Files },
               { id: "shared", label: "Shared", icon: Share2 },
+              { id: "fir-search", label: "FIR Search", icon: Search },
+              { id: "global-chat", label: "Global AI Chat", icon: Sparkles },
               ...(user?.role === "admin" ? [{ id: "admin", label: "Admin", icon: Shield }] : []),
             ].map((tab) => {
               const Icon = tab.icon;
@@ -1047,7 +1359,11 @@ export default function DashboardPage() {
           {isExplorer && (
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setIsNewFolderModalOpen(true)}
+                onClick={() => {
+                  const currentFolder = folderPath.length > 0 ? folderPath[folderPath.length - 1] : null;
+                  setNewFolderAccessLevel(currentFolder?.accessLevel === "admin" ? "admin" : "all");
+                  setIsNewFolderModalOpen(true);
+                }}
                 className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 <FolderPlus className="h-4 w-4 text-slate-500" />
@@ -1173,6 +1489,7 @@ export default function DashboardPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search files and folders…"
+                    suppressHydrationWarning
                     className="h-9 w-48 rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-xs text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#0052FF] focus:ring-4 focus:ring-[#0052FF]/10 focus:w-64 dark:border-slate-800 dark:bg-slate-900 dark:text-white sm:w-56 sm:focus:w-72"
                   />
                   {searchQuery && (
@@ -1267,9 +1584,17 @@ export default function DashboardPage() {
                               <Folder className="h-5 w-5" />
                             </div>
                             <div className="truncate">
-                              <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
-                                {folder.name}
-                              </p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
+                                  {folder.name}
+                                </p>
+                                {folder.shared && folder.accessLevel === "admin" && (
+                                  <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-600 border border-amber-500/20 dark:text-amber-400">
+                                    <Shield className="h-2.5 w-2.5" />
+                                    Admin
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[10px] text-slate-400">{formatDate(folder.createdAt)}</p>
                             </div>
                           </div>
@@ -1300,8 +1625,11 @@ export default function DashboardPage() {
                             <div
                               key={file.id}
                               onClick={() => {
-                                if (file.type === "pdf") handleOpenPdf(file);
-                                else setPreviewFile(file);
+                                if (file.type === "pdf") {
+                                  setPdfModeDropdownId(pdfModeDropdownId === file.id ? null : file.id);
+                                } else {
+                                  setPreviewFile(file);
+                                }
                               }}
                               className="group relative flex cursor-pointer flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
                             >
@@ -1321,6 +1649,9 @@ export default function DashboardPage() {
                                   </button>
                                   {openMenuId === file.id && (
                                     <ContextMenu
+                                      file={file}
+                                      onOpenChat={() => handleOpenPdf(file, "chat")}
+                                      onOpenView={() => handleOpenPdf(file, "view")}
                                       onDownload={() => handleDownload(file)}
                                       onShare={() => handleShare(file)}
                                       onDelete={() => handleDelete(file)}
@@ -1330,14 +1661,57 @@ export default function DashboardPage() {
                                 </div>
                               </div>
                               <div>
-                                <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
-                                  {file.name}
-                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
+                                    {file.name}
+                                  </p>
+                                  {file.shared && file.accessLevel === "admin" && (
+                                    <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-600 border border-amber-500/20 dark:text-amber-400">
+                                      <Shield className="h-2.5 w-2.5" />
+                                      Admin
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400">
                                   <span>{formatBytes(file.sizeBytes)}</span>
                                   <span>{formatDate(file.updatedAt)}</span>
                                 </div>
                               </div>
+
+                              {/* Mode Dropdown Popover on File Click */}
+                              {pdfModeDropdownId === file.id && (
+                                <div
+                                  ref={pdfModeMenuRef}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute right-3 top-12 z-40 w-48 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95 animate-in fade-in slide-in-from-top-2 duration-150"
+                                >
+                                  <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Select Mode</p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPdfModeDropdownId(null);
+                                      handleOpenPdf(file, "chat");
+                                    }}
+                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-[#0052FF] dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-[#4D7CFF]"
+                                  >
+                                    <MessageSquare className="h-4 w-4 text-[#0052FF]" />
+                                    Chat Mode
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPdfModeDropdownId(null);
+                                      handleOpenPdf(file, "view");
+                                    }}
+                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-[#0052FF] dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-[#4D7CFF]"
+                                  >
+                                    <Eye className="h-4 w-4 text-[#0052FF]" />
+                                    View Mode
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -1360,16 +1734,60 @@ export default function DashboardPage() {
                                 <tr
                                   key={file.id}
                                   onClick={() => {
-                                    if (file.type === "pdf") handleOpenPdf(file);
-                                    else setPreviewFile(file);
+                                    if (file.type === "pdf") {
+                                      setPdfModeDropdownId(pdfModeDropdownId === file.id ? null : file.id);
+                                    } else {
+                                      setPreviewFile(file);
+                                    }
                                   }}
-                                  className="group cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                                  className="group relative cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
                                 >
                                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
                                     <div className="flex items-center gap-3">
                                       <Vis.icon className={`h-4 w-4 ${Vis.className}`} />
                                       <span className="truncate max-w-xs">{file.name}</span>
+                                      {file.shared && file.accessLevel === "admin" && (
+                                        <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-600 border border-amber-500/20 dark:text-amber-400">
+                                          <Shield className="h-2.5 w-2.5" />
+                                          Admin
+                                        </span>
+                                      )}
                                     </div>
+
+                                    {/* Mode Dropdown Popover on File Click (Table View) */}
+                                    {pdfModeDropdownId === file.id && (
+                                      <div
+                                        ref={pdfModeMenuRef}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="absolute left-40 top-full z-40 mt-1 w-48 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95 animate-in fade-in slide-in-from-top-2 duration-150"
+                                      >
+                                        <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Select Mode</p>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setPdfModeDropdownId(null);
+                                            handleOpenPdf(file, "chat");
+                                          }}
+                                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-[#0052FF] dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-[#4D7CFF]"
+                                        >
+                                          <MessageSquare className="h-4 w-4 text-[#0052FF]" />
+                                          Chat Mode
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setPdfModeDropdownId(null);
+                                            handleOpenPdf(file, "view");
+                                          }}
+                                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-[#0052FF] dark:text-slate-200 dark:hover:bg-blue-500/10 dark:hover:text-[#4D7CFF]"
+                                        >
+                                          <Eye className="h-4 w-4 text-[#0052FF]" />
+                                          View Mode
+                                        </button>
+                                      </div>
+                                    )}
                                   </td>
                                   <td className="px-4 py-3 text-slate-500">{formatBytes(file.sizeBytes)}</td>
                                   <td className="px-4 py-3 text-slate-500">{formatDate(file.updatedAt)}</td>
@@ -1405,7 +1823,34 @@ export default function DashboardPage() {
 
         {/* TAB 4: ADMIN PANEL */}
         {category === "admin" && user?.role === "admin" && <AdminPanel />}
+
+        {/* TAB 5: FIR SEARCH */}
+        {category === "fir-search" && (
+          <FirSearchPanel />
+        )}
+
+        {/* TAB 6: GLOBAL AI CHAT */}
+        {category === "global-chat" && (
+          <GlobalChatPanel user={user} />
+        )}
+
+        {/* FLOATING PROCESSING STATUS BAR */}
+        <ProcessingStatusBar onComplete={() => fetchExplorerContent(category as ExplorerCategory, currentFolderId)} />
       </main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA] text-slate-500 dark:bg-slate-950">
+          <Loader2 className="h-6 w-6 animate-spin text-[#0052FF]" />
+        </div>
+      }
+    >
+      <DashboardContent />
+    </React.Suspense>
   );
 }

@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJwt } from "@/lib/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define which paths require authentication
-  const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/api/protected");
-  
-  // Define auth paths where logged-in users shouldn't be (like the login page itself)
+  const isProtectedRoute =
+    pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/") ||
+    pathname.startsWith("/api/protected");
+
+  // Define auth/landing paths where logged-in users should be sent to the dashboard
   const isAuthRoute = pathname === "/login";
+  const isHomeRoute = pathname === "/";
 
   const token = request.cookies.get("auth_token")?.value;
   let verifiedPayload = null;
@@ -25,8 +29,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If a logged-in user tries to visit the login page, redirect them to the dashboard
-  if (isAuthRoute && verifiedPayload) {
+  // If a logged-in user visits the landing/home page or login page, redirect them to the dashboard
+  if ((isHomeRoute || isAuthRoute) && verifiedPayload) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -35,9 +39,13 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Optimize middleware execution by filtering paths
+export const middleware = proxy;
+
+// Optimize proxy execution by filtering paths
 export const config = {
   matcher: [
+    "/",
+    "/dashboard",
     "/dashboard/:path*",
     "/login",
     "/api/protected/:path*",

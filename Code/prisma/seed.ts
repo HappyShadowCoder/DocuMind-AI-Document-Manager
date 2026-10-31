@@ -2,61 +2,98 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Pool } from "../node_modules/@types/pg";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
 import bcrypt from "bcryptjs";
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-    throw new Error("DATABASE_URL environment variable is missing.");
+function escapeSql(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+function runSql(sql: string): void {
+  execFileSync("npx", ["prisma", "db", "execute", "--stdin"], {
+    cwd: path.resolve(__dirname, ".."),
+    env: process.env,
+    input: sql,
+    stdio: "pipe",
+    encoding: "utf8",
+  });
+}
 
 async function main() {
-    const commonPassword = await bcrypt.hash("password123", 10);
+  const commonPassword = await bcrypt.hash("password123", 10);
+  const safePassword = escapeSql(commonPassword);
 
-    // 1. Seed Admin User
-    const admin = await prisma.user.upsert({
-        where: { email: "admin@example.com" },
-        update: { role: "admin" },
-        create: {
-            email: "admin@example.com", // <-- Syntax error fixed here
-            fullName: "Admin User",
-            passwordHash: commonPassword,
-            role: "admin",
-            mustChangePassword: false,
-        },
-    });
+  const sql = `
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM "User" WHERE email = 'admin@example.com') THEN
+        INSERT INTO "User" (
+          id,
+          email,
+          "fullName",
+          "passwordHash",
+          role,
+          "mustChangePassword",
+          "createdAt",
+          "updatedAt"
+        ) VALUES (
+          gen_random_uuid()::text,
+          'admin@example.com',
+          'Admin User',
+          '${safePassword}',
+          'admin',
+          false,
+          NOW(),
+          NOW()
+        );
+      ELSE
+        UPDATE "User"
+        SET "passwordHash" = '${safePassword}',
+            "fullName" = 'Admin User',
+            role = 'admin',
+            "mustChangePassword" = false,
+            "updatedAt" = NOW()
+        WHERE email = 'admin@example.com';
+      END IF;
 
-    console.log("Seeded admin user:", admin.email);
+      IF NOT EXISTS (SELECT 1 FROM "User" WHERE email = 'test@example.com') THEN
+        INSERT INTO "User" (
+          id,
+          email,
+          "fullName",
+          "passwordHash",
+          role,
+          "mustChangePassword",
+          "createdAt",
+          "updatedAt"
+        ) VALUES (
+          gen_random_uuid()::text,
+          'test@example.com',
+          'Test User',
+          '${safePassword}',
+          'user',
+          false,
+          NOW(),
+          NOW()
+        );
+      ELSE
+        UPDATE "User"
+        SET "passwordHash" = '${safePassword}',
+            "fullName" = 'Test User',
+            role = 'user',
+            "mustChangePassword" = false,
+            "updatedAt" = NOW()
+        WHERE email = 'test@example.com';
+      END IF;
+    END $$;
+  `;
 
-    // 2. Seed Standard User
-    const user = await prisma.user.upsert({
-        where: { email: "test@example.com" },
-        update: { role: "user" },
-        create: {
-            email: "test@example.com",
-            fullName: "Test User",
-            passwordHash: commonPassword,
-            role: "user",
-            mustChangePassword: false,
-        },
-    });
-
-    console.log("Seeded standard user:", user.email);
+  runSql(sql);
+  console.log("Seeded admin and test users.");
 }
 
-main()
-    .catch((e) => {
-        console.error("Error seeding database:", e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-        await pool.end();
-    });
+main().catch((error) => {
+  console.error("Error seeding database:", error);
+  process.exit(1);
+});

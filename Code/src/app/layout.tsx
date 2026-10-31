@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "../components/theme-provider";
-import  Navbar  from "@/components/navbar";
+import Navbar from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Knowledge Spatial | Document Management",
+  title: "Office Document Management",
   description: "Enterprise document management platform.",
 };
 

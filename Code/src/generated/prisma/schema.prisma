@@ -26,45 +26,48 @@ model User {
 }
 
 model Folder {
-  id        String   @id @default(cuid())
-  name      String
-  parentId  String?
-  shared    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ownerId   String
-  files     File[]
-  owner     User     @relation("UserFolders", fields: [ownerId], references: [id], onDelete: Cascade)
-  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[] @relation("FolderToFolder")
+  id          String      @id @default(cuid())
+  name        String
+  parentId    String?
+  shared      Boolean     @default(false)
+  accessLevel AccessLevel @default(all)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  ownerId     String
+  files       File[]
+  owner       User        @relation("UserFolders", fields: [ownerId], references: [id], onDelete: Cascade)
+  parent      Folder?     @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]    @relation("FolderToFolder")
 
   @@index([ownerId])
   @@index([parentId])
 }
 
 model File {
-  id                String           @id @default(cuid())
+  id                String            @id @default(cuid())
   name              String
   type              String
   sizeBytes         BigInt
   path              String
-  shared            Boolean          @default(false)
+  shared            Boolean           @default(false)
+  accessLevel       AccessLevel       @default(all)
   ownerId           String
   folderId          String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  processingStatus  ProcessingStatus @default(idle)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  processingStatus  ProcessingStatus  @default(idle)
   processingError   String?
   summary           String?
   processedAt       DateTime?
-  chunkCount        Int              @default(0)
+  chunkCount        Int               @default(0)
   embeddingProvider AiProvider?
-  isScanned         Boolean          @default(false)
+  isScanned         Boolean           @default(false)
   ocrEngineUsed     String?
   chatMessages      ChatMessage[]
   chunks            DocumentChunk[]
-  folder            Folder?          @relation(fields: [folderId], references: [id])
-  owner             User             @relation("UserFiles", fields: [ownerId], references: [id], onDelete: Cascade)
+  documentMetadata  DocumentMetadata?
+  folder            Folder?           @relation(fields: [folderId], references: [id])
+  owner             User              @relation("UserFiles", fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
   @@index([folderId])
@@ -86,13 +89,53 @@ model DocumentChunk {
   @@index([fileId, chunkIndex])
 }
 
+model ChatSession {
+  id         String         @id @default(cuid())
+  entityType ChatEntityType
+  entityId   String
+  title      String
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  messages   ChatMessage[]
+
+  @@index([entityType, entityId])
+}
+
 model ChatMessage {
-  id        String   @id @default(cuid())
-  fileId    String
+  id        String       @id @default(cuid())
+  sessionId String?
+  session   ChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fileId    String?
   content   String
-  createdAt DateTime @default(now())
-  role      String
-  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  role      ChatRole
+  sources   String[]     @default([])
+  file      File?        @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model DocumentMetadata {
+  id               String    @id @default(cuid())
+  fileId           String    @unique
+  file             File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  state            String?
+  firNumber        String?
+  firDate          DateTime?
+  district         String?
+  subDivision      String?
+  policeStation    String?
+  propertyLoss     Float?
+  actsAndSections  Json?
+  zeroFirReference String?
+  rawJson          Json?
+
+  @@index([state])
+  @@index([firNumber])
+  @@index([district])
+  @@index([subDivision])
+  @@index([policeStation])
+  @@index([firDate])
 }
 
 enum Role {
@@ -116,4 +159,41 @@ enum ChatRole {
   user
   assistant
   system
+}
+
+enum ChatEntityType {
+  FILE
+  FOLDER
+  GLOBAL
+}
+
+enum AccessLevel {
+  all
+  admin
+}
+
+enum CacheScope {
+  FILE
+  FOLDER
+  GLOBAL
+}
+
+model SemanticCache {
+  id                String                @id @default(cuid())
+  scopeType         CacheScope
+  scopeId           String
+  docFingerprint    String
+  questionHash      String
+  /// 768-dimension embedding of the user question (same dim as DocumentChunk)
+  questionEmbedding Unsupported("vector")
+  answerText        String
+  sourcePages       String[]              @default([])
+  aiProvider        AiProvider
+  hitCount          Int                   @default(0)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([scopeType, scopeId])
+  @@index([docFingerprint])
+  @@index([questionHash])
 }

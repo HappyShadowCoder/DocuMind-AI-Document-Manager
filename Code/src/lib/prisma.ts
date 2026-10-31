@@ -1,8 +1,10 @@
 import { PrismaClient } from "@/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "../../node_modules/@types/pg";
+import { Pool } from "pg";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+type GlobalPrisma = typeof globalThis & { prisma?: PrismaClient };
+
+const globalForPrisma = globalThis as GlobalPrisma;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -10,11 +12,16 @@ const pool = new Pool({
 
 const adapter = new PrismaPg(pool);
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    adapter,
-  });
+const createPrismaClient = () => new PrismaClient({ adapter });
+
+const existingPrisma = globalForPrisma.prisma;
+const hasRequiredModels =
+  !!existingPrisma &&
+  typeof (existingPrisma as PrismaClient & { chatSession?: unknown }).chatSession !== "undefined" &&
+  typeof (existingPrisma as PrismaClient & { chatMessage?: unknown }).chatMessage !== "undefined" &&
+  typeof (existingPrisma as PrismaClient & { documentMetadata?: unknown }).documentMetadata !== "undefined";
+
+export const prisma = hasRequiredModels ? existingPrisma : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

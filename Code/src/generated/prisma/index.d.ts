@@ -34,10 +34,25 @@ export type File = $Result.DefaultSelection<Prisma.$FilePayload>
  */
 export type DocumentChunk = $Result.DefaultSelection<Prisma.$DocumentChunkPayload>
 /**
+ * Model ChatSession
+ * 
+ */
+export type ChatSession = $Result.DefaultSelection<Prisma.$ChatSessionPayload>
+/**
  * Model ChatMessage
  * 
  */
 export type ChatMessage = $Result.DefaultSelection<Prisma.$ChatMessagePayload>
+/**
+ * Model DocumentMetadata
+ * 
+ */
+export type DocumentMetadata = $Result.DefaultSelection<Prisma.$DocumentMetadataPayload>
+/**
+ * Model SemanticCache
+ * 
+ */
+export type SemanticCache = $Result.DefaultSelection<Prisma.$SemanticCachePayload>
 
 /**
  * Enums
@@ -77,6 +92,32 @@ export const ChatRole: {
 
 export type ChatRole = (typeof ChatRole)[keyof typeof ChatRole]
 
+
+export const ChatEntityType: {
+  FILE: 'FILE',
+  FOLDER: 'FOLDER',
+  GLOBAL: 'GLOBAL'
+};
+
+export type ChatEntityType = (typeof ChatEntityType)[keyof typeof ChatEntityType]
+
+
+export const AccessLevel: {
+  all: 'all',
+  admin: 'admin'
+};
+
+export type AccessLevel = (typeof AccessLevel)[keyof typeof AccessLevel]
+
+
+export const CacheScope: {
+  FILE: 'FILE',
+  FOLDER: 'FOLDER',
+  GLOBAL: 'GLOBAL'
+};
+
+export type CacheScope = (typeof CacheScope)[keyof typeof CacheScope]
+
 }
 
 export type Role = $Enums.Role
@@ -94,6 +135,18 @@ export const ProcessingStatus: typeof $Enums.ProcessingStatus
 export type ChatRole = $Enums.ChatRole
 
 export const ChatRole: typeof $Enums.ChatRole
+
+export type ChatEntityType = $Enums.ChatEntityType
+
+export const ChatEntityType: typeof $Enums.ChatEntityType
+
+export type AccessLevel = $Enums.AccessLevel
+
+export const AccessLevel: typeof $Enums.AccessLevel
+
+export type CacheScope = $Enums.CacheScope
+
+export const CacheScope: typeof $Enums.CacheScope
 
 /**
  * ##  Prisma Client ʲˢ
@@ -257,6 +310,16 @@ export class PrismaClient<
   get documentChunk(): Prisma.DocumentChunkDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.chatSession`: Exposes CRUD operations for the **ChatSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ChatSessions
+    * const chatSessions = await prisma.chatSession.findMany()
+    * ```
+    */
+  get chatSession(): Prisma.ChatSessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.chatMessage`: Exposes CRUD operations for the **ChatMessage** model.
     * Example usage:
     * ```ts
@@ -265,6 +328,26 @@ export class PrismaClient<
     * ```
     */
   get chatMessage(): Prisma.ChatMessageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.documentMetadata`: Exposes CRUD operations for the **DocumentMetadata** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DocumentMetadata
+    * const documentMetadata = await prisma.documentMetadata.findMany()
+    * ```
+    */
+  get documentMetadata(): Prisma.DocumentMetadataDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.semanticCache`: Exposes CRUD operations for the **SemanticCache** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SemanticCaches
+    * const semanticCaches = await prisma.semanticCache.findMany()
+    * ```
+    */
+  get semanticCache(): Prisma.SemanticCacheDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -716,7 +799,10 @@ export namespace Prisma {
     Folder: 'Folder',
     File: 'File',
     DocumentChunk: 'DocumentChunk',
-    ChatMessage: 'ChatMessage'
+    ChatSession: 'ChatSession',
+    ChatMessage: 'ChatMessage',
+    DocumentMetadata: 'DocumentMetadata',
+    SemanticCache: 'SemanticCache'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -732,7 +818,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "folder" | "file" | "documentChunk" | "chatMessage"
+      modelProps: "user" | "folder" | "file" | "documentChunk" | "chatSession" | "chatMessage" | "documentMetadata" | "semanticCache"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1016,6 +1102,80 @@ export namespace Prisma {
           }
         }
       }
+      ChatSession: {
+        payload: Prisma.$ChatSessionPayload<ExtArgs>
+        fields: Prisma.ChatSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ChatSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ChatSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.ChatSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ChatSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          findMany: {
+            args: Prisma.ChatSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>[]
+          }
+          create: {
+            args: Prisma.ChatSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          createMany: {
+            args: Prisma.ChatSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ChatSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.ChatSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          update: {
+            args: Prisma.ChatSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.ChatSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ChatSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ChatSessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.ChatSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.ChatSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateChatSession>
+          }
+          groupBy: {
+            args: Prisma.ChatSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ChatSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ChatSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<ChatSessionCountAggregateOutputType> | number
+          }
+        }
+      }
       ChatMessage: {
         payload: Prisma.$ChatMessagePayload<ExtArgs>
         fields: Prisma.ChatMessageFieldRefs
@@ -1087,6 +1247,138 @@ export namespace Prisma {
           count: {
             args: Prisma.ChatMessageCountArgs<ExtArgs>
             result: $Utils.Optional<ChatMessageCountAggregateOutputType> | number
+          }
+        }
+      }
+      DocumentMetadata: {
+        payload: Prisma.$DocumentMetadataPayload<ExtArgs>
+        fields: Prisma.DocumentMetadataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DocumentMetadataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DocumentMetadataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          findFirst: {
+            args: Prisma.DocumentMetadataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DocumentMetadataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          findMany: {
+            args: Prisma.DocumentMetadataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>[]
+          }
+          create: {
+            args: Prisma.DocumentMetadataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          createMany: {
+            args: Prisma.DocumentMetadataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DocumentMetadataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>[]
+          }
+          delete: {
+            args: Prisma.DocumentMetadataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          update: {
+            args: Prisma.DocumentMetadataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          deleteMany: {
+            args: Prisma.DocumentMetadataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DocumentMetadataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DocumentMetadataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>[]
+          }
+          upsert: {
+            args: Prisma.DocumentMetadataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentMetadataPayload>
+          }
+          aggregate: {
+            args: Prisma.DocumentMetadataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDocumentMetadata>
+          }
+          groupBy: {
+            args: Prisma.DocumentMetadataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DocumentMetadataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DocumentMetadataCountArgs<ExtArgs>
+            result: $Utils.Optional<DocumentMetadataCountAggregateOutputType> | number
+          }
+        }
+      }
+      SemanticCache: {
+        payload: Prisma.$SemanticCachePayload<ExtArgs>
+        fields: Prisma.SemanticCacheFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SemanticCacheFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SemanticCacheFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>
+          }
+          findFirst: {
+            args: Prisma.SemanticCacheFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SemanticCacheFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>
+          }
+          findMany: {
+            args: Prisma.SemanticCacheFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>[]
+          }
+          delete: {
+            args: Prisma.SemanticCacheDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>
+          }
+          update: {
+            args: Prisma.SemanticCacheUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>
+          }
+          deleteMany: {
+            args: Prisma.SemanticCacheDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SemanticCacheUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SemanticCacheUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemanticCachePayload>[]
+          }
+          aggregate: {
+            args: Prisma.SemanticCacheAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSemanticCache>
+          }
+          groupBy: {
+            args: Prisma.SemanticCacheGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SemanticCacheGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SemanticCacheCountArgs<ExtArgs>
+            result: $Utils.Optional<SemanticCacheCountAggregateOutputType> | number
           }
         }
       }
@@ -1217,7 +1509,10 @@ export namespace Prisma {
     folder?: FolderOmit
     file?: FileOmit
     documentChunk?: DocumentChunkOmit
+    chatSession?: ChatSessionOmit
     chatMessage?: ChatMessageOmit
+    documentMetadata?: DocumentMetadataOmit
+    semanticCache?: SemanticCacheOmit
   }
 
   /* Types for Logging */
@@ -1410,6 +1705,37 @@ export namespace Prisma {
    */
   export type FileCountOutputTypeCountChunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DocumentChunkWhereInput
+  }
+
+
+  /**
+   * Count Type ChatSessionCountOutputType
+   */
+
+  export type ChatSessionCountOutputType = {
+    messages: number
+  }
+
+  export type ChatSessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    messages?: boolean | ChatSessionCountOutputTypeCountMessagesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ChatSessionCountOutputType without action
+   */
+  export type ChatSessionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSessionCountOutputType
+     */
+    select?: ChatSessionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ChatSessionCountOutputType without action
+   */
+  export type ChatSessionCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatMessageWhereInput
   }
 
 
@@ -2647,6 +2973,7 @@ export namespace Prisma {
     name: string | null
     parentId: string | null
     shared: boolean | null
+    accessLevel: $Enums.AccessLevel | null
     createdAt: Date | null
     updatedAt: Date | null
     ownerId: string | null
@@ -2657,6 +2984,7 @@ export namespace Prisma {
     name: string | null
     parentId: string | null
     shared: boolean | null
+    accessLevel: $Enums.AccessLevel | null
     createdAt: Date | null
     updatedAt: Date | null
     ownerId: string | null
@@ -2667,6 +2995,7 @@ export namespace Prisma {
     name: number
     parentId: number
     shared: number
+    accessLevel: number
     createdAt: number
     updatedAt: number
     ownerId: number
@@ -2679,6 +3008,7 @@ export namespace Prisma {
     name?: true
     parentId?: true
     shared?: true
+    accessLevel?: true
     createdAt?: true
     updatedAt?: true
     ownerId?: true
@@ -2689,6 +3019,7 @@ export namespace Prisma {
     name?: true
     parentId?: true
     shared?: true
+    accessLevel?: true
     createdAt?: true
     updatedAt?: true
     ownerId?: true
@@ -2699,6 +3030,7 @@ export namespace Prisma {
     name?: true
     parentId?: true
     shared?: true
+    accessLevel?: true
     createdAt?: true
     updatedAt?: true
     ownerId?: true
@@ -2782,6 +3114,7 @@ export namespace Prisma {
     name: string
     parentId: string | null
     shared: boolean
+    accessLevel: $Enums.AccessLevel
     createdAt: Date
     updatedAt: Date
     ownerId: string
@@ -2809,6 +3142,7 @@ export namespace Prisma {
     name?: boolean
     parentId?: boolean
     shared?: boolean
+    accessLevel?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     ownerId?: boolean
@@ -2824,6 +3158,7 @@ export namespace Prisma {
     name?: boolean
     parentId?: boolean
     shared?: boolean
+    accessLevel?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     ownerId?: boolean
@@ -2836,6 +3171,7 @@ export namespace Prisma {
     name?: boolean
     parentId?: boolean
     shared?: boolean
+    accessLevel?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     ownerId?: boolean
@@ -2848,12 +3184,13 @@ export namespace Prisma {
     name?: boolean
     parentId?: boolean
     shared?: boolean
+    accessLevel?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     ownerId?: boolean
   }
 
-  export type FolderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "parentId" | "shared" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["folder"]>
+  export type FolderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "parentId" | "shared" | "accessLevel" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["folder"]>
   export type FolderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     files?: boolean | Folder$filesArgs<ExtArgs>
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -2883,6 +3220,7 @@ export namespace Prisma {
       name: string
       parentId: string | null
       shared: boolean
+      accessLevel: $Enums.AccessLevel
       createdAt: Date
       updatedAt: Date
       ownerId: string
@@ -3317,6 +3655,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Folder", 'String'>
     readonly parentId: FieldRef<"Folder", 'String'>
     readonly shared: FieldRef<"Folder", 'Boolean'>
+    readonly accessLevel: FieldRef<"Folder", 'AccessLevel'>
     readonly createdAt: FieldRef<"Folder", 'DateTime'>
     readonly updatedAt: FieldRef<"Folder", 'DateTime'>
     readonly ownerId: FieldRef<"Folder", 'String'>
@@ -3835,6 +4174,7 @@ export namespace Prisma {
     sizeBytes: bigint | null
     path: string | null
     shared: boolean | null
+    accessLevel: $Enums.AccessLevel | null
     ownerId: string | null
     folderId: string | null
     createdAt: Date | null
@@ -3856,6 +4196,7 @@ export namespace Prisma {
     sizeBytes: bigint | null
     path: string | null
     shared: boolean | null
+    accessLevel: $Enums.AccessLevel | null
     ownerId: string | null
     folderId: string | null
     createdAt: Date | null
@@ -3877,6 +4218,7 @@ export namespace Prisma {
     sizeBytes: number
     path: number
     shared: number
+    accessLevel: number
     ownerId: number
     folderId: number
     createdAt: number
@@ -3910,6 +4252,7 @@ export namespace Prisma {
     sizeBytes?: true
     path?: true
     shared?: true
+    accessLevel?: true
     ownerId?: true
     folderId?: true
     createdAt?: true
@@ -3931,6 +4274,7 @@ export namespace Prisma {
     sizeBytes?: true
     path?: true
     shared?: true
+    accessLevel?: true
     ownerId?: true
     folderId?: true
     createdAt?: true
@@ -3952,6 +4296,7 @@ export namespace Prisma {
     sizeBytes?: true
     path?: true
     shared?: true
+    accessLevel?: true
     ownerId?: true
     folderId?: true
     createdAt?: true
@@ -4060,6 +4405,7 @@ export namespace Prisma {
     sizeBytes: bigint
     path: string
     shared: boolean
+    accessLevel: $Enums.AccessLevel
     ownerId: string
     folderId: string | null
     createdAt: Date
@@ -4100,6 +4446,7 @@ export namespace Prisma {
     sizeBytes?: boolean
     path?: boolean
     shared?: boolean
+    accessLevel?: boolean
     ownerId?: boolean
     folderId?: boolean
     createdAt?: boolean
@@ -4114,6 +4461,7 @@ export namespace Prisma {
     ocrEngineUsed?: boolean
     chatMessages?: boolean | File$chatMessagesArgs<ExtArgs>
     chunks?: boolean | File$chunksArgs<ExtArgs>
+    documentMetadata?: boolean | File$documentMetadataArgs<ExtArgs>
     folder?: boolean | File$folderArgs<ExtArgs>
     owner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -4126,6 +4474,7 @@ export namespace Prisma {
     sizeBytes?: boolean
     path?: boolean
     shared?: boolean
+    accessLevel?: boolean
     ownerId?: boolean
     folderId?: boolean
     createdAt?: boolean
@@ -4149,6 +4498,7 @@ export namespace Prisma {
     sizeBytes?: boolean
     path?: boolean
     shared?: boolean
+    accessLevel?: boolean
     ownerId?: boolean
     folderId?: boolean
     createdAt?: boolean
@@ -4172,6 +4522,7 @@ export namespace Prisma {
     sizeBytes?: boolean
     path?: boolean
     shared?: boolean
+    accessLevel?: boolean
     ownerId?: boolean
     folderId?: boolean
     createdAt?: boolean
@@ -4186,10 +4537,11 @@ export namespace Prisma {
     ocrEngineUsed?: boolean
   }
 
-  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "sizeBytes" | "path" | "shared" | "ownerId" | "folderId" | "createdAt" | "updatedAt" | "processingStatus" | "processingError" | "summary" | "processedAt" | "chunkCount" | "embeddingProvider" | "isScanned" | "ocrEngineUsed", ExtArgs["result"]["file"]>
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "sizeBytes" | "path" | "shared" | "accessLevel" | "ownerId" | "folderId" | "createdAt" | "updatedAt" | "processingStatus" | "processingError" | "summary" | "processedAt" | "chunkCount" | "embeddingProvider" | "isScanned" | "ocrEngineUsed", ExtArgs["result"]["file"]>
   export type FileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chatMessages?: boolean | File$chatMessagesArgs<ExtArgs>
     chunks?: boolean | File$chunksArgs<ExtArgs>
+    documentMetadata?: boolean | File$documentMetadataArgs<ExtArgs>
     folder?: boolean | File$folderArgs<ExtArgs>
     owner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -4208,6 +4560,7 @@ export namespace Prisma {
     objects: {
       chatMessages: Prisma.$ChatMessagePayload<ExtArgs>[]
       chunks: Prisma.$DocumentChunkPayload<ExtArgs>[]
+      documentMetadata: Prisma.$DocumentMetadataPayload<ExtArgs> | null
       folder: Prisma.$FolderPayload<ExtArgs> | null
       owner: Prisma.$UserPayload<ExtArgs>
     }
@@ -4218,6 +4571,7 @@ export namespace Prisma {
       sizeBytes: bigint
       path: string
       shared: boolean
+      accessLevel: $Enums.AccessLevel
       ownerId: string
       folderId: string | null
       createdAt: Date
@@ -4626,6 +4980,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     chatMessages<T extends File$chatMessagesArgs<ExtArgs> = {}>(args?: Subset<T, File$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     chunks<T extends File$chunksArgs<ExtArgs> = {}>(args?: Subset<T, File$chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documentMetadata<T extends File$documentMetadataArgs<ExtArgs> = {}>(args?: Subset<T, File$documentMetadataArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     folder<T extends File$folderArgs<ExtArgs> = {}>(args?: Subset<T, File$folderArgs<ExtArgs>>): Prisma__FolderClient<$Result.GetResult<Prisma.$FolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -4663,6 +5018,7 @@ export namespace Prisma {
     readonly sizeBytes: FieldRef<"File", 'BigInt'>
     readonly path: FieldRef<"File", 'String'>
     readonly shared: FieldRef<"File", 'Boolean'>
+    readonly accessLevel: FieldRef<"File", 'AccessLevel'>
     readonly ownerId: FieldRef<"File", 'String'>
     readonly folderId: FieldRef<"File", 'String'>
     readonly createdAt: FieldRef<"File", 'DateTime'>
@@ -5121,6 +5477,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DocumentChunkScalarFieldEnum | DocumentChunkScalarFieldEnum[]
+  }
+
+  /**
+   * File.documentMetadata
+   */
+  export type File$documentMetadataArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    where?: DocumentMetadataWhereInput
   }
 
   /**
@@ -6123,6 +6498,1094 @@ export namespace Prisma {
 
 
   /**
+   * Model ChatSession
+   */
+
+  export type AggregateChatSession = {
+    _count: ChatSessionCountAggregateOutputType | null
+    _min: ChatSessionMinAggregateOutputType | null
+    _max: ChatSessionMaxAggregateOutputType | null
+  }
+
+  export type ChatSessionMinAggregateOutputType = {
+    id: string | null
+    entityType: $Enums.ChatEntityType | null
+    entityId: string | null
+    title: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ChatSessionMaxAggregateOutputType = {
+    id: string | null
+    entityType: $Enums.ChatEntityType | null
+    entityId: string | null
+    title: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ChatSessionCountAggregateOutputType = {
+    id: number
+    entityType: number
+    entityId: number
+    title: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ChatSessionMinAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    title?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ChatSessionMaxAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    title?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ChatSessionCountAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    title?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ChatSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChatSession to aggregate.
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatSessions to fetch.
+     */
+    orderBy?: ChatSessionOrderByWithRelationInput | ChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ChatSessions
+    **/
+    _count?: true | ChatSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ChatSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ChatSessionMaxAggregateInputType
+  }
+
+  export type GetChatSessionAggregateType<T extends ChatSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateChatSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateChatSession[P]>
+      : GetScalarType<T[P], AggregateChatSession[P]>
+  }
+
+
+
+
+  export type ChatSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatSessionWhereInput
+    orderBy?: ChatSessionOrderByWithAggregationInput | ChatSessionOrderByWithAggregationInput[]
+    by: ChatSessionScalarFieldEnum[] | ChatSessionScalarFieldEnum
+    having?: ChatSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ChatSessionCountAggregateInputType | true
+    _min?: ChatSessionMinAggregateInputType
+    _max?: ChatSessionMaxAggregateInputType
+  }
+
+  export type ChatSessionGroupByOutputType = {
+    id: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ChatSessionCountAggregateOutputType | null
+    _min: ChatSessionMinAggregateOutputType | null
+    _max: ChatSessionMaxAggregateOutputType | null
+  }
+
+  type GetChatSessionGroupByPayload<T extends ChatSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ChatSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ChatSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ChatSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], ChatSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ChatSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    title?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    messages?: boolean | ChatSession$messagesArgs<ExtArgs>
+    _count?: boolean | ChatSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chatSession"]>
+
+  export type ChatSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    title?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["chatSession"]>
+
+  export type ChatSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    title?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["chatSession"]>
+
+  export type ChatSessionSelectScalar = {
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    title?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ChatSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "entityType" | "entityId" | "title" | "createdAt" | "updatedAt", ExtArgs["result"]["chatSession"]>
+  export type ChatSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    messages?: boolean | ChatSession$messagesArgs<ExtArgs>
+    _count?: boolean | ChatSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ChatSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ChatSessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $ChatSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ChatSession"
+    objects: {
+      messages: Prisma.$ChatMessagePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      entityType: $Enums.ChatEntityType
+      entityId: string
+      title: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["chatSession"]>
+    composites: {}
+  }
+
+  type ChatSessionGetPayload<S extends boolean | null | undefined | ChatSessionDefaultArgs> = $Result.GetResult<Prisma.$ChatSessionPayload, S>
+
+  type ChatSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ChatSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ChatSessionCountAggregateInputType | true
+    }
+
+  export interface ChatSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ChatSession'], meta: { name: 'ChatSession' } }
+    /**
+     * Find zero or one ChatSession that matches the filter.
+     * @param {ChatSessionFindUniqueArgs} args - Arguments to find a ChatSession
+     * @example
+     * // Get one ChatSession
+     * const chatSession = await prisma.chatSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ChatSessionFindUniqueArgs>(args: SelectSubset<T, ChatSessionFindUniqueArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ChatSession that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ChatSessionFindUniqueOrThrowArgs} args - Arguments to find a ChatSession
+     * @example
+     * // Get one ChatSession
+     * const chatSession = await prisma.chatSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ChatSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, ChatSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChatSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionFindFirstArgs} args - Arguments to find a ChatSession
+     * @example
+     * // Get one ChatSession
+     * const chatSession = await prisma.chatSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ChatSessionFindFirstArgs>(args?: SelectSubset<T, ChatSessionFindFirstArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChatSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionFindFirstOrThrowArgs} args - Arguments to find a ChatSession
+     * @example
+     * // Get one ChatSession
+     * const chatSession = await prisma.chatSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ChatSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, ChatSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ChatSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ChatSessions
+     * const chatSessions = await prisma.chatSession.findMany()
+     * 
+     * // Get first 10 ChatSessions
+     * const chatSessions = await prisma.chatSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const chatSessionWithIdOnly = await prisma.chatSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ChatSessionFindManyArgs>(args?: SelectSubset<T, ChatSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ChatSession.
+     * @param {ChatSessionCreateArgs} args - Arguments to create a ChatSession.
+     * @example
+     * // Create one ChatSession
+     * const ChatSession = await prisma.chatSession.create({
+     *   data: {
+     *     // ... data to create a ChatSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends ChatSessionCreateArgs>(args: SelectSubset<T, ChatSessionCreateArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ChatSessions.
+     * @param {ChatSessionCreateManyArgs} args - Arguments to create many ChatSessions.
+     * @example
+     * // Create many ChatSessions
+     * const chatSession = await prisma.chatSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ChatSessionCreateManyArgs>(args?: SelectSubset<T, ChatSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ChatSessions and returns the data saved in the database.
+     * @param {ChatSessionCreateManyAndReturnArgs} args - Arguments to create many ChatSessions.
+     * @example
+     * // Create many ChatSessions
+     * const chatSession = await prisma.chatSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ChatSessions and only return the `id`
+     * const chatSessionWithIdOnly = await prisma.chatSession.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ChatSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, ChatSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ChatSession.
+     * @param {ChatSessionDeleteArgs} args - Arguments to delete one ChatSession.
+     * @example
+     * // Delete one ChatSession
+     * const ChatSession = await prisma.chatSession.delete({
+     *   where: {
+     *     // ... filter to delete one ChatSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ChatSessionDeleteArgs>(args: SelectSubset<T, ChatSessionDeleteArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ChatSession.
+     * @param {ChatSessionUpdateArgs} args - Arguments to update one ChatSession.
+     * @example
+     * // Update one ChatSession
+     * const chatSession = await prisma.chatSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ChatSessionUpdateArgs>(args: SelectSubset<T, ChatSessionUpdateArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ChatSessions.
+     * @param {ChatSessionDeleteManyArgs} args - Arguments to filter ChatSessions to delete.
+     * @example
+     * // Delete a few ChatSessions
+     * const { count } = await prisma.chatSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ChatSessionDeleteManyArgs>(args?: SelectSubset<T, ChatSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChatSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ChatSessions
+     * const chatSession = await prisma.chatSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ChatSessionUpdateManyArgs>(args: SelectSubset<T, ChatSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChatSessions and returns the data updated in the database.
+     * @param {ChatSessionUpdateManyAndReturnArgs} args - Arguments to update many ChatSessions.
+     * @example
+     * // Update many ChatSessions
+     * const chatSession = await prisma.chatSession.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ChatSessions and only return the `id`
+     * const chatSessionWithIdOnly = await prisma.chatSession.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ChatSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, ChatSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ChatSession.
+     * @param {ChatSessionUpsertArgs} args - Arguments to update or create a ChatSession.
+     * @example
+     * // Update or create a ChatSession
+     * const chatSession = await prisma.chatSession.upsert({
+     *   create: {
+     *     // ... data to create a ChatSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ChatSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ChatSessionUpsertArgs>(args: SelectSubset<T, ChatSessionUpsertArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ChatSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionCountArgs} args - Arguments to filter ChatSessions to count.
+     * @example
+     * // Count the number of ChatSessions
+     * const count = await prisma.chatSession.count({
+     *   where: {
+     *     // ... the filter for the ChatSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends ChatSessionCountArgs>(
+      args?: Subset<T, ChatSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ChatSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ChatSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ChatSessionAggregateArgs>(args: Subset<T, ChatSessionAggregateArgs>): Prisma.PrismaPromise<GetChatSessionAggregateType<T>>
+
+    /**
+     * Group by ChatSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ChatSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ChatSessionGroupByArgs['orderBy'] }
+        : { orderBy?: ChatSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ChatSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChatSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ChatSession model
+   */
+  readonly fields: ChatSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ChatSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ChatSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    messages<T extends ChatSession$messagesArgs<ExtArgs> = {}>(args?: Subset<T, ChatSession$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ChatSession model
+   */
+  interface ChatSessionFieldRefs {
+    readonly id: FieldRef<"ChatSession", 'String'>
+    readonly entityType: FieldRef<"ChatSession", 'ChatEntityType'>
+    readonly entityId: FieldRef<"ChatSession", 'String'>
+    readonly title: FieldRef<"ChatSession", 'String'>
+    readonly createdAt: FieldRef<"ChatSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"ChatSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ChatSession findUnique
+   */
+  export type ChatSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatSession to fetch.
+     */
+    where: ChatSessionWhereUniqueInput
+  }
+
+  /**
+   * ChatSession findUniqueOrThrow
+   */
+  export type ChatSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatSession to fetch.
+     */
+    where: ChatSessionWhereUniqueInput
+  }
+
+  /**
+   * ChatSession findFirst
+   */
+  export type ChatSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatSession to fetch.
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatSessions to fetch.
+     */
+    orderBy?: ChatSessionOrderByWithRelationInput | ChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChatSessions.
+     */
+    cursor?: ChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChatSessions.
+     */
+    distinct?: ChatSessionScalarFieldEnum | ChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * ChatSession findFirstOrThrow
+   */
+  export type ChatSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatSession to fetch.
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatSessions to fetch.
+     */
+    orderBy?: ChatSessionOrderByWithRelationInput | ChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChatSessions.
+     */
+    cursor?: ChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChatSessions.
+     */
+    distinct?: ChatSessionScalarFieldEnum | ChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * ChatSession findMany
+   */
+  export type ChatSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatSessions to fetch.
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatSessions to fetch.
+     */
+    orderBy?: ChatSessionOrderByWithRelationInput | ChatSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ChatSessions.
+     */
+    cursor?: ChatSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChatSessions.
+     */
+    distinct?: ChatSessionScalarFieldEnum | ChatSessionScalarFieldEnum[]
+  }
+
+  /**
+   * ChatSession create
+   */
+  export type ChatSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ChatSession.
+     */
+    data: XOR<ChatSessionCreateInput, ChatSessionUncheckedCreateInput>
+  }
+
+  /**
+   * ChatSession createMany
+   */
+  export type ChatSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ChatSessions.
+     */
+    data: ChatSessionCreateManyInput | ChatSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ChatSession createManyAndReturn
+   */
+  export type ChatSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many ChatSessions.
+     */
+    data: ChatSessionCreateManyInput | ChatSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ChatSession update
+   */
+  export type ChatSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ChatSession.
+     */
+    data: XOR<ChatSessionUpdateInput, ChatSessionUncheckedUpdateInput>
+    /**
+     * Choose, which ChatSession to update.
+     */
+    where: ChatSessionWhereUniqueInput
+  }
+
+  /**
+   * ChatSession updateMany
+   */
+  export type ChatSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ChatSessions.
+     */
+    data: XOR<ChatSessionUpdateManyMutationInput, ChatSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which ChatSessions to update
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * Limit how many ChatSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChatSession updateManyAndReturn
+   */
+  export type ChatSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * The data used to update ChatSessions.
+     */
+    data: XOR<ChatSessionUpdateManyMutationInput, ChatSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which ChatSessions to update
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * Limit how many ChatSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChatSession upsert
+   */
+  export type ChatSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ChatSession to update in case it exists.
+     */
+    where: ChatSessionWhereUniqueInput
+    /**
+     * In case the ChatSession found by the `where` argument doesn't exist, create a new ChatSession with this data.
+     */
+    create: XOR<ChatSessionCreateInput, ChatSessionUncheckedCreateInput>
+    /**
+     * In case the ChatSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ChatSessionUpdateInput, ChatSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * ChatSession delete
+   */
+  export type ChatSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    /**
+     * Filter which ChatSession to delete.
+     */
+    where: ChatSessionWhereUniqueInput
+  }
+
+  /**
+   * ChatSession deleteMany
+   */
+  export type ChatSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChatSessions to delete
+     */
+    where?: ChatSessionWhereInput
+    /**
+     * Limit how many ChatSessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChatSession.messages
+   */
+  export type ChatSession$messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatMessage
+     */
+    select?: ChatMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatMessage
+     */
+    omit?: ChatMessageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatMessageInclude<ExtArgs> | null
+    where?: ChatMessageWhereInput
+    orderBy?: ChatMessageOrderByWithRelationInput | ChatMessageOrderByWithRelationInput[]
+    cursor?: ChatMessageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChatMessageScalarFieldEnum | ChatMessageScalarFieldEnum[]
+  }
+
+  /**
+   * ChatSession without action
+   */
+  export type ChatSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model ChatMessage
    */
 
@@ -6134,32 +7597,37 @@ export namespace Prisma {
 
   export type ChatMessageMinAggregateOutputType = {
     id: string | null
+    sessionId: string | null
     fileId: string | null
     content: string | null
     createdAt: Date | null
-    role: string | null
+    role: $Enums.ChatRole | null
   }
 
   export type ChatMessageMaxAggregateOutputType = {
     id: string | null
+    sessionId: string | null
     fileId: string | null
     content: string | null
     createdAt: Date | null
-    role: string | null
+    role: $Enums.ChatRole | null
   }
 
   export type ChatMessageCountAggregateOutputType = {
     id: number
+    sessionId: number
     fileId: number
     content: number
     createdAt: number
     role: number
+    sources: number
     _all: number
   }
 
 
   export type ChatMessageMinAggregateInputType = {
     id?: true
+    sessionId?: true
     fileId?: true
     content?: true
     createdAt?: true
@@ -6168,6 +7636,7 @@ export namespace Prisma {
 
   export type ChatMessageMaxAggregateInputType = {
     id?: true
+    sessionId?: true
     fileId?: true
     content?: true
     createdAt?: true
@@ -6176,10 +7645,12 @@ export namespace Prisma {
 
   export type ChatMessageCountAggregateInputType = {
     id?: true
+    sessionId?: true
     fileId?: true
     content?: true
     createdAt?: true
     role?: true
+    sources?: true
     _all?: true
   }
 
@@ -6257,10 +7728,12 @@ export namespace Prisma {
 
   export type ChatMessageGroupByOutputType = {
     id: string
-    fileId: string
+    sessionId: string | null
+    fileId: string | null
     content: string
     createdAt: Date
-    role: string
+    role: $Enums.ChatRole
+    sources: string[]
     _count: ChatMessageCountAggregateOutputType | null
     _min: ChatMessageMinAggregateOutputType | null
     _max: ChatMessageMaxAggregateOutputType | null
@@ -6282,61 +7755,78 @@ export namespace Prisma {
 
   export type ChatMessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    sessionId?: boolean
     fileId?: boolean
     content?: boolean
     createdAt?: boolean
     role?: boolean
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    sources?: boolean
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }, ExtArgs["result"]["chatMessage"]>
 
   export type ChatMessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    sessionId?: boolean
     fileId?: boolean
     content?: boolean
     createdAt?: boolean
     role?: boolean
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    sources?: boolean
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }, ExtArgs["result"]["chatMessage"]>
 
   export type ChatMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    sessionId?: boolean
     fileId?: boolean
     content?: boolean
     createdAt?: boolean
     role?: boolean
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    sources?: boolean
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }, ExtArgs["result"]["chatMessage"]>
 
   export type ChatMessageSelectScalar = {
     id?: boolean
+    sessionId?: boolean
     fileId?: boolean
     content?: boolean
     createdAt?: boolean
     role?: boolean
+    sources?: boolean
   }
 
-  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "content" | "createdAt" | "role", ExtArgs["result"]["chatMessage"]>
+  export type ChatMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionId" | "fileId" | "content" | "createdAt" | "role" | "sources", ExtArgs["result"]["chatMessage"]>
   export type ChatMessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }
   export type ChatMessageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }
   export type ChatMessageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    file?: boolean | FileDefaultArgs<ExtArgs>
+    session?: boolean | ChatMessage$sessionArgs<ExtArgs>
+    file?: boolean | ChatMessage$fileArgs<ExtArgs>
   }
 
   export type $ChatMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ChatMessage"
     objects: {
-      file: Prisma.$FilePayload<ExtArgs>
+      session: Prisma.$ChatSessionPayload<ExtArgs> | null
+      file: Prisma.$FilePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      fileId: string
+      sessionId: string | null
+      fileId: string | null
       content: string
       createdAt: Date
-      role: string
+      role: $Enums.ChatRole
+      sources: string[]
     }, ExtArgs["result"]["chatMessage"]>
     composites: {}
   }
@@ -6731,7 +8221,8 @@ export namespace Prisma {
    */
   export interface Prisma__ChatMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    session<T extends ChatMessage$sessionArgs<ExtArgs> = {}>(args?: Subset<T, ChatMessage$sessionArgs<ExtArgs>>): Prisma__ChatSessionClient<$Result.GetResult<Prisma.$ChatSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    file<T extends ChatMessage$fileArgs<ExtArgs> = {}>(args?: Subset<T, ChatMessage$fileArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6762,10 +8253,12 @@ export namespace Prisma {
    */
   interface ChatMessageFieldRefs {
     readonly id: FieldRef<"ChatMessage", 'String'>
+    readonly sessionId: FieldRef<"ChatMessage", 'String'>
     readonly fileId: FieldRef<"ChatMessage", 'String'>
     readonly content: FieldRef<"ChatMessage", 'String'>
     readonly createdAt: FieldRef<"ChatMessage", 'DateTime'>
-    readonly role: FieldRef<"ChatMessage", 'String'>
+    readonly role: FieldRef<"ChatMessage", 'ChatRole'>
+    readonly sources: FieldRef<"ChatMessage", 'String[]'>
   }
     
 
@@ -7167,6 +8660,44 @@ export namespace Prisma {
   }
 
   /**
+   * ChatMessage.session
+   */
+  export type ChatMessage$sessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatSession
+     */
+    select?: ChatSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatSession
+     */
+    omit?: ChatSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatSessionInclude<ExtArgs> | null
+    where?: ChatSessionWhereInput
+  }
+
+  /**
+   * ChatMessage.file
+   */
+  export type ChatMessage$fileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the File
+     */
+    select?: FileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the File
+     */
+    omit?: FileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileInclude<ExtArgs> | null
+    where?: FileWhereInput
+  }
+
+  /**
    * ChatMessage without action
    */
   export type ChatMessageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7182,6 +8713,2136 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ChatMessageInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DocumentMetadata
+   */
+
+  export type AggregateDocumentMetadata = {
+    _count: DocumentMetadataCountAggregateOutputType | null
+    _avg: DocumentMetadataAvgAggregateOutputType | null
+    _sum: DocumentMetadataSumAggregateOutputType | null
+    _min: DocumentMetadataMinAggregateOutputType | null
+    _max: DocumentMetadataMaxAggregateOutputType | null
+  }
+
+  export type DocumentMetadataAvgAggregateOutputType = {
+    propertyLoss: number | null
+  }
+
+  export type DocumentMetadataSumAggregateOutputType = {
+    propertyLoss: number | null
+  }
+
+  export type DocumentMetadataMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    state: string | null
+    firNumber: string | null
+    firDate: Date | null
+    district: string | null
+    subDivision: string | null
+    policeStation: string | null
+    propertyLoss: number | null
+    zeroFirReference: string | null
+  }
+
+  export type DocumentMetadataMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    state: string | null
+    firNumber: string | null
+    firDate: Date | null
+    district: string | null
+    subDivision: string | null
+    policeStation: string | null
+    propertyLoss: number | null
+    zeroFirReference: string | null
+  }
+
+  export type DocumentMetadataCountAggregateOutputType = {
+    id: number
+    fileId: number
+    state: number
+    firNumber: number
+    firDate: number
+    district: number
+    subDivision: number
+    policeStation: number
+    propertyLoss: number
+    actsAndSections: number
+    zeroFirReference: number
+    rawJson: number
+    _all: number
+  }
+
+
+  export type DocumentMetadataAvgAggregateInputType = {
+    propertyLoss?: true
+  }
+
+  export type DocumentMetadataSumAggregateInputType = {
+    propertyLoss?: true
+  }
+
+  export type DocumentMetadataMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    state?: true
+    firNumber?: true
+    firDate?: true
+    district?: true
+    subDivision?: true
+    policeStation?: true
+    propertyLoss?: true
+    zeroFirReference?: true
+  }
+
+  export type DocumentMetadataMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    state?: true
+    firNumber?: true
+    firDate?: true
+    district?: true
+    subDivision?: true
+    policeStation?: true
+    propertyLoss?: true
+    zeroFirReference?: true
+  }
+
+  export type DocumentMetadataCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    state?: true
+    firNumber?: true
+    firDate?: true
+    district?: true
+    subDivision?: true
+    policeStation?: true
+    propertyLoss?: true
+    actsAndSections?: true
+    zeroFirReference?: true
+    rawJson?: true
+    _all?: true
+  }
+
+  export type DocumentMetadataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentMetadata to aggregate.
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentMetadata to fetch.
+     */
+    orderBy?: DocumentMetadataOrderByWithRelationInput | DocumentMetadataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DocumentMetadataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentMetadata from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentMetadata.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DocumentMetadata
+    **/
+    _count?: true | DocumentMetadataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DocumentMetadataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DocumentMetadataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DocumentMetadataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DocumentMetadataMaxAggregateInputType
+  }
+
+  export type GetDocumentMetadataAggregateType<T extends DocumentMetadataAggregateArgs> = {
+        [P in keyof T & keyof AggregateDocumentMetadata]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDocumentMetadata[P]>
+      : GetScalarType<T[P], AggregateDocumentMetadata[P]>
+  }
+
+
+
+
+  export type DocumentMetadataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentMetadataWhereInput
+    orderBy?: DocumentMetadataOrderByWithAggregationInput | DocumentMetadataOrderByWithAggregationInput[]
+    by: DocumentMetadataScalarFieldEnum[] | DocumentMetadataScalarFieldEnum
+    having?: DocumentMetadataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DocumentMetadataCountAggregateInputType | true
+    _avg?: DocumentMetadataAvgAggregateInputType
+    _sum?: DocumentMetadataSumAggregateInputType
+    _min?: DocumentMetadataMinAggregateInputType
+    _max?: DocumentMetadataMaxAggregateInputType
+  }
+
+  export type DocumentMetadataGroupByOutputType = {
+    id: string
+    fileId: string
+    state: string | null
+    firNumber: string | null
+    firDate: Date | null
+    district: string | null
+    subDivision: string | null
+    policeStation: string | null
+    propertyLoss: number | null
+    actsAndSections: JsonValue | null
+    zeroFirReference: string | null
+    rawJson: JsonValue | null
+    _count: DocumentMetadataCountAggregateOutputType | null
+    _avg: DocumentMetadataAvgAggregateOutputType | null
+    _sum: DocumentMetadataSumAggregateOutputType | null
+    _min: DocumentMetadataMinAggregateOutputType | null
+    _max: DocumentMetadataMaxAggregateOutputType | null
+  }
+
+  type GetDocumentMetadataGroupByPayload<T extends DocumentMetadataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DocumentMetadataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DocumentMetadataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DocumentMetadataGroupByOutputType[P]>
+            : GetScalarType<T[P], DocumentMetadataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DocumentMetadataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    state?: boolean
+    firNumber?: boolean
+    firDate?: boolean
+    district?: boolean
+    subDivision?: boolean
+    policeStation?: boolean
+    propertyLoss?: boolean
+    actsAndSections?: boolean
+    zeroFirReference?: boolean
+    rawJson?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["documentMetadata"]>
+
+  export type DocumentMetadataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    state?: boolean
+    firNumber?: boolean
+    firDate?: boolean
+    district?: boolean
+    subDivision?: boolean
+    policeStation?: boolean
+    propertyLoss?: boolean
+    actsAndSections?: boolean
+    zeroFirReference?: boolean
+    rawJson?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["documentMetadata"]>
+
+  export type DocumentMetadataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    state?: boolean
+    firNumber?: boolean
+    firDate?: boolean
+    district?: boolean
+    subDivision?: boolean
+    policeStation?: boolean
+    propertyLoss?: boolean
+    actsAndSections?: boolean
+    zeroFirReference?: boolean
+    rawJson?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["documentMetadata"]>
+
+  export type DocumentMetadataSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    state?: boolean
+    firNumber?: boolean
+    firDate?: boolean
+    district?: boolean
+    subDivision?: boolean
+    policeStation?: boolean
+    propertyLoss?: boolean
+    actsAndSections?: boolean
+    zeroFirReference?: boolean
+    rawJson?: boolean
+  }
+
+  export type DocumentMetadataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "state" | "firNumber" | "firDate" | "district" | "subDivision" | "policeStation" | "propertyLoss" | "actsAndSections" | "zeroFirReference" | "rawJson", ExtArgs["result"]["documentMetadata"]>
+  export type DocumentMetadataInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+  export type DocumentMetadataIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+  export type DocumentMetadataIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+
+  export type $DocumentMetadataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DocumentMetadata"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      state: string | null
+      firNumber: string | null
+      firDate: Date | null
+      district: string | null
+      subDivision: string | null
+      policeStation: string | null
+      propertyLoss: number | null
+      actsAndSections: Prisma.JsonValue | null
+      zeroFirReference: string | null
+      rawJson: Prisma.JsonValue | null
+    }, ExtArgs["result"]["documentMetadata"]>
+    composites: {}
+  }
+
+  type DocumentMetadataGetPayload<S extends boolean | null | undefined | DocumentMetadataDefaultArgs> = $Result.GetResult<Prisma.$DocumentMetadataPayload, S>
+
+  type DocumentMetadataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DocumentMetadataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DocumentMetadataCountAggregateInputType | true
+    }
+
+  export interface DocumentMetadataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DocumentMetadata'], meta: { name: 'DocumentMetadata' } }
+    /**
+     * Find zero or one DocumentMetadata that matches the filter.
+     * @param {DocumentMetadataFindUniqueArgs} args - Arguments to find a DocumentMetadata
+     * @example
+     * // Get one DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DocumentMetadataFindUniqueArgs>(args: SelectSubset<T, DocumentMetadataFindUniqueArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DocumentMetadata that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DocumentMetadataFindUniqueOrThrowArgs} args - Arguments to find a DocumentMetadata
+     * @example
+     * // Get one DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DocumentMetadataFindUniqueOrThrowArgs>(args: SelectSubset<T, DocumentMetadataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DocumentMetadata that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataFindFirstArgs} args - Arguments to find a DocumentMetadata
+     * @example
+     * // Get one DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DocumentMetadataFindFirstArgs>(args?: SelectSubset<T, DocumentMetadataFindFirstArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DocumentMetadata that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataFindFirstOrThrowArgs} args - Arguments to find a DocumentMetadata
+     * @example
+     * // Get one DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DocumentMetadataFindFirstOrThrowArgs>(args?: SelectSubset<T, DocumentMetadataFindFirstOrThrowArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DocumentMetadata that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findMany()
+     * 
+     * // Get first 10 DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const documentMetadataWithIdOnly = await prisma.documentMetadata.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DocumentMetadataFindManyArgs>(args?: SelectSubset<T, DocumentMetadataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DocumentMetadata.
+     * @param {DocumentMetadataCreateArgs} args - Arguments to create a DocumentMetadata.
+     * @example
+     * // Create one DocumentMetadata
+     * const DocumentMetadata = await prisma.documentMetadata.create({
+     *   data: {
+     *     // ... data to create a DocumentMetadata
+     *   }
+     * })
+     * 
+     */
+    create<T extends DocumentMetadataCreateArgs>(args: SelectSubset<T, DocumentMetadataCreateArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DocumentMetadata.
+     * @param {DocumentMetadataCreateManyArgs} args - Arguments to create many DocumentMetadata.
+     * @example
+     * // Create many DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DocumentMetadataCreateManyArgs>(args?: SelectSubset<T, DocumentMetadataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DocumentMetadata and returns the data saved in the database.
+     * @param {DocumentMetadataCreateManyAndReturnArgs} args - Arguments to create many DocumentMetadata.
+     * @example
+     * // Create many DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DocumentMetadata and only return the `id`
+     * const documentMetadataWithIdOnly = await prisma.documentMetadata.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DocumentMetadataCreateManyAndReturnArgs>(args?: SelectSubset<T, DocumentMetadataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DocumentMetadata.
+     * @param {DocumentMetadataDeleteArgs} args - Arguments to delete one DocumentMetadata.
+     * @example
+     * // Delete one DocumentMetadata
+     * const DocumentMetadata = await prisma.documentMetadata.delete({
+     *   where: {
+     *     // ... filter to delete one DocumentMetadata
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DocumentMetadataDeleteArgs>(args: SelectSubset<T, DocumentMetadataDeleteArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DocumentMetadata.
+     * @param {DocumentMetadataUpdateArgs} args - Arguments to update one DocumentMetadata.
+     * @example
+     * // Update one DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DocumentMetadataUpdateArgs>(args: SelectSubset<T, DocumentMetadataUpdateArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DocumentMetadata.
+     * @param {DocumentMetadataDeleteManyArgs} args - Arguments to filter DocumentMetadata to delete.
+     * @example
+     * // Delete a few DocumentMetadata
+     * const { count } = await prisma.documentMetadata.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DocumentMetadataDeleteManyArgs>(args?: SelectSubset<T, DocumentMetadataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DocumentMetadata.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DocumentMetadataUpdateManyArgs>(args: SelectSubset<T, DocumentMetadataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DocumentMetadata and returns the data updated in the database.
+     * @param {DocumentMetadataUpdateManyAndReturnArgs} args - Arguments to update many DocumentMetadata.
+     * @example
+     * // Update many DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DocumentMetadata and only return the `id`
+     * const documentMetadataWithIdOnly = await prisma.documentMetadata.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DocumentMetadataUpdateManyAndReturnArgs>(args: SelectSubset<T, DocumentMetadataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DocumentMetadata.
+     * @param {DocumentMetadataUpsertArgs} args - Arguments to update or create a DocumentMetadata.
+     * @example
+     * // Update or create a DocumentMetadata
+     * const documentMetadata = await prisma.documentMetadata.upsert({
+     *   create: {
+     *     // ... data to create a DocumentMetadata
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DocumentMetadata we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DocumentMetadataUpsertArgs>(args: SelectSubset<T, DocumentMetadataUpsertArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DocumentMetadata.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataCountArgs} args - Arguments to filter DocumentMetadata to count.
+     * @example
+     * // Count the number of DocumentMetadata
+     * const count = await prisma.documentMetadata.count({
+     *   where: {
+     *     // ... the filter for the DocumentMetadata we want to count
+     *   }
+     * })
+    **/
+    count<T extends DocumentMetadataCountArgs>(
+      args?: Subset<T, DocumentMetadataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DocumentMetadataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DocumentMetadata.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DocumentMetadataAggregateArgs>(args: Subset<T, DocumentMetadataAggregateArgs>): Prisma.PrismaPromise<GetDocumentMetadataAggregateType<T>>
+
+    /**
+     * Group by DocumentMetadata.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentMetadataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DocumentMetadataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DocumentMetadataGroupByArgs['orderBy'] }
+        : { orderBy?: DocumentMetadataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DocumentMetadataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDocumentMetadataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DocumentMetadata model
+   */
+  readonly fields: DocumentMetadataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DocumentMetadata.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DocumentMetadataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DocumentMetadata model
+   */
+  interface DocumentMetadataFieldRefs {
+    readonly id: FieldRef<"DocumentMetadata", 'String'>
+    readonly fileId: FieldRef<"DocumentMetadata", 'String'>
+    readonly state: FieldRef<"DocumentMetadata", 'String'>
+    readonly firNumber: FieldRef<"DocumentMetadata", 'String'>
+    readonly firDate: FieldRef<"DocumentMetadata", 'DateTime'>
+    readonly district: FieldRef<"DocumentMetadata", 'String'>
+    readonly subDivision: FieldRef<"DocumentMetadata", 'String'>
+    readonly policeStation: FieldRef<"DocumentMetadata", 'String'>
+    readonly propertyLoss: FieldRef<"DocumentMetadata", 'Float'>
+    readonly actsAndSections: FieldRef<"DocumentMetadata", 'Json'>
+    readonly zeroFirReference: FieldRef<"DocumentMetadata", 'String'>
+    readonly rawJson: FieldRef<"DocumentMetadata", 'Json'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DocumentMetadata findUnique
+   */
+  export type DocumentMetadataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentMetadata to fetch.
+     */
+    where: DocumentMetadataWhereUniqueInput
+  }
+
+  /**
+   * DocumentMetadata findUniqueOrThrow
+   */
+  export type DocumentMetadataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentMetadata to fetch.
+     */
+    where: DocumentMetadataWhereUniqueInput
+  }
+
+  /**
+   * DocumentMetadata findFirst
+   */
+  export type DocumentMetadataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentMetadata to fetch.
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentMetadata to fetch.
+     */
+    orderBy?: DocumentMetadataOrderByWithRelationInput | DocumentMetadataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentMetadata.
+     */
+    cursor?: DocumentMetadataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentMetadata from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentMetadata.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentMetadata.
+     */
+    distinct?: DocumentMetadataScalarFieldEnum | DocumentMetadataScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentMetadata findFirstOrThrow
+   */
+  export type DocumentMetadataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentMetadata to fetch.
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentMetadata to fetch.
+     */
+    orderBy?: DocumentMetadataOrderByWithRelationInput | DocumentMetadataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentMetadata.
+     */
+    cursor?: DocumentMetadataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentMetadata from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentMetadata.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentMetadata.
+     */
+    distinct?: DocumentMetadataScalarFieldEnum | DocumentMetadataScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentMetadata findMany
+   */
+  export type DocumentMetadataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentMetadata to fetch.
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentMetadata to fetch.
+     */
+    orderBy?: DocumentMetadataOrderByWithRelationInput | DocumentMetadataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DocumentMetadata.
+     */
+    cursor?: DocumentMetadataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentMetadata from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentMetadata.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentMetadata.
+     */
+    distinct?: DocumentMetadataScalarFieldEnum | DocumentMetadataScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentMetadata create
+   */
+  export type DocumentMetadataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DocumentMetadata.
+     */
+    data: XOR<DocumentMetadataCreateInput, DocumentMetadataUncheckedCreateInput>
+  }
+
+  /**
+   * DocumentMetadata createMany
+   */
+  export type DocumentMetadataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DocumentMetadata.
+     */
+    data: DocumentMetadataCreateManyInput | DocumentMetadataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DocumentMetadata createManyAndReturn
+   */
+  export type DocumentMetadataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * The data used to create many DocumentMetadata.
+     */
+    data: DocumentMetadataCreateManyInput | DocumentMetadataCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DocumentMetadata update
+   */
+  export type DocumentMetadataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DocumentMetadata.
+     */
+    data: XOR<DocumentMetadataUpdateInput, DocumentMetadataUncheckedUpdateInput>
+    /**
+     * Choose, which DocumentMetadata to update.
+     */
+    where: DocumentMetadataWhereUniqueInput
+  }
+
+  /**
+   * DocumentMetadata updateMany
+   */
+  export type DocumentMetadataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DocumentMetadata.
+     */
+    data: XOR<DocumentMetadataUpdateManyMutationInput, DocumentMetadataUncheckedUpdateManyInput>
+    /**
+     * Filter which DocumentMetadata to update
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * Limit how many DocumentMetadata to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DocumentMetadata updateManyAndReturn
+   */
+  export type DocumentMetadataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * The data used to update DocumentMetadata.
+     */
+    data: XOR<DocumentMetadataUpdateManyMutationInput, DocumentMetadataUncheckedUpdateManyInput>
+    /**
+     * Filter which DocumentMetadata to update
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * Limit how many DocumentMetadata to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DocumentMetadata upsert
+   */
+  export type DocumentMetadataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DocumentMetadata to update in case it exists.
+     */
+    where: DocumentMetadataWhereUniqueInput
+    /**
+     * In case the DocumentMetadata found by the `where` argument doesn't exist, create a new DocumentMetadata with this data.
+     */
+    create: XOR<DocumentMetadataCreateInput, DocumentMetadataUncheckedCreateInput>
+    /**
+     * In case the DocumentMetadata was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DocumentMetadataUpdateInput, DocumentMetadataUncheckedUpdateInput>
+  }
+
+  /**
+   * DocumentMetadata delete
+   */
+  export type DocumentMetadataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+    /**
+     * Filter which DocumentMetadata to delete.
+     */
+    where: DocumentMetadataWhereUniqueInput
+  }
+
+  /**
+   * DocumentMetadata deleteMany
+   */
+  export type DocumentMetadataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentMetadata to delete
+     */
+    where?: DocumentMetadataWhereInput
+    /**
+     * Limit how many DocumentMetadata to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DocumentMetadata without action
+   */
+  export type DocumentMetadataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentMetadata
+     */
+    select?: DocumentMetadataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentMetadata
+     */
+    omit?: DocumentMetadataOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentMetadataInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SemanticCache
+   */
+
+  export type AggregateSemanticCache = {
+    _count: SemanticCacheCountAggregateOutputType | null
+    _avg: SemanticCacheAvgAggregateOutputType | null
+    _sum: SemanticCacheSumAggregateOutputType | null
+    _min: SemanticCacheMinAggregateOutputType | null
+    _max: SemanticCacheMaxAggregateOutputType | null
+  }
+
+  export type SemanticCacheAvgAggregateOutputType = {
+    hitCount: number | null
+  }
+
+  export type SemanticCacheSumAggregateOutputType = {
+    hitCount: number | null
+  }
+
+  export type SemanticCacheMinAggregateOutputType = {
+    id: string | null
+    scopeType: $Enums.CacheScope | null
+    scopeId: string | null
+    docFingerprint: string | null
+    questionHash: string | null
+    answerText: string | null
+    aiProvider: $Enums.AiProvider | null
+    hitCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SemanticCacheMaxAggregateOutputType = {
+    id: string | null
+    scopeType: $Enums.CacheScope | null
+    scopeId: string | null
+    docFingerprint: string | null
+    questionHash: string | null
+    answerText: string | null
+    aiProvider: $Enums.AiProvider | null
+    hitCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SemanticCacheCountAggregateOutputType = {
+    id: number
+    scopeType: number
+    scopeId: number
+    docFingerprint: number
+    questionHash: number
+    answerText: number
+    sourcePages: number
+    aiProvider: number
+    hitCount: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SemanticCacheAvgAggregateInputType = {
+    hitCount?: true
+  }
+
+  export type SemanticCacheSumAggregateInputType = {
+    hitCount?: true
+  }
+
+  export type SemanticCacheMinAggregateInputType = {
+    id?: true
+    scopeType?: true
+    scopeId?: true
+    docFingerprint?: true
+    questionHash?: true
+    answerText?: true
+    aiProvider?: true
+    hitCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SemanticCacheMaxAggregateInputType = {
+    id?: true
+    scopeType?: true
+    scopeId?: true
+    docFingerprint?: true
+    questionHash?: true
+    answerText?: true
+    aiProvider?: true
+    hitCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SemanticCacheCountAggregateInputType = {
+    id?: true
+    scopeType?: true
+    scopeId?: true
+    docFingerprint?: true
+    questionHash?: true
+    answerText?: true
+    sourcePages?: true
+    aiProvider?: true
+    hitCount?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SemanticCacheAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SemanticCache to aggregate.
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SemanticCaches to fetch.
+     */
+    orderBy?: SemanticCacheOrderByWithRelationInput | SemanticCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SemanticCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SemanticCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SemanticCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SemanticCaches
+    **/
+    _count?: true | SemanticCacheCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SemanticCacheAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SemanticCacheSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SemanticCacheMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SemanticCacheMaxAggregateInputType
+  }
+
+  export type GetSemanticCacheAggregateType<T extends SemanticCacheAggregateArgs> = {
+        [P in keyof T & keyof AggregateSemanticCache]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSemanticCache[P]>
+      : GetScalarType<T[P], AggregateSemanticCache[P]>
+  }
+
+
+
+
+  export type SemanticCacheGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SemanticCacheWhereInput
+    orderBy?: SemanticCacheOrderByWithAggregationInput | SemanticCacheOrderByWithAggregationInput[]
+    by: SemanticCacheScalarFieldEnum[] | SemanticCacheScalarFieldEnum
+    having?: SemanticCacheScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SemanticCacheCountAggregateInputType | true
+    _avg?: SemanticCacheAvgAggregateInputType
+    _sum?: SemanticCacheSumAggregateInputType
+    _min?: SemanticCacheMinAggregateInputType
+    _max?: SemanticCacheMaxAggregateInputType
+  }
+
+  export type SemanticCacheGroupByOutputType = {
+    id: string
+    scopeType: $Enums.CacheScope
+    scopeId: string
+    docFingerprint: string
+    questionHash: string
+    answerText: string
+    sourcePages: string[]
+    aiProvider: $Enums.AiProvider
+    hitCount: number
+    createdAt: Date
+    updatedAt: Date
+    _count: SemanticCacheCountAggregateOutputType | null
+    _avg: SemanticCacheAvgAggregateOutputType | null
+    _sum: SemanticCacheSumAggregateOutputType | null
+    _min: SemanticCacheMinAggregateOutputType | null
+    _max: SemanticCacheMaxAggregateOutputType | null
+  }
+
+  type GetSemanticCacheGroupByPayload<T extends SemanticCacheGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SemanticCacheGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SemanticCacheGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SemanticCacheGroupByOutputType[P]>
+            : GetScalarType<T[P], SemanticCacheGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SemanticCacheSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    scopeType?: boolean
+    scopeId?: boolean
+    docFingerprint?: boolean
+    questionHash?: boolean
+    answerText?: boolean
+    sourcePages?: boolean
+    aiProvider?: boolean
+    hitCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["semanticCache"]>
+
+
+  export type SemanticCacheSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    scopeType?: boolean
+    scopeId?: boolean
+    docFingerprint?: boolean
+    questionHash?: boolean
+    answerText?: boolean
+    sourcePages?: boolean
+    aiProvider?: boolean
+    hitCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["semanticCache"]>
+
+  export type SemanticCacheSelectScalar = {
+    id?: boolean
+    scopeType?: boolean
+    scopeId?: boolean
+    docFingerprint?: boolean
+    questionHash?: boolean
+    answerText?: boolean
+    sourcePages?: boolean
+    aiProvider?: boolean
+    hitCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SemanticCacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "scopeType" | "scopeId" | "docFingerprint" | "questionHash" | "answerText" | "sourcePages" | "aiProvider" | "hitCount" | "createdAt" | "updatedAt", ExtArgs["result"]["semanticCache"]>
+
+  export type $SemanticCachePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SemanticCache"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      scopeType: $Enums.CacheScope
+      scopeId: string
+      docFingerprint: string
+      questionHash: string
+      answerText: string
+      sourcePages: string[]
+      aiProvider: $Enums.AiProvider
+      hitCount: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["semanticCache"]>
+    composites: {}
+  }
+
+  type SemanticCacheGetPayload<S extends boolean | null | undefined | SemanticCacheDefaultArgs> = $Result.GetResult<Prisma.$SemanticCachePayload, S>
+
+  type SemanticCacheCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SemanticCacheFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SemanticCacheCountAggregateInputType | true
+    }
+
+  export interface SemanticCacheDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SemanticCache'], meta: { name: 'SemanticCache' } }
+    /**
+     * Find zero or one SemanticCache that matches the filter.
+     * @param {SemanticCacheFindUniqueArgs} args - Arguments to find a SemanticCache
+     * @example
+     * // Get one SemanticCache
+     * const semanticCache = await prisma.semanticCache.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SemanticCacheFindUniqueArgs>(args: SelectSubset<T, SemanticCacheFindUniqueArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SemanticCache that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SemanticCacheFindUniqueOrThrowArgs} args - Arguments to find a SemanticCache
+     * @example
+     * // Get one SemanticCache
+     * const semanticCache = await prisma.semanticCache.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SemanticCacheFindUniqueOrThrowArgs>(args: SelectSubset<T, SemanticCacheFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SemanticCache that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheFindFirstArgs} args - Arguments to find a SemanticCache
+     * @example
+     * // Get one SemanticCache
+     * const semanticCache = await prisma.semanticCache.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SemanticCacheFindFirstArgs>(args?: SelectSubset<T, SemanticCacheFindFirstArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SemanticCache that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheFindFirstOrThrowArgs} args - Arguments to find a SemanticCache
+     * @example
+     * // Get one SemanticCache
+     * const semanticCache = await prisma.semanticCache.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SemanticCacheFindFirstOrThrowArgs>(args?: SelectSubset<T, SemanticCacheFindFirstOrThrowArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SemanticCaches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SemanticCaches
+     * const semanticCaches = await prisma.semanticCache.findMany()
+     * 
+     * // Get first 10 SemanticCaches
+     * const semanticCaches = await prisma.semanticCache.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const semanticCacheWithIdOnly = await prisma.semanticCache.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SemanticCacheFindManyArgs>(args?: SelectSubset<T, SemanticCacheFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Delete a SemanticCache.
+     * @param {SemanticCacheDeleteArgs} args - Arguments to delete one SemanticCache.
+     * @example
+     * // Delete one SemanticCache
+     * const SemanticCache = await prisma.semanticCache.delete({
+     *   where: {
+     *     // ... filter to delete one SemanticCache
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SemanticCacheDeleteArgs>(args: SelectSubset<T, SemanticCacheDeleteArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SemanticCache.
+     * @param {SemanticCacheUpdateArgs} args - Arguments to update one SemanticCache.
+     * @example
+     * // Update one SemanticCache
+     * const semanticCache = await prisma.semanticCache.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SemanticCacheUpdateArgs>(args: SelectSubset<T, SemanticCacheUpdateArgs<ExtArgs>>): Prisma__SemanticCacheClient<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SemanticCaches.
+     * @param {SemanticCacheDeleteManyArgs} args - Arguments to filter SemanticCaches to delete.
+     * @example
+     * // Delete a few SemanticCaches
+     * const { count } = await prisma.semanticCache.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SemanticCacheDeleteManyArgs>(args?: SelectSubset<T, SemanticCacheDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SemanticCaches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SemanticCaches
+     * const semanticCache = await prisma.semanticCache.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SemanticCacheUpdateManyArgs>(args: SelectSubset<T, SemanticCacheUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SemanticCaches and returns the data updated in the database.
+     * @param {SemanticCacheUpdateManyAndReturnArgs} args - Arguments to update many SemanticCaches.
+     * @example
+     * // Update many SemanticCaches
+     * const semanticCache = await prisma.semanticCache.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SemanticCaches and only return the `id`
+     * const semanticCacheWithIdOnly = await prisma.semanticCache.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SemanticCacheUpdateManyAndReturnArgs>(args: SelectSubset<T, SemanticCacheUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SemanticCachePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+
+    /**
+     * Count the number of SemanticCaches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheCountArgs} args - Arguments to filter SemanticCaches to count.
+     * @example
+     * // Count the number of SemanticCaches
+     * const count = await prisma.semanticCache.count({
+     *   where: {
+     *     // ... the filter for the SemanticCaches we want to count
+     *   }
+     * })
+    **/
+    count<T extends SemanticCacheCountArgs>(
+      args?: Subset<T, SemanticCacheCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SemanticCacheCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SemanticCache.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SemanticCacheAggregateArgs>(args: Subset<T, SemanticCacheAggregateArgs>): Prisma.PrismaPromise<GetSemanticCacheAggregateType<T>>
+
+    /**
+     * Group by SemanticCache.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemanticCacheGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SemanticCacheGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SemanticCacheGroupByArgs['orderBy'] }
+        : { orderBy?: SemanticCacheGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SemanticCacheGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSemanticCacheGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SemanticCache model
+   */
+  readonly fields: SemanticCacheFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SemanticCache.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SemanticCacheClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SemanticCache model
+   */
+  interface SemanticCacheFieldRefs {
+    readonly id: FieldRef<"SemanticCache", 'String'>
+    readonly scopeType: FieldRef<"SemanticCache", 'CacheScope'>
+    readonly scopeId: FieldRef<"SemanticCache", 'String'>
+    readonly docFingerprint: FieldRef<"SemanticCache", 'String'>
+    readonly questionHash: FieldRef<"SemanticCache", 'String'>
+    readonly answerText: FieldRef<"SemanticCache", 'String'>
+    readonly sourcePages: FieldRef<"SemanticCache", 'String[]'>
+    readonly aiProvider: FieldRef<"SemanticCache", 'AiProvider'>
+    readonly hitCount: FieldRef<"SemanticCache", 'Int'>
+    readonly createdAt: FieldRef<"SemanticCache", 'DateTime'>
+    readonly updatedAt: FieldRef<"SemanticCache", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SemanticCache findUnique
+   */
+  export type SemanticCacheFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which SemanticCache to fetch.
+     */
+    where: SemanticCacheWhereUniqueInput
+  }
+
+  /**
+   * SemanticCache findUniqueOrThrow
+   */
+  export type SemanticCacheFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which SemanticCache to fetch.
+     */
+    where: SemanticCacheWhereUniqueInput
+  }
+
+  /**
+   * SemanticCache findFirst
+   */
+  export type SemanticCacheFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which SemanticCache to fetch.
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SemanticCaches to fetch.
+     */
+    orderBy?: SemanticCacheOrderByWithRelationInput | SemanticCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SemanticCaches.
+     */
+    cursor?: SemanticCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SemanticCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SemanticCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SemanticCaches.
+     */
+    distinct?: SemanticCacheScalarFieldEnum | SemanticCacheScalarFieldEnum[]
+  }
+
+  /**
+   * SemanticCache findFirstOrThrow
+   */
+  export type SemanticCacheFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which SemanticCache to fetch.
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SemanticCaches to fetch.
+     */
+    orderBy?: SemanticCacheOrderByWithRelationInput | SemanticCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SemanticCaches.
+     */
+    cursor?: SemanticCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SemanticCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SemanticCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SemanticCaches.
+     */
+    distinct?: SemanticCacheScalarFieldEnum | SemanticCacheScalarFieldEnum[]
+  }
+
+  /**
+   * SemanticCache findMany
+   */
+  export type SemanticCacheFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which SemanticCaches to fetch.
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SemanticCaches to fetch.
+     */
+    orderBy?: SemanticCacheOrderByWithRelationInput | SemanticCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SemanticCaches.
+     */
+    cursor?: SemanticCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SemanticCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SemanticCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SemanticCaches.
+     */
+    distinct?: SemanticCacheScalarFieldEnum | SemanticCacheScalarFieldEnum[]
+  }
+
+  /**
+   * SemanticCache update
+   */
+  export type SemanticCacheUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SemanticCache.
+     */
+    data: XOR<SemanticCacheUpdateInput, SemanticCacheUncheckedUpdateInput>
+    /**
+     * Choose, which SemanticCache to update.
+     */
+    where: SemanticCacheWhereUniqueInput
+  }
+
+  /**
+   * SemanticCache updateMany
+   */
+  export type SemanticCacheUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SemanticCaches.
+     */
+    data: XOR<SemanticCacheUpdateManyMutationInput, SemanticCacheUncheckedUpdateManyInput>
+    /**
+     * Filter which SemanticCaches to update
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * Limit how many SemanticCaches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SemanticCache updateManyAndReturn
+   */
+  export type SemanticCacheUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * The data used to update SemanticCaches.
+     */
+    data: XOR<SemanticCacheUpdateManyMutationInput, SemanticCacheUncheckedUpdateManyInput>
+    /**
+     * Filter which SemanticCaches to update
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * Limit how many SemanticCaches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SemanticCache delete
+   */
+  export type SemanticCacheDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
+    /**
+     * Filter which SemanticCache to delete.
+     */
+    where: SemanticCacheWhereUniqueInput
+  }
+
+  /**
+   * SemanticCache deleteMany
+   */
+  export type SemanticCacheDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SemanticCaches to delete
+     */
+    where?: SemanticCacheWhereInput
+    /**
+     * Limit how many SemanticCaches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SemanticCache without action
+   */
+  export type SemanticCacheDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SemanticCache
+     */
+    select?: SemanticCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SemanticCache
+     */
+    omit?: SemanticCacheOmit<ExtArgs> | null
   }
 
 
@@ -7221,6 +10882,7 @@ export namespace Prisma {
     name: 'name',
     parentId: 'parentId',
     shared: 'shared',
+    accessLevel: 'accessLevel',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     ownerId: 'ownerId'
@@ -7236,6 +10898,7 @@ export namespace Prisma {
     sizeBytes: 'sizeBytes',
     path: 'path',
     shared: 'shared',
+    accessLevel: 'accessLevel',
     ownerId: 'ownerId',
     folderId: 'folderId',
     createdAt: 'createdAt',
@@ -7266,15 +10929,64 @@ export namespace Prisma {
   export type DocumentChunkScalarFieldEnum = (typeof DocumentChunkScalarFieldEnum)[keyof typeof DocumentChunkScalarFieldEnum]
 
 
+  export const ChatSessionScalarFieldEnum: {
+    id: 'id',
+    entityType: 'entityType',
+    entityId: 'entityId',
+    title: 'title',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ChatSessionScalarFieldEnum = (typeof ChatSessionScalarFieldEnum)[keyof typeof ChatSessionScalarFieldEnum]
+
+
   export const ChatMessageScalarFieldEnum: {
     id: 'id',
+    sessionId: 'sessionId',
     fileId: 'fileId',
     content: 'content',
     createdAt: 'createdAt',
-    role: 'role'
+    role: 'role',
+    sources: 'sources'
   };
 
   export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
+
+
+  export const DocumentMetadataScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    state: 'state',
+    firNumber: 'firNumber',
+    firDate: 'firDate',
+    district: 'district',
+    subDivision: 'subDivision',
+    policeStation: 'policeStation',
+    propertyLoss: 'propertyLoss',
+    actsAndSections: 'actsAndSections',
+    zeroFirReference: 'zeroFirReference',
+    rawJson: 'rawJson'
+  };
+
+  export type DocumentMetadataScalarFieldEnum = (typeof DocumentMetadataScalarFieldEnum)[keyof typeof DocumentMetadataScalarFieldEnum]
+
+
+  export const SemanticCacheScalarFieldEnum: {
+    id: 'id',
+    scopeType: 'scopeType',
+    scopeId: 'scopeId',
+    docFingerprint: 'docFingerprint',
+    questionHash: 'questionHash',
+    answerText: 'answerText',
+    sourcePages: 'sourcePages',
+    aiProvider: 'aiProvider',
+    hitCount: 'hitCount',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SemanticCacheScalarFieldEnum = (typeof SemanticCacheScalarFieldEnum)[keyof typeof SemanticCacheScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7283,6 +10995,14 @@ export namespace Prisma {
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -7299,6 +11019,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -7384,6 +11113,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'AccessLevel'
+   */
+  export type EnumAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessLevel'>
+    
+
+
+  /**
+   * Reference to a field of type 'AccessLevel[]'
+   */
+  export type ListEnumAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessLevel[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ProcessingStatus'
    */
   export type EnumProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcessingStatus'>
@@ -7412,6 +11155,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ChatEntityType'
+   */
+  export type EnumChatEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChatEntityType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ChatEntityType[]'
+   */
+  export type ListEnumChatEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChatEntityType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ChatRole'
+   */
+  export type EnumChatRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChatRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'ChatRole[]'
+   */
+  export type ListEnumChatRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChatRole[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -7422,6 +11193,34 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'CacheScope'
+   */
+  export type EnumCacheScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CacheScope'>
+    
+
+
+  /**
+   * Reference to a field of type 'CacheScope[]'
+   */
+  export type ListEnumCacheScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CacheScope[]'>
     
   /**
    * Deep Input Types
@@ -7526,6 +11325,7 @@ export namespace Prisma {
     name?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
     shared?: BoolFilter<"Folder"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"Folder"> | $Enums.AccessLevel
     createdAt?: DateTimeFilter<"Folder"> | Date | string
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     ownerId?: StringFilter<"Folder"> | string
@@ -7540,6 +11340,7 @@ export namespace Prisma {
     name?: SortOrder
     parentId?: SortOrderInput | SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownerId?: SortOrder
@@ -7557,6 +11358,7 @@ export namespace Prisma {
     name?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
     shared?: BoolFilter<"Folder"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"Folder"> | $Enums.AccessLevel
     createdAt?: DateTimeFilter<"Folder"> | Date | string
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     ownerId?: StringFilter<"Folder"> | string
@@ -7571,6 +11373,7 @@ export namespace Prisma {
     name?: SortOrder
     parentId?: SortOrderInput | SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownerId?: SortOrder
@@ -7587,6 +11390,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Folder"> | string
     parentId?: StringNullableWithAggregatesFilter<"Folder"> | string | null
     shared?: BoolWithAggregatesFilter<"Folder"> | boolean
+    accessLevel?: EnumAccessLevelWithAggregatesFilter<"Folder"> | $Enums.AccessLevel
     createdAt?: DateTimeWithAggregatesFilter<"Folder"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Folder"> | Date | string
     ownerId?: StringWithAggregatesFilter<"Folder"> | string
@@ -7602,6 +11406,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFilter<"File"> | bigint | number
     path?: StringFilter<"File"> | string
     shared?: BoolFilter<"File"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
     folderId?: StringNullableFilter<"File"> | string | null
     createdAt?: DateTimeFilter<"File"> | Date | string
@@ -7616,6 +11421,7 @@ export namespace Prisma {
     ocrEngineUsed?: StringNullableFilter<"File"> | string | null
     chatMessages?: ChatMessageListRelationFilter
     chunks?: DocumentChunkListRelationFilter
+    documentMetadata?: XOR<DocumentMetadataNullableScalarRelationFilter, DocumentMetadataWhereInput> | null
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -7627,6 +11433,7 @@ export namespace Prisma {
     sizeBytes?: SortOrder
     path?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     ownerId?: SortOrder
     folderId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -7641,6 +11448,7 @@ export namespace Prisma {
     ocrEngineUsed?: SortOrderInput | SortOrder
     chatMessages?: ChatMessageOrderByRelationAggregateInput
     chunks?: DocumentChunkOrderByRelationAggregateInput
+    documentMetadata?: DocumentMetadataOrderByWithRelationInput
     folder?: FolderOrderByWithRelationInput
     owner?: UserOrderByWithRelationInput
   }
@@ -7655,6 +11463,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFilter<"File"> | bigint | number
     path?: StringFilter<"File"> | string
     shared?: BoolFilter<"File"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
     folderId?: StringNullableFilter<"File"> | string | null
     createdAt?: DateTimeFilter<"File"> | Date | string
@@ -7669,6 +11478,7 @@ export namespace Prisma {
     ocrEngineUsed?: StringNullableFilter<"File"> | string | null
     chatMessages?: ChatMessageListRelationFilter
     chunks?: DocumentChunkListRelationFilter
+    documentMetadata?: XOR<DocumentMetadataNullableScalarRelationFilter, DocumentMetadataWhereInput> | null
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -7680,6 +11490,7 @@ export namespace Prisma {
     sizeBytes?: SortOrder
     path?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     ownerId?: SortOrder
     folderId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -7709,6 +11520,7 @@ export namespace Prisma {
     sizeBytes?: BigIntWithAggregatesFilter<"File"> | bigint | number
     path?: StringWithAggregatesFilter<"File"> | string
     shared?: BoolWithAggregatesFilter<"File"> | boolean
+    accessLevel?: EnumAccessLevelWithAggregatesFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringWithAggregatesFilter<"File"> | string
     folderId?: StringNullableWithAggregatesFilter<"File"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"File"> | Date | string
@@ -7790,24 +11602,90 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"DocumentChunk"> | Date | string
   }
 
+  export type ChatSessionWhereInput = {
+    AND?: ChatSessionWhereInput | ChatSessionWhereInput[]
+    OR?: ChatSessionWhereInput[]
+    NOT?: ChatSessionWhereInput | ChatSessionWhereInput[]
+    id?: StringFilter<"ChatSession"> | string
+    entityType?: EnumChatEntityTypeFilter<"ChatSession"> | $Enums.ChatEntityType
+    entityId?: StringFilter<"ChatSession"> | string
+    title?: StringFilter<"ChatSession"> | string
+    createdAt?: DateTimeFilter<"ChatSession"> | Date | string
+    updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
+    messages?: ChatMessageListRelationFilter
+  }
+
+  export type ChatSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    title?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    messages?: ChatMessageOrderByRelationAggregateInput
+  }
+
+  export type ChatSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ChatSessionWhereInput | ChatSessionWhereInput[]
+    OR?: ChatSessionWhereInput[]
+    NOT?: ChatSessionWhereInput | ChatSessionWhereInput[]
+    entityType?: EnumChatEntityTypeFilter<"ChatSession"> | $Enums.ChatEntityType
+    entityId?: StringFilter<"ChatSession"> | string
+    title?: StringFilter<"ChatSession"> | string
+    createdAt?: DateTimeFilter<"ChatSession"> | Date | string
+    updatedAt?: DateTimeFilter<"ChatSession"> | Date | string
+    messages?: ChatMessageListRelationFilter
+  }, "id">
+
+  export type ChatSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    title?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ChatSessionCountOrderByAggregateInput
+    _max?: ChatSessionMaxOrderByAggregateInput
+    _min?: ChatSessionMinOrderByAggregateInput
+  }
+
+  export type ChatSessionScalarWhereWithAggregatesInput = {
+    AND?: ChatSessionScalarWhereWithAggregatesInput | ChatSessionScalarWhereWithAggregatesInput[]
+    OR?: ChatSessionScalarWhereWithAggregatesInput[]
+    NOT?: ChatSessionScalarWhereWithAggregatesInput | ChatSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ChatSession"> | string
+    entityType?: EnumChatEntityTypeWithAggregatesFilter<"ChatSession"> | $Enums.ChatEntityType
+    entityId?: StringWithAggregatesFilter<"ChatSession"> | string
+    title?: StringWithAggregatesFilter<"ChatSession"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ChatSession"> | Date | string
+  }
+
   export type ChatMessageWhereInput = {
     AND?: ChatMessageWhereInput | ChatMessageWhereInput[]
     OR?: ChatMessageWhereInput[]
     NOT?: ChatMessageWhereInput | ChatMessageWhereInput[]
     id?: StringFilter<"ChatMessage"> | string
-    fileId?: StringFilter<"ChatMessage"> | string
+    sessionId?: StringNullableFilter<"ChatMessage"> | string | null
+    fileId?: StringNullableFilter<"ChatMessage"> | string | null
     content?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
-    role?: StringFilter<"ChatMessage"> | string
-    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    role?: EnumChatRoleFilter<"ChatMessage"> | $Enums.ChatRole
+    sources?: StringNullableListFilter<"ChatMessage">
+    session?: XOR<ChatSessionNullableScalarRelationFilter, ChatSessionWhereInput> | null
+    file?: XOR<FileNullableScalarRelationFilter, FileWhereInput> | null
   }
 
   export type ChatMessageOrderByWithRelationInput = {
     id?: SortOrder
-    fileId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    fileId?: SortOrderInput | SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     role?: SortOrder
+    sources?: SortOrder
+    session?: ChatSessionOrderByWithRelationInput
     file?: FileOrderByWithRelationInput
   }
 
@@ -7816,19 +11694,24 @@ export namespace Prisma {
     AND?: ChatMessageWhereInput | ChatMessageWhereInput[]
     OR?: ChatMessageWhereInput[]
     NOT?: ChatMessageWhereInput | ChatMessageWhereInput[]
-    fileId?: StringFilter<"ChatMessage"> | string
+    sessionId?: StringNullableFilter<"ChatMessage"> | string | null
+    fileId?: StringNullableFilter<"ChatMessage"> | string | null
     content?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
-    role?: StringFilter<"ChatMessage"> | string
-    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+    role?: EnumChatRoleFilter<"ChatMessage"> | $Enums.ChatRole
+    sources?: StringNullableListFilter<"ChatMessage">
+    session?: XOR<ChatSessionNullableScalarRelationFilter, ChatSessionWhereInput> | null
+    file?: XOR<FileNullableScalarRelationFilter, FileWhereInput> | null
   }, "id">
 
   export type ChatMessageOrderByWithAggregationInput = {
     id?: SortOrder
-    fileId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    fileId?: SortOrderInput | SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     role?: SortOrder
+    sources?: SortOrder
     _count?: ChatMessageCountOrderByAggregateInput
     _max?: ChatMessageMaxOrderByAggregateInput
     _min?: ChatMessageMinOrderByAggregateInput
@@ -7839,10 +11722,188 @@ export namespace Prisma {
     OR?: ChatMessageScalarWhereWithAggregatesInput[]
     NOT?: ChatMessageScalarWhereWithAggregatesInput | ChatMessageScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ChatMessage"> | string
-    fileId?: StringWithAggregatesFilter<"ChatMessage"> | string
+    sessionId?: StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
+    fileId?: StringNullableWithAggregatesFilter<"ChatMessage"> | string | null
     content?: StringWithAggregatesFilter<"ChatMessage"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ChatMessage"> | Date | string
-    role?: StringWithAggregatesFilter<"ChatMessage"> | string
+    role?: EnumChatRoleWithAggregatesFilter<"ChatMessage"> | $Enums.ChatRole
+    sources?: StringNullableListFilter<"ChatMessage">
+  }
+
+  export type DocumentMetadataWhereInput = {
+    AND?: DocumentMetadataWhereInput | DocumentMetadataWhereInput[]
+    OR?: DocumentMetadataWhereInput[]
+    NOT?: DocumentMetadataWhereInput | DocumentMetadataWhereInput[]
+    id?: StringFilter<"DocumentMetadata"> | string
+    fileId?: StringFilter<"DocumentMetadata"> | string
+    state?: StringNullableFilter<"DocumentMetadata"> | string | null
+    firNumber?: StringNullableFilter<"DocumentMetadata"> | string | null
+    firDate?: DateTimeNullableFilter<"DocumentMetadata"> | Date | string | null
+    district?: StringNullableFilter<"DocumentMetadata"> | string | null
+    subDivision?: StringNullableFilter<"DocumentMetadata"> | string | null
+    policeStation?: StringNullableFilter<"DocumentMetadata"> | string | null
+    propertyLoss?: FloatNullableFilter<"DocumentMetadata"> | number | null
+    actsAndSections?: JsonNullableFilter<"DocumentMetadata">
+    zeroFirReference?: StringNullableFilter<"DocumentMetadata"> | string | null
+    rawJson?: JsonNullableFilter<"DocumentMetadata">
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+  }
+
+  export type DocumentMetadataOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    state?: SortOrderInput | SortOrder
+    firNumber?: SortOrderInput | SortOrder
+    firDate?: SortOrderInput | SortOrder
+    district?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    policeStation?: SortOrderInput | SortOrder
+    propertyLoss?: SortOrderInput | SortOrder
+    actsAndSections?: SortOrderInput | SortOrder
+    zeroFirReference?: SortOrderInput | SortOrder
+    rawJson?: SortOrderInput | SortOrder
+    file?: FileOrderByWithRelationInput
+  }
+
+  export type DocumentMetadataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId?: string
+    AND?: DocumentMetadataWhereInput | DocumentMetadataWhereInput[]
+    OR?: DocumentMetadataWhereInput[]
+    NOT?: DocumentMetadataWhereInput | DocumentMetadataWhereInput[]
+    state?: StringNullableFilter<"DocumentMetadata"> | string | null
+    firNumber?: StringNullableFilter<"DocumentMetadata"> | string | null
+    firDate?: DateTimeNullableFilter<"DocumentMetadata"> | Date | string | null
+    district?: StringNullableFilter<"DocumentMetadata"> | string | null
+    subDivision?: StringNullableFilter<"DocumentMetadata"> | string | null
+    policeStation?: StringNullableFilter<"DocumentMetadata"> | string | null
+    propertyLoss?: FloatNullableFilter<"DocumentMetadata"> | number | null
+    actsAndSections?: JsonNullableFilter<"DocumentMetadata">
+    zeroFirReference?: StringNullableFilter<"DocumentMetadata"> | string | null
+    rawJson?: JsonNullableFilter<"DocumentMetadata">
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+  }, "id" | "fileId">
+
+  export type DocumentMetadataOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    state?: SortOrderInput | SortOrder
+    firNumber?: SortOrderInput | SortOrder
+    firDate?: SortOrderInput | SortOrder
+    district?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    policeStation?: SortOrderInput | SortOrder
+    propertyLoss?: SortOrderInput | SortOrder
+    actsAndSections?: SortOrderInput | SortOrder
+    zeroFirReference?: SortOrderInput | SortOrder
+    rawJson?: SortOrderInput | SortOrder
+    _count?: DocumentMetadataCountOrderByAggregateInput
+    _avg?: DocumentMetadataAvgOrderByAggregateInput
+    _max?: DocumentMetadataMaxOrderByAggregateInput
+    _min?: DocumentMetadataMinOrderByAggregateInput
+    _sum?: DocumentMetadataSumOrderByAggregateInput
+  }
+
+  export type DocumentMetadataScalarWhereWithAggregatesInput = {
+    AND?: DocumentMetadataScalarWhereWithAggregatesInput | DocumentMetadataScalarWhereWithAggregatesInput[]
+    OR?: DocumentMetadataScalarWhereWithAggregatesInput[]
+    NOT?: DocumentMetadataScalarWhereWithAggregatesInput | DocumentMetadataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DocumentMetadata"> | string
+    fileId?: StringWithAggregatesFilter<"DocumentMetadata"> | string
+    state?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    firNumber?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    firDate?: DateTimeNullableWithAggregatesFilter<"DocumentMetadata"> | Date | string | null
+    district?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    policeStation?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    propertyLoss?: FloatNullableWithAggregatesFilter<"DocumentMetadata"> | number | null
+    actsAndSections?: JsonNullableWithAggregatesFilter<"DocumentMetadata">
+    zeroFirReference?: StringNullableWithAggregatesFilter<"DocumentMetadata"> | string | null
+    rawJson?: JsonNullableWithAggregatesFilter<"DocumentMetadata">
+  }
+
+  export type SemanticCacheWhereInput = {
+    AND?: SemanticCacheWhereInput | SemanticCacheWhereInput[]
+    OR?: SemanticCacheWhereInput[]
+    NOT?: SemanticCacheWhereInput | SemanticCacheWhereInput[]
+    id?: StringFilter<"SemanticCache"> | string
+    scopeType?: EnumCacheScopeFilter<"SemanticCache"> | $Enums.CacheScope
+    scopeId?: StringFilter<"SemanticCache"> | string
+    docFingerprint?: StringFilter<"SemanticCache"> | string
+    questionHash?: StringFilter<"SemanticCache"> | string
+    answerText?: StringFilter<"SemanticCache"> | string
+    sourcePages?: StringNullableListFilter<"SemanticCache">
+    aiProvider?: EnumAiProviderFilter<"SemanticCache"> | $Enums.AiProvider
+    hitCount?: IntFilter<"SemanticCache"> | number
+    createdAt?: DateTimeFilter<"SemanticCache"> | Date | string
+    updatedAt?: DateTimeFilter<"SemanticCache"> | Date | string
+  }
+
+  export type SemanticCacheOrderByWithRelationInput = {
+    id?: SortOrder
+    scopeType?: SortOrder
+    scopeId?: SortOrder
+    docFingerprint?: SortOrder
+    questionHash?: SortOrder
+    answerText?: SortOrder
+    sourcePages?: SortOrder
+    aiProvider?: SortOrder
+    hitCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SemanticCacheWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SemanticCacheWhereInput | SemanticCacheWhereInput[]
+    OR?: SemanticCacheWhereInput[]
+    NOT?: SemanticCacheWhereInput | SemanticCacheWhereInput[]
+    scopeType?: EnumCacheScopeFilter<"SemanticCache"> | $Enums.CacheScope
+    scopeId?: StringFilter<"SemanticCache"> | string
+    docFingerprint?: StringFilter<"SemanticCache"> | string
+    questionHash?: StringFilter<"SemanticCache"> | string
+    answerText?: StringFilter<"SemanticCache"> | string
+    sourcePages?: StringNullableListFilter<"SemanticCache">
+    aiProvider?: EnumAiProviderFilter<"SemanticCache"> | $Enums.AiProvider
+    hitCount?: IntFilter<"SemanticCache"> | number
+    createdAt?: DateTimeFilter<"SemanticCache"> | Date | string
+    updatedAt?: DateTimeFilter<"SemanticCache"> | Date | string
+  }, "id">
+
+  export type SemanticCacheOrderByWithAggregationInput = {
+    id?: SortOrder
+    scopeType?: SortOrder
+    scopeId?: SortOrder
+    docFingerprint?: SortOrder
+    questionHash?: SortOrder
+    answerText?: SortOrder
+    sourcePages?: SortOrder
+    aiProvider?: SortOrder
+    hitCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SemanticCacheCountOrderByAggregateInput
+    _avg?: SemanticCacheAvgOrderByAggregateInput
+    _max?: SemanticCacheMaxOrderByAggregateInput
+    _min?: SemanticCacheMinOrderByAggregateInput
+    _sum?: SemanticCacheSumOrderByAggregateInput
+  }
+
+  export type SemanticCacheScalarWhereWithAggregatesInput = {
+    AND?: SemanticCacheScalarWhereWithAggregatesInput | SemanticCacheScalarWhereWithAggregatesInput[]
+    OR?: SemanticCacheScalarWhereWithAggregatesInput[]
+    NOT?: SemanticCacheScalarWhereWithAggregatesInput | SemanticCacheScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SemanticCache"> | string
+    scopeType?: EnumCacheScopeWithAggregatesFilter<"SemanticCache"> | $Enums.CacheScope
+    scopeId?: StringWithAggregatesFilter<"SemanticCache"> | string
+    docFingerprint?: StringWithAggregatesFilter<"SemanticCache"> | string
+    questionHash?: StringWithAggregatesFilter<"SemanticCache"> | string
+    answerText?: StringWithAggregatesFilter<"SemanticCache"> | string
+    sourcePages?: StringNullableListFilter<"SemanticCache">
+    aiProvider?: EnumAiProviderWithAggregatesFilter<"SemanticCache"> | $Enums.AiProvider
+    hitCount?: IntWithAggregatesFilter<"SemanticCache"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"SemanticCache"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SemanticCache"> | Date | string
   }
 
   export type UserCreateInput = {
@@ -7955,6 +12016,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     files?: FileCreateNestedManyWithoutFolderInput
@@ -7968,6 +12030,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -7979,6 +12042,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     files?: FileUpdateManyWithoutFolderNestedInput
@@ -7992,6 +12056,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -8004,6 +12069,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -8013,6 +12079,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8022,6 +12089,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -8034,6 +12102,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     processingStatus?: $Enums.ProcessingStatus
@@ -8046,6 +12115,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -8057,6 +12127,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     folderId?: string | null
     createdAt?: Date | string
@@ -8071,6 +12142,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileUpdateInput = {
@@ -8080,6 +12152,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -8092,6 +12165,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -8103,6 +12177,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8117,6 +12192,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileCreateManyInput = {
@@ -8126,6 +12202,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     folderId?: string | null
     createdAt?: Date | string
@@ -8147,6 +12224,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -8166,6 +12244,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8219,59 +12298,299 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ChatSessionCreateInput = {
+    id?: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: ChatMessageCreateNestedManyWithoutSessionInput
+  }
+
+  export type ChatSessionUncheckedCreateInput = {
+    id?: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    messages?: ChatMessageUncheckedCreateNestedManyWithoutSessionInput
+  }
+
+  export type ChatSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: ChatMessageUpdateManyWithoutSessionNestedInput
+  }
+
+  export type ChatSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    messages?: ChatMessageUncheckedUpdateManyWithoutSessionNestedInput
+  }
+
+  export type ChatSessionCreateManyInput = {
+    id?: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ChatSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ChatMessageCreateInput = {
     id?: string
     content: string
     createdAt?: Date | string
-    role: string
-    file: FileCreateNestedOneWithoutChatMessagesInput
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
+    session?: ChatSessionCreateNestedOneWithoutMessagesInput
+    file?: FileCreateNestedOneWithoutChatMessagesInput
   }
 
   export type ChatMessageUncheckedCreateInput = {
     id?: string
-    fileId: string
+    sessionId?: string | null
+    fileId?: string | null
     content: string
     createdAt?: Date | string
-    role: string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
   }
 
   export type ChatMessageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
-    file?: FileUpdateOneRequiredWithoutChatMessagesNestedInput
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
+    session?: ChatSessionUpdateOneWithoutMessagesNestedInput
+    file?: FileUpdateOneWithoutChatMessagesNestedInput
   }
 
   export type ChatMessageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fileId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    fileId?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
   }
 
   export type ChatMessageCreateManyInput = {
     id?: string
-    fileId: string
+    sessionId?: string | null
+    fileId?: string | null
     content: string
     createdAt?: Date | string
-    role: string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
   }
 
   export type ChatMessageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
   }
 
   export type ChatMessageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fileId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    fileId?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
+  }
+
+  export type DocumentMetadataCreateInput = {
+    id?: string
+    state?: string | null
+    firNumber?: string | null
+    firDate?: Date | string | null
+    district?: string | null
+    subDivision?: string | null
+    policeStation?: string | null
+    propertyLoss?: number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+    file: FileCreateNestedOneWithoutDocumentMetadataInput
+  }
+
+  export type DocumentMetadataUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    state?: string | null
+    firNumber?: string | null
+    firDate?: Date | string | null
+    district?: string | null
+    subDivision?: string | null
+    policeStation?: string | null
+    propertyLoss?: number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+    file?: FileUpdateOneRequiredWithoutDocumentMetadataNestedInput
+  }
+
+  export type DocumentMetadataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataCreateManyInput = {
+    id?: string
+    fileId: string
+    state?: string | null
+    firNumber?: string | null
+    firDate?: Date | string | null
+    district?: string | null
+    subDivision?: string | null
+    policeStation?: string | null
+    propertyLoss?: number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type SemanticCacheUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    scopeType?: EnumCacheScopeFieldUpdateOperationsInput | $Enums.CacheScope
+    scopeId?: StringFieldUpdateOperationsInput | string
+    docFingerprint?: StringFieldUpdateOperationsInput | string
+    questionHash?: StringFieldUpdateOperationsInput | string
+    answerText?: StringFieldUpdateOperationsInput | string
+    sourcePages?: SemanticCacheUpdatesourcePagesInput | string[]
+    aiProvider?: EnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider
+    hitCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SemanticCacheUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    scopeType?: EnumCacheScopeFieldUpdateOperationsInput | $Enums.CacheScope
+    scopeId?: StringFieldUpdateOperationsInput | string
+    docFingerprint?: StringFieldUpdateOperationsInput | string
+    questionHash?: StringFieldUpdateOperationsInput | string
+    answerText?: StringFieldUpdateOperationsInput | string
+    sourcePages?: SemanticCacheUpdatesourcePagesInput | string[]
+    aiProvider?: EnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider
+    hitCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SemanticCacheUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    scopeType?: EnumCacheScopeFieldUpdateOperationsInput | $Enums.CacheScope
+    scopeId?: StringFieldUpdateOperationsInput | string
+    docFingerprint?: StringFieldUpdateOperationsInput | string
+    questionHash?: StringFieldUpdateOperationsInput | string
+    answerText?: StringFieldUpdateOperationsInput | string
+    sourcePages?: SemanticCacheUpdatesourcePagesInput | string[]
+    aiProvider?: EnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider
+    hitCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SemanticCacheUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    scopeType?: EnumCacheScopeFieldUpdateOperationsInput | $Enums.CacheScope
+    scopeId?: StringFieldUpdateOperationsInput | string
+    docFingerprint?: StringFieldUpdateOperationsInput | string
+    questionHash?: StringFieldUpdateOperationsInput | string
+    answerText?: StringFieldUpdateOperationsInput | string
+    sourcePages?: SemanticCacheUpdatesourcePagesInput | string[]
+    aiProvider?: EnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider
+    hitCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -8514,6 +12833,13 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type EnumAccessLevelFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccessLevel | EnumAccessLevelFieldRefInput<$PrismaModel>
+    in?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccessLevelFilter<$PrismaModel> | $Enums.AccessLevel
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -8529,6 +12855,7 @@ export namespace Prisma {
     name?: SortOrder
     parentId?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownerId?: SortOrder
@@ -8539,6 +12866,7 @@ export namespace Prisma {
     name?: SortOrder
     parentId?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownerId?: SortOrder
@@ -8549,9 +12877,20 @@ export namespace Prisma {
     name?: SortOrder
     parentId?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     ownerId?: SortOrder
+  }
+
+  export type EnumAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccessLevel | EnumAccessLevelFieldRefInput<$PrismaModel>
+    in?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.AccessLevel
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAccessLevelFilter<$PrismaModel>
+    _max?: NestedEnumAccessLevelFilter<$PrismaModel>
   }
 
   export type EnumProcessingStatusFilter<$PrismaModel = never> = {
@@ -8602,6 +12941,11 @@ export namespace Prisma {
     none?: DocumentChunkWhereInput
   }
 
+  export type DocumentMetadataNullableScalarRelationFilter = {
+    is?: DocumentMetadataWhereInput | null
+    isNot?: DocumentMetadataWhereInput | null
+  }
+
   export type ChatMessageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -8617,6 +12961,7 @@ export namespace Prisma {
     sizeBytes?: SortOrder
     path?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     ownerId?: SortOrder
     folderId?: SortOrder
     createdAt?: SortOrder
@@ -8643,6 +12988,7 @@ export namespace Prisma {
     sizeBytes?: SortOrder
     path?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     ownerId?: SortOrder
     folderId?: SortOrder
     createdAt?: SortOrder
@@ -8664,6 +13010,7 @@ export namespace Prisma {
     sizeBytes?: SortOrder
     path?: SortOrder
     shared?: SortOrder
+    accessLevel?: SortOrder
     ownerId?: SortOrder
     folderId?: SortOrder
     createdAt?: SortOrder
@@ -8807,16 +13154,88 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type EnumChatEntityTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatEntityType | EnumChatEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatEntityTypeFilter<$PrismaModel> | $Enums.ChatEntityType
+  }
+
+  export type ChatSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    title?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ChatSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    title?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ChatSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    title?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumChatEntityTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatEntityType | EnumChatEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatEntityTypeWithAggregatesFilter<$PrismaModel> | $Enums.ChatEntityType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChatEntityTypeFilter<$PrismaModel>
+    _max?: NestedEnumChatEntityTypeFilter<$PrismaModel>
+  }
+
+  export type EnumChatRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatRole | EnumChatRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatRoleFilter<$PrismaModel> | $Enums.ChatRole
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type ChatSessionNullableScalarRelationFilter = {
+    is?: ChatSessionWhereInput | null
+    isNot?: ChatSessionWhereInput | null
+  }
+
+  export type FileNullableScalarRelationFilter = {
+    is?: FileWhereInput | null
+    isNot?: FileWhereInput | null
+  }
+
   export type ChatMessageCountOrderByAggregateInput = {
     id?: SortOrder
+    sessionId?: SortOrder
     fileId?: SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     role?: SortOrder
+    sources?: SortOrder
   }
 
   export type ChatMessageMaxOrderByAggregateInput = {
     id?: SortOrder
+    sessionId?: SortOrder
     fileId?: SortOrder
     content?: SortOrder
     createdAt?: SortOrder
@@ -8825,10 +13244,211 @@ export namespace Prisma {
 
   export type ChatMessageMinOrderByAggregateInput = {
     id?: SortOrder
+    sessionId?: SortOrder
     fileId?: SortOrder
     content?: SortOrder
     createdAt?: SortOrder
     role?: SortOrder
+  }
+
+  export type EnumChatRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatRole | EnumChatRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatRoleWithAggregatesFilter<$PrismaModel> | $Enums.ChatRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChatRoleFilter<$PrismaModel>
+    _max?: NestedEnumChatRoleFilter<$PrismaModel>
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type DocumentMetadataCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    state?: SortOrder
+    firNumber?: SortOrder
+    firDate?: SortOrder
+    district?: SortOrder
+    subDivision?: SortOrder
+    policeStation?: SortOrder
+    propertyLoss?: SortOrder
+    actsAndSections?: SortOrder
+    zeroFirReference?: SortOrder
+    rawJson?: SortOrder
+  }
+
+  export type DocumentMetadataAvgOrderByAggregateInput = {
+    propertyLoss?: SortOrder
+  }
+
+  export type DocumentMetadataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    state?: SortOrder
+    firNumber?: SortOrder
+    firDate?: SortOrder
+    district?: SortOrder
+    subDivision?: SortOrder
+    policeStation?: SortOrder
+    propertyLoss?: SortOrder
+    zeroFirReference?: SortOrder
+  }
+
+  export type DocumentMetadataMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    state?: SortOrder
+    firNumber?: SortOrder
+    firDate?: SortOrder
+    district?: SortOrder
+    subDivision?: SortOrder
+    policeStation?: SortOrder
+    propertyLoss?: SortOrder
+    zeroFirReference?: SortOrder
+  }
+
+  export type DocumentMetadataSumOrderByAggregateInput = {
+    propertyLoss?: SortOrder
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type EnumCacheScopeFilter<$PrismaModel = never> = {
+    equals?: $Enums.CacheScope | EnumCacheScopeFieldRefInput<$PrismaModel>
+    in?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCacheScopeFilter<$PrismaModel> | $Enums.CacheScope
+  }
+
+  export type SemanticCacheCountOrderByAggregateInput = {
+    id?: SortOrder
+    scopeType?: SortOrder
+    scopeId?: SortOrder
+    docFingerprint?: SortOrder
+    questionHash?: SortOrder
+    answerText?: SortOrder
+    sourcePages?: SortOrder
+    aiProvider?: SortOrder
+    hitCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SemanticCacheAvgOrderByAggregateInput = {
+    hitCount?: SortOrder
+  }
+
+  export type SemanticCacheMaxOrderByAggregateInput = {
+    id?: SortOrder
+    scopeType?: SortOrder
+    scopeId?: SortOrder
+    docFingerprint?: SortOrder
+    questionHash?: SortOrder
+    answerText?: SortOrder
+    aiProvider?: SortOrder
+    hitCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SemanticCacheMinOrderByAggregateInput = {
+    id?: SortOrder
+    scopeType?: SortOrder
+    scopeId?: SortOrder
+    docFingerprint?: SortOrder
+    questionHash?: SortOrder
+    answerText?: SortOrder
+    aiProvider?: SortOrder
+    hitCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SemanticCacheSumOrderByAggregateInput = {
+    hitCount?: SortOrder
+  }
+
+  export type EnumCacheScopeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CacheScope | EnumCacheScopeFieldRefInput<$PrismaModel>
+    in?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCacheScopeWithAggregatesFilter<$PrismaModel> | $Enums.CacheScope
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCacheScopeFilter<$PrismaModel>
+    _max?: NestedEnumCacheScopeFilter<$PrismaModel>
   }
 
   export type FileCreateNestedManyWithoutOwnerInput = {
@@ -8987,6 +13607,10 @@ export namespace Prisma {
     connect?: FolderWhereUniqueInput | FolderWhereUniqueInput[]
   }
 
+  export type EnumAccessLevelFieldUpdateOperationsInput = {
+    set?: $Enums.AccessLevel
+  }
+
   export type FileUpdateManyWithoutFolderNestedInput = {
     create?: XOR<FileCreateWithoutFolderInput, FileUncheckedCreateWithoutFolderInput> | FileCreateWithoutFolderInput[] | FileUncheckedCreateWithoutFolderInput[]
     connectOrCreate?: FileCreateOrConnectWithoutFolderInput | FileCreateOrConnectWithoutFolderInput[]
@@ -9072,6 +13696,12 @@ export namespace Prisma {
     connect?: DocumentChunkWhereUniqueInput | DocumentChunkWhereUniqueInput[]
   }
 
+  export type DocumentMetadataCreateNestedOneWithoutFileInput = {
+    create?: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+    connectOrCreate?: DocumentMetadataCreateOrConnectWithoutFileInput
+    connect?: DocumentMetadataWhereUniqueInput
+  }
+
   export type FolderCreateNestedOneWithoutFilesInput = {
     create?: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
     connectOrCreate?: FolderCreateOrConnectWithoutFilesInput
@@ -9093,6 +13723,12 @@ export namespace Prisma {
 
   export type DocumentChunkUncheckedCreateNestedManyWithoutFileInput = {
     connect?: DocumentChunkWhereUniqueInput | DocumentChunkWhereUniqueInput[]
+  }
+
+  export type DocumentMetadataUncheckedCreateNestedOneWithoutFileInput = {
+    create?: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+    connectOrCreate?: DocumentMetadataCreateOrConnectWithoutFileInput
+    connect?: DocumentMetadataWhereUniqueInput
   }
 
   export type EnumProcessingStatusFieldUpdateOperationsInput = {
@@ -9139,6 +13775,16 @@ export namespace Prisma {
     deleteMany?: DocumentChunkScalarWhereInput | DocumentChunkScalarWhereInput[]
   }
 
+  export type DocumentMetadataUpdateOneWithoutFileNestedInput = {
+    create?: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+    connectOrCreate?: DocumentMetadataCreateOrConnectWithoutFileInput
+    upsert?: DocumentMetadataUpsertWithoutFileInput
+    disconnect?: DocumentMetadataWhereInput | boolean
+    delete?: DocumentMetadataWhereInput | boolean
+    connect?: DocumentMetadataWhereUniqueInput
+    update?: XOR<XOR<DocumentMetadataUpdateToOneWithWhereWithoutFileInput, DocumentMetadataUpdateWithoutFileInput>, DocumentMetadataUncheckedUpdateWithoutFileInput>
+  }
+
   export type FolderUpdateOneWithoutFilesNestedInput = {
     create?: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
     connectOrCreate?: FolderCreateOrConnectWithoutFilesInput
@@ -9181,6 +13827,16 @@ export namespace Prisma {
     deleteMany?: DocumentChunkScalarWhereInput | DocumentChunkScalarWhereInput[]
   }
 
+  export type DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput = {
+    create?: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+    connectOrCreate?: DocumentMetadataCreateOrConnectWithoutFileInput
+    upsert?: DocumentMetadataUpsertWithoutFileInput
+    disconnect?: DocumentMetadataWhereInput | boolean
+    delete?: DocumentMetadataWhereInput | boolean
+    connect?: DocumentMetadataWhereUniqueInput
+    update?: XOR<XOR<DocumentMetadataUpdateToOneWithWhereWithoutFileInput, DocumentMetadataUpdateWithoutFileInput>, DocumentMetadataUncheckedUpdateWithoutFileInput>
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -9197,18 +13853,126 @@ export namespace Prisma {
     update?: XOR<XOR<FileUpdateToOneWithWhereWithoutChunksInput, FileUpdateWithoutChunksInput>, FileUncheckedUpdateWithoutChunksInput>
   }
 
+  export type ChatMessageCreateNestedManyWithoutSessionInput = {
+    create?: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput> | ChatMessageCreateWithoutSessionInput[] | ChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: ChatMessageCreateOrConnectWithoutSessionInput | ChatMessageCreateOrConnectWithoutSessionInput[]
+    createMany?: ChatMessageCreateManySessionInputEnvelope
+    connect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+  }
+
+  export type ChatMessageUncheckedCreateNestedManyWithoutSessionInput = {
+    create?: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput> | ChatMessageCreateWithoutSessionInput[] | ChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: ChatMessageCreateOrConnectWithoutSessionInput | ChatMessageCreateOrConnectWithoutSessionInput[]
+    createMany?: ChatMessageCreateManySessionInputEnvelope
+    connect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+  }
+
+  export type EnumChatEntityTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ChatEntityType
+  }
+
+  export type ChatMessageUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput> | ChatMessageCreateWithoutSessionInput[] | ChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: ChatMessageCreateOrConnectWithoutSessionInput | ChatMessageCreateOrConnectWithoutSessionInput[]
+    upsert?: ChatMessageUpsertWithWhereUniqueWithoutSessionInput | ChatMessageUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: ChatMessageCreateManySessionInputEnvelope
+    set?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    disconnect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    delete?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    connect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    update?: ChatMessageUpdateWithWhereUniqueWithoutSessionInput | ChatMessageUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: ChatMessageUpdateManyWithWhereWithoutSessionInput | ChatMessageUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: ChatMessageScalarWhereInput | ChatMessageScalarWhereInput[]
+  }
+
+  export type ChatMessageUncheckedUpdateManyWithoutSessionNestedInput = {
+    create?: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput> | ChatMessageCreateWithoutSessionInput[] | ChatMessageUncheckedCreateWithoutSessionInput[]
+    connectOrCreate?: ChatMessageCreateOrConnectWithoutSessionInput | ChatMessageCreateOrConnectWithoutSessionInput[]
+    upsert?: ChatMessageUpsertWithWhereUniqueWithoutSessionInput | ChatMessageUpsertWithWhereUniqueWithoutSessionInput[]
+    createMany?: ChatMessageCreateManySessionInputEnvelope
+    set?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    disconnect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    delete?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    connect?: ChatMessageWhereUniqueInput | ChatMessageWhereUniqueInput[]
+    update?: ChatMessageUpdateWithWhereUniqueWithoutSessionInput | ChatMessageUpdateWithWhereUniqueWithoutSessionInput[]
+    updateMany?: ChatMessageUpdateManyWithWhereWithoutSessionInput | ChatMessageUpdateManyWithWhereWithoutSessionInput[]
+    deleteMany?: ChatMessageScalarWhereInput | ChatMessageScalarWhereInput[]
+  }
+
+  export type ChatMessageCreatesourcesInput = {
+    set: string[]
+  }
+
+  export type ChatSessionCreateNestedOneWithoutMessagesInput = {
+    create?: XOR<ChatSessionCreateWithoutMessagesInput, ChatSessionUncheckedCreateWithoutMessagesInput>
+    connectOrCreate?: ChatSessionCreateOrConnectWithoutMessagesInput
+    connect?: ChatSessionWhereUniqueInput
+  }
+
   export type FileCreateNestedOneWithoutChatMessagesInput = {
     create?: XOR<FileCreateWithoutChatMessagesInput, FileUncheckedCreateWithoutChatMessagesInput>
     connectOrCreate?: FileCreateOrConnectWithoutChatMessagesInput
     connect?: FileWhereUniqueInput
   }
 
-  export type FileUpdateOneRequiredWithoutChatMessagesNestedInput = {
+  export type EnumChatRoleFieldUpdateOperationsInput = {
+    set?: $Enums.ChatRole
+  }
+
+  export type ChatMessageUpdatesourcesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type ChatSessionUpdateOneWithoutMessagesNestedInput = {
+    create?: XOR<ChatSessionCreateWithoutMessagesInput, ChatSessionUncheckedCreateWithoutMessagesInput>
+    connectOrCreate?: ChatSessionCreateOrConnectWithoutMessagesInput
+    upsert?: ChatSessionUpsertWithoutMessagesInput
+    disconnect?: ChatSessionWhereInput | boolean
+    delete?: ChatSessionWhereInput | boolean
+    connect?: ChatSessionWhereUniqueInput
+    update?: XOR<XOR<ChatSessionUpdateToOneWithWhereWithoutMessagesInput, ChatSessionUpdateWithoutMessagesInput>, ChatSessionUncheckedUpdateWithoutMessagesInput>
+  }
+
+  export type FileUpdateOneWithoutChatMessagesNestedInput = {
     create?: XOR<FileCreateWithoutChatMessagesInput, FileUncheckedCreateWithoutChatMessagesInput>
     connectOrCreate?: FileCreateOrConnectWithoutChatMessagesInput
     upsert?: FileUpsertWithoutChatMessagesInput
+    disconnect?: FileWhereInput | boolean
+    delete?: FileWhereInput | boolean
     connect?: FileWhereUniqueInput
     update?: XOR<XOR<FileUpdateToOneWithWhereWithoutChatMessagesInput, FileUpdateWithoutChatMessagesInput>, FileUncheckedUpdateWithoutChatMessagesInput>
+  }
+
+  export type FileCreateNestedOneWithoutDocumentMetadataInput = {
+    create?: XOR<FileCreateWithoutDocumentMetadataInput, FileUncheckedCreateWithoutDocumentMetadataInput>
+    connectOrCreate?: FileCreateOrConnectWithoutDocumentMetadataInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type FileUpdateOneRequiredWithoutDocumentMetadataNestedInput = {
+    create?: XOR<FileCreateWithoutDocumentMetadataInput, FileUncheckedCreateWithoutDocumentMetadataInput>
+    connectOrCreate?: FileCreateOrConnectWithoutDocumentMetadataInput
+    upsert?: FileUpsertWithoutDocumentMetadataInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutDocumentMetadataInput, FileUpdateWithoutDocumentMetadataInput>, FileUncheckedUpdateWithoutDocumentMetadataInput>
+  }
+
+  export type EnumCacheScopeFieldUpdateOperationsInput = {
+    set?: $Enums.CacheScope
+  }
+
+  export type SemanticCacheUpdatesourcePagesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -9405,6 +14169,23 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedEnumAccessLevelFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccessLevel | EnumAccessLevelFieldRefInput<$PrismaModel>
+    in?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccessLevelFilter<$PrismaModel> | $Enums.AccessLevel
+  }
+
+  export type NestedEnumAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AccessLevel | EnumAccessLevelFieldRefInput<$PrismaModel>
+    in?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AccessLevel[] | ListEnumAccessLevelFieldRefInput<$PrismaModel>
+    not?: NestedEnumAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.AccessLevel
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAccessLevelFilter<$PrismaModel>
+    _max?: NestedEnumAccessLevelFilter<$PrismaModel>
+  }
+
   export type NestedEnumProcessingStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
@@ -9507,6 +14288,96 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumChatEntityTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatEntityType | EnumChatEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatEntityTypeFilter<$PrismaModel> | $Enums.ChatEntityType
+  }
+
+  export type NestedEnumChatEntityTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatEntityType | EnumChatEntityTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatEntityType[] | ListEnumChatEntityTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatEntityTypeWithAggregatesFilter<$PrismaModel> | $Enums.ChatEntityType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChatEntityTypeFilter<$PrismaModel>
+    _max?: NestedEnumChatEntityTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumChatRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatRole | EnumChatRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatRoleFilter<$PrismaModel> | $Enums.ChatRole
+  }
+
+  export type NestedEnumChatRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ChatRole | EnumChatRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ChatRole[] | ListEnumChatRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumChatRoleWithAggregatesFilter<$PrismaModel> | $Enums.ChatRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChatRoleFilter<$PrismaModel>
+    _max?: NestedEnumChatRoleFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedEnumCacheScopeFilter<$PrismaModel = never> = {
+    equals?: $Enums.CacheScope | EnumCacheScopeFieldRefInput<$PrismaModel>
+    in?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCacheScopeFilter<$PrismaModel> | $Enums.CacheScope
+  }
+
+  export type NestedEnumCacheScopeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CacheScope | EnumCacheScopeFieldRefInput<$PrismaModel>
+    in?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CacheScope[] | ListEnumCacheScopeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCacheScopeWithAggregatesFilter<$PrismaModel> | $Enums.CacheScope
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCacheScopeFilter<$PrismaModel>
+    _max?: NestedEnumCacheScopeFilter<$PrismaModel>
+  }
+
   export type FileCreateWithoutOwnerInput = {
     id?: string
     name: string
@@ -9514,6 +14385,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     processingStatus?: $Enums.ProcessingStatus
@@ -9526,6 +14398,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
   }
 
@@ -9536,6 +14409,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     folderId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9549,6 +14423,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutOwnerInput = {
@@ -9565,6 +14440,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     files?: FileCreateNestedManyWithoutFolderInput
@@ -9577,6 +14453,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     files?: FileUncheckedCreateNestedManyWithoutFolderInput
@@ -9619,6 +14496,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFilter<"File"> | bigint | number
     path?: StringFilter<"File"> | string
     shared?: BoolFilter<"File"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
     folderId?: StringNullableFilter<"File"> | string | null
     createdAt?: DateTimeFilter<"File"> | Date | string
@@ -9657,6 +14535,7 @@ export namespace Prisma {
     name?: StringFilter<"Folder"> | string
     parentId?: StringNullableFilter<"Folder"> | string | null
     shared?: BoolFilter<"Folder"> | boolean
+    accessLevel?: EnumAccessLevelFilter<"Folder"> | $Enums.AccessLevel
     createdAt?: DateTimeFilter<"Folder"> | Date | string
     updatedAt?: DateTimeFilter<"Folder"> | Date | string
     ownerId?: StringFilter<"Folder"> | string
@@ -9669,6 +14548,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     processingStatus?: $Enums.ProcessingStatus
@@ -9681,6 +14561,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
 
@@ -9691,6 +14572,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9704,6 +14586,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutFolderInput = {
@@ -9755,6 +14638,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     files?: FileCreateNestedManyWithoutFolderInput
@@ -9767,6 +14651,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -9782,6 +14667,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     files?: FileCreateNestedManyWithoutFolderInput
@@ -9793,6 +14679,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -9882,6 +14769,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     files?: FileUpdateManyWithoutFolderNestedInput
@@ -9894,6 +14782,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -9920,14 +14809,18 @@ export namespace Prisma {
     id?: string
     content: string
     createdAt?: Date | string
-    role: string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
+    session?: ChatSessionCreateNestedOneWithoutMessagesInput
   }
 
   export type ChatMessageUncheckedCreateWithoutFileInput = {
     id?: string
+    sessionId?: string | null
     content: string
     createdAt?: Date | string
-    role: string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
   }
 
   export type ChatMessageCreateOrConnectWithoutFileInput = {
@@ -9940,10 +14833,44 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DocumentMetadataCreateWithoutFileInput = {
+    id?: string
+    state?: string | null
+    firNumber?: string | null
+    firDate?: Date | string | null
+    district?: string | null
+    subDivision?: string | null
+    policeStation?: string | null
+    propertyLoss?: number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataUncheckedCreateWithoutFileInput = {
+    id?: string
+    state?: string | null
+    firNumber?: string | null
+    firDate?: Date | string | null
+    district?: string | null
+    subDivision?: string | null
+    policeStation?: string | null
+    propertyLoss?: number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataCreateOrConnectWithoutFileInput = {
+    where: DocumentMetadataWhereUniqueInput
+    create: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+  }
+
   export type FolderCreateWithoutFilesInput = {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutFoldersInput
@@ -9956,6 +14883,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -10023,10 +14951,12 @@ export namespace Prisma {
     OR?: ChatMessageScalarWhereInput[]
     NOT?: ChatMessageScalarWhereInput | ChatMessageScalarWhereInput[]
     id?: StringFilter<"ChatMessage"> | string
-    fileId?: StringFilter<"ChatMessage"> | string
+    sessionId?: StringNullableFilter<"ChatMessage"> | string | null
+    fileId?: StringNullableFilter<"ChatMessage"> | string | null
     content?: StringFilter<"ChatMessage"> | string
     createdAt?: DateTimeFilter<"ChatMessage"> | Date | string
-    role?: StringFilter<"ChatMessage"> | string
+    role?: EnumChatRoleFilter<"ChatMessage"> | $Enums.ChatRole
+    sources?: StringNullableListFilter<"ChatMessage">
   }
 
   export type DocumentChunkUpdateWithWhereUniqueWithoutFileInput = {
@@ -10052,6 +14982,45 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"DocumentChunk"> | Date | string
   }
 
+  export type DocumentMetadataUpsertWithoutFileInput = {
+    update: XOR<DocumentMetadataUpdateWithoutFileInput, DocumentMetadataUncheckedUpdateWithoutFileInput>
+    create: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
+    where?: DocumentMetadataWhereInput
+  }
+
+  export type DocumentMetadataUpdateToOneWithWhereWithoutFileInput = {
+    where?: DocumentMetadataWhereInput
+    data: XOR<DocumentMetadataUpdateWithoutFileInput, DocumentMetadataUncheckedUpdateWithoutFileInput>
+  }
+
+  export type DocumentMetadataUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DocumentMetadataUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    firNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    firDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    district?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    policeStation?: NullableStringFieldUpdateOperationsInput | string | null
+    propertyLoss?: NullableFloatFieldUpdateOperationsInput | number | null
+    actsAndSections?: NullableJsonNullValueInput | InputJsonValue
+    zeroFirReference?: NullableStringFieldUpdateOperationsInput | string | null
+    rawJson?: NullableJsonNullValueInput | InputJsonValue
+  }
+
   export type FolderUpsertWithoutFilesInput = {
     update: XOR<FolderUpdateWithoutFilesInput, FolderUncheckedUpdateWithoutFilesInput>
     create: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
@@ -10067,6 +15036,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutFoldersNestedInput
@@ -10079,6 +15049,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -10133,6 +15104,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     processingStatus?: $Enums.ProcessingStatus
@@ -10144,6 +15116,7 @@ export namespace Prisma {
     isScanned?: boolean
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -10155,6 +15128,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     folderId?: string | null
     createdAt?: Date | string
@@ -10168,6 +15142,7 @@ export namespace Prisma {
     isScanned?: boolean
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutChunksInput = {
@@ -10193,6 +15168,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -10204,6 +15180,7 @@ export namespace Prisma {
     isScanned?: BoolFieldUpdateOperationsInput | boolean
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -10215,6 +15192,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10228,6 +15206,74 @@ export namespace Prisma {
     isScanned?: BoolFieldUpdateOperationsInput | boolean
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+  }
+
+  export type ChatMessageCreateWithoutSessionInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
+    file?: FileCreateNestedOneWithoutChatMessagesInput
+  }
+
+  export type ChatMessageUncheckedCreateWithoutSessionInput = {
+    id?: string
+    fileId?: string | null
+    content: string
+    createdAt?: Date | string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
+  }
+
+  export type ChatMessageCreateOrConnectWithoutSessionInput = {
+    where: ChatMessageWhereUniqueInput
+    create: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput>
+  }
+
+  export type ChatMessageCreateManySessionInputEnvelope = {
+    data: ChatMessageCreateManySessionInput | ChatMessageCreateManySessionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ChatMessageUpsertWithWhereUniqueWithoutSessionInput = {
+    where: ChatMessageWhereUniqueInput
+    update: XOR<ChatMessageUpdateWithoutSessionInput, ChatMessageUncheckedUpdateWithoutSessionInput>
+    create: XOR<ChatMessageCreateWithoutSessionInput, ChatMessageUncheckedCreateWithoutSessionInput>
+  }
+
+  export type ChatMessageUpdateWithWhereUniqueWithoutSessionInput = {
+    where: ChatMessageWhereUniqueInput
+    data: XOR<ChatMessageUpdateWithoutSessionInput, ChatMessageUncheckedUpdateWithoutSessionInput>
+  }
+
+  export type ChatMessageUpdateManyWithWhereWithoutSessionInput = {
+    where: ChatMessageScalarWhereInput
+    data: XOR<ChatMessageUpdateManyMutationInput, ChatMessageUncheckedUpdateManyWithoutSessionInput>
+  }
+
+  export type ChatSessionCreateWithoutMessagesInput = {
+    id?: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ChatSessionUncheckedCreateWithoutMessagesInput = {
+    id?: string
+    entityType: $Enums.ChatEntityType
+    entityId: string
+    title: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ChatSessionCreateOrConnectWithoutMessagesInput = {
+    where: ChatSessionWhereUniqueInput
+    create: XOR<ChatSessionCreateWithoutMessagesInput, ChatSessionUncheckedCreateWithoutMessagesInput>
   }
 
   export type FileCreateWithoutChatMessagesInput = {
@@ -10237,6 +15283,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     processingStatus?: $Enums.ProcessingStatus
@@ -10248,6 +15295,7 @@ export namespace Prisma {
     isScanned?: boolean
     ocrEngineUsed?: string | null
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -10259,6 +15307,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     folderId?: string | null
     createdAt?: Date | string
@@ -10272,11 +15321,41 @@ export namespace Prisma {
     isScanned?: boolean
     ocrEngineUsed?: string | null
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutChatMessagesInput = {
     where: FileWhereUniqueInput
     create: XOR<FileCreateWithoutChatMessagesInput, FileUncheckedCreateWithoutChatMessagesInput>
+  }
+
+  export type ChatSessionUpsertWithoutMessagesInput = {
+    update: XOR<ChatSessionUpdateWithoutMessagesInput, ChatSessionUncheckedUpdateWithoutMessagesInput>
+    create: XOR<ChatSessionCreateWithoutMessagesInput, ChatSessionUncheckedCreateWithoutMessagesInput>
+    where?: ChatSessionWhereInput
+  }
+
+  export type ChatSessionUpdateToOneWithWhereWithoutMessagesInput = {
+    where?: ChatSessionWhereInput
+    data: XOR<ChatSessionUpdateWithoutMessagesInput, ChatSessionUncheckedUpdateWithoutMessagesInput>
+  }
+
+  export type ChatSessionUpdateWithoutMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatSessionUncheckedUpdateWithoutMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: EnumChatEntityTypeFieldUpdateOperationsInput | $Enums.ChatEntityType
+    entityId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FileUpsertWithoutChatMessagesInput = {
@@ -10297,6 +15376,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -10308,6 +15388,7 @@ export namespace Prisma {
     isScanned?: BoolFieldUpdateOperationsInput | boolean
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -10319,6 +15400,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10332,6 +15414,119 @@ export namespace Prisma {
     isScanned?: BoolFieldUpdateOperationsInput | boolean
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+  }
+
+  export type FileCreateWithoutDocumentMetadataInput = {
+    id?: string
+    name: string
+    type: string
+    sizeBytes: bigint | number
+    path: string
+    shared?: boolean
+    accessLevel?: $Enums.AccessLevel
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    summary?: string | null
+    processedAt?: Date | string | null
+    chunkCount?: number
+    embeddingProvider?: $Enums.AiProvider | null
+    isScanned?: boolean
+    ocrEngineUsed?: string | null
+    chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
+    chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    folder?: FolderCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesInput
+  }
+
+  export type FileUncheckedCreateWithoutDocumentMetadataInput = {
+    id?: string
+    name: string
+    type: string
+    sizeBytes: bigint | number
+    path: string
+    shared?: boolean
+    accessLevel?: $Enums.AccessLevel
+    ownerId: string
+    folderId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    summary?: string | null
+    processedAt?: Date | string | null
+    chunkCount?: number
+    embeddingProvider?: $Enums.AiProvider | null
+    isScanned?: boolean
+    ocrEngineUsed?: string | null
+    chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
+    chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutDocumentMetadataInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutDocumentMetadataInput, FileUncheckedCreateWithoutDocumentMetadataInput>
+  }
+
+  export type FileUpsertWithoutDocumentMetadataInput = {
+    update: XOR<FileUpdateWithoutDocumentMetadataInput, FileUncheckedUpdateWithoutDocumentMetadataInput>
+    create: XOR<FileCreateWithoutDocumentMetadataInput, FileUncheckedCreateWithoutDocumentMetadataInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutDocumentMetadataInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutDocumentMetadataInput, FileUncheckedUpdateWithoutDocumentMetadataInput>
+  }
+
+  export type FileUpdateWithoutDocumentMetadataInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
+    path?: StringFieldUpdateOperationsInput | string
+    shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chunkCount?: IntFieldUpdateOperationsInput | number
+    embeddingProvider?: NullableEnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider | null
+    isScanned?: BoolFieldUpdateOperationsInput | boolean
+    ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
+    chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    folder?: FolderUpdateOneWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutDocumentMetadataInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
+    path?: StringFieldUpdateOperationsInput | string
+    shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
+    ownerId?: StringFieldUpdateOperationsInput | string
+    folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chunkCount?: IntFieldUpdateOperationsInput | number
+    embeddingProvider?: NullableEnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider | null
+    isScanned?: BoolFieldUpdateOperationsInput | boolean
+    ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
+    chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
   }
 
   export type FileCreateManyOwnerInput = {
@@ -10341,6 +15536,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     folderId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10359,6 +15555,7 @@ export namespace Prisma {
     name: string
     parentId?: string | null
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10370,6 +15567,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -10382,6 +15580,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
   }
 
@@ -10392,6 +15591,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10405,6 +15605,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileUncheckedUpdateManyWithoutOwnerInput = {
@@ -10414,6 +15615,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10431,6 +15633,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     files?: FileUpdateManyWithoutFolderNestedInput
@@ -10443,6 +15646,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     files?: FileUncheckedUpdateManyWithoutFolderNestedInput
@@ -10454,6 +15658,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10465,6 +15670,7 @@ export namespace Prisma {
     sizeBytes: bigint | number
     path: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10482,6 +15688,7 @@ export namespace Prisma {
     id?: string
     name: string
     shared?: boolean
+    accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
     updatedAt?: Date | string
     ownerId: string
@@ -10494,6 +15701,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
@@ -10506,6 +15714,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
 
@@ -10516,6 +15725,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10529,6 +15739,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileUncheckedUpdateManyWithoutFolderInput = {
@@ -10538,6 +15749,7 @@ export namespace Prisma {
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
     path?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10555,6 +15767,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     files?: FileUpdateManyWithoutFolderNestedInput
@@ -10566,6 +15779,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -10577,6 +15791,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -10584,30 +15799,38 @@ export namespace Prisma {
 
   export type ChatMessageCreateManyFileInput = {
     id?: string
+    sessionId?: string | null
     content: string
     createdAt?: Date | string
-    role: string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
   }
 
   export type ChatMessageUpdateWithoutFileInput = {
     id?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
+    session?: ChatSessionUpdateOneWithoutMessagesNestedInput
   }
 
   export type ChatMessageUncheckedUpdateWithoutFileInput = {
     id?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
   }
 
   export type ChatMessageUncheckedUpdateManyWithoutFileInput = {
     id?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    role?: StringFieldUpdateOperationsInput | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
   }
 
   export type DocumentChunkUpdateWithoutFileInput = {
@@ -10635,6 +15858,42 @@ export namespace Prisma {
     content?: StringFieldUpdateOperationsInput | string
     tokenCount?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatMessageCreateManySessionInput = {
+    id?: string
+    fileId?: string | null
+    content: string
+    createdAt?: Date | string
+    role: $Enums.ChatRole
+    sources?: ChatMessageCreatesourcesInput | string[]
+  }
+
+  export type ChatMessageUpdateWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
+    file?: FileUpdateOneWithoutChatMessagesNestedInput
+  }
+
+  export type ChatMessageUncheckedUpdateWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
+  }
+
+  export type ChatMessageUncheckedUpdateManyWithoutSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumChatRoleFieldUpdateOperationsInput | $Enums.ChatRole
+    sources?: ChatMessageUpdatesourcesInput | string[]
   }
 
 
