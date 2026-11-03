@@ -13,6 +13,7 @@ import {
   storeSemanticCache,
   streamCachedAnswer,
 } from "@/lib/semantic-cache";
+import { generateChatTitle } from "@/lib/chat-title";
 
 function sanitizeRecord<T>(data: T): T {
   return JSON.parse(
@@ -147,20 +148,6 @@ export async function POST(
           },
         })
       : null;
-
-function generateChatTitle(query: string): string {
-  let clean = query.replace(/[#*`_]/g, "").replace(/\s+/g, " ").trim();
-  clean = clean.replace(
-    /^(can you please|could you please|please|can you|could you|tell me about|what is|show me|find all|list all|give me|check)\s+/i,
-    ""
-  );
-  if (!clean) return "New Chat";
-  const capped = clean.charAt(0).toUpperCase() + clean.slice(1);
-  if (capped.length <= 36) return capped;
-  const truncated = capped.slice(0, 36);
-  const lastSpace = truncated.lastIndexOf(" ");
-  return lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
-}
 
     if (!chatSession) {
       chatSession = await prisma.chatSession.create({

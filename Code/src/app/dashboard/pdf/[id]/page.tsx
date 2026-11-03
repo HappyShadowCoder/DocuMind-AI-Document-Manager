@@ -29,6 +29,7 @@ import {
     Hash,
     Zap,
     Trash2,
+    Clock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -92,6 +93,25 @@ function extractSources(raw: string): number[] | null {
     return Array.from(new Set(match[1].split(",").map(Number))).sort((a, b) => a - b);
 }
 
+function formatSessionTime(dateStr?: string): string {
+    if (!dateStr) return "";
+    try {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return "Just now";
+        if (diffMin < 60) return `${diffMin}m ago`;
+        const diffHours = Math.floor(diffMin / 60);
+        if (diffHours < 24) return `${diffHours}h ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    } catch {
+        return "";
+    }
+}
+
 function ChatSkeleton() {
     return (
         <div className="flex h-full flex-col gap-5 p-5">
@@ -129,6 +149,8 @@ function PdfChatContent() {
     const [mode, setMode] = useState<"chat" | "view">(initialMode);
     const [modeDropdownOpen, setModeDropdownOpen] = useState(false);
     const modeDropdownRef = useRef<HTMLDivElement>(null);
+    const [historyOpen, setHistoryOpen] = useState(false);
+    const historyDropdownRef = useRef<HTMLDivElement>(null);
 
     const [fileMeta, setFileMeta] = useState<FileMeta | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -200,6 +222,9 @@ function PdfChatContent() {
         function handleClickOutside(e: MouseEvent) {
             if (modeDropdownRef.current && !modeDropdownRef.current.contains(e.target as Node)) {
                 setModeDropdownOpen(false);
+            }
+            if (historyDropdownRef.current && !historyDropdownRef.current.contains(e.target as Node)) {
+                setHistoryOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -776,98 +801,146 @@ function PdfChatContent() {
                             </div>
                         ) : (
                             <>
-                                <div className="flex flex-col gap-3 border-b border-slate-200 p-3 dark:border-slate-800">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setCurrentSessionId(null);
-                                                    setMessages([]);
-                                                }}
-                                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
-                                                aria-label="New chat"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </button>
-                                            <div>
-                                                <p className="text-sm font-semibold text-slate-900 dark:text-white">Chat history</p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">Switch threads or start fresh</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            {sessions.length > 0 && (
+                                {(() => {
+                                    const activeSession = sessions.find((s) => s.id === currentSessionId);
+                                    const activeSessionTitle = activeSession?.title || (currentSessionId ? "Chat Thread" : "New Conversation");
+                                    return (
+                                        <div className="relative z-20 flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-3.5 py-2.5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+                                            <div className="flex items-center gap-2">
+                                                {/* New Chat Button */}
                                                 <button
                                                     type="button"
-                                                    disabled={isClearingAll}
-                                                    onClick={handleClearAllSessions}
-                                                    className="flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/50 px-2.5 py-2 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-500/20 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-900/30 disabled:opacity-50"
-                                                    title="Delete all chat history for this document"
+                                                    onClick={() => {
+                                                        setCurrentSessionId(null);
+                                                        setMessages([]);
+                                                        setHistoryOpen(false);
+                                                    }}
+                                                    className="flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-[#0052FF] transition hover:bg-blue-500/20 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-[#4D7CFF] dark:hover:bg-blue-500/20"
+                                                    title="Start a new chat thread"
                                                 >
-                                                    {isClearingAll ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                    )}
-                                                    <span className="hidden sm:inline">Clear all</span>
+                                                    <Plus className="h-3.5 w-3.5" />
+                                                    <span>New Chat</span>
                                                 </button>
-                                            )}
+
+                                                {/* Thread Dropdown Trigger */}
+                                                <div className="relative" ref={historyDropdownRef}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setHistoryOpen((prev) => !prev)}
+                                                        className={`flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-medium transition ${
+                                                            historyOpen
+                                                                ? "border-[#0052FF]/50 bg-white text-[#0052FF] shadow-sm dark:border-[#4D7CFF]/50 dark:bg-slate-800 dark:text-[#4D7CFF]"
+                                                                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900"
+                                                        }`}
+                                                    >
+                                                        <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
+                                                        <span className="max-w-[130px] sm:max-w-[190px] truncate font-medium">
+                                                            {activeSessionTitle}
+                                                        </span>
+                                                        {sessions.length > 0 && (
+                                                            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                                                {sessions.length}
+                                                            </span>
+                                                        )}
+                                                        <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+                                                    </button>
+
+                                                    {/* Thread Dropdown Menu Popover */}
+                                                    {historyOpen && (
+                                                        <div className="absolute left-0 top-full z-50 mt-1.5 w-72 sm:w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                                                            <div className="flex items-center justify-between border-b border-slate-100 px-3.5 py-2.5 dark:border-slate-800">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                                                                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                                                                        Previous Chats ({sessions.length})
+                                                                    </span>
+                                                                </div>
+                                                                {sessions.length > 0 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={isClearingAll}
+                                                                        onClick={handleClearAllSessions}
+                                                                        className="flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 transition"
+                                                                    >
+                                                                        {isClearingAll ? (
+                                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                                        ) : (
+                                                                            <Trash2 className="h-3 w-3" />
+                                                                        )}
+                                                                        <span>Clear all</span>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="max-h-64 overflow-y-auto p-1.5 space-y-1">
+                                                                {sessions.length === 0 ? (
+                                                                    <div className="py-6 text-center text-xs text-slate-400">
+                                                                        No prior chats yet.
+                                                                    </div>
+                                                                ) : (
+                                                                    sessions.map((session) => (
+                                                                        <div
+                                                                            key={session.id}
+                                                                            className={`group flex items-center justify-between rounded-xl px-2.5 py-2 text-xs transition cursor-pointer ${
+                                                                                currentSessionId === session.id
+                                                                                    ? "bg-blue-50/80 text-[#0052FF] dark:bg-blue-950/40 dark:text-[#4D7CFF]"
+                                                                                    : "hover:bg-slate-100 text-slate-700 dark:hover:bg-slate-800/80 dark:text-slate-300"
+                                                                            }`}
+                                                                            onClick={() => {
+                                                                                setCurrentSessionId(session.id);
+                                                                                void loadHistory(session.id);
+                                                                                setHistoryOpen(false);
+                                                                            }}
+                                                                        >
+                                                                            <div className="flex items-center gap-2.5 overflow-hidden">
+                                                                                <MessageSquare className={`h-3.5 w-3.5 flex-shrink-0 ${
+                                                                                    currentSessionId === session.id
+                                                                                        ? "text-[#0052FF] dark:text-[#4D7CFF]"
+                                                                                        : "text-slate-400"
+                                                                                }`} />
+                                                                                <div className="flex flex-col overflow-hidden text-left">
+                                                                                    <span className="truncate font-medium">
+                                                                                        {session.title}
+                                                                                    </span>
+                                                                                    <span className="text-[10px] text-slate-400">
+                                                                                        {formatSessionTime(session.updatedAt)}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <button
+                                                                                type="button"
+                                                                                disabled={deletingSessionId === session.id}
+                                                                                onClick={(e) => handleDeleteSession(e, session.id)}
+                                                                                className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition"
+                                                                                title="Delete chat thread"
+                                                                            >
+                                                                                {deletingSessionId === session.id ? (
+                                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                                ) : (
+                                                                                    <Trash2 className="h-3 w-3" />
+                                                                                )}
+                                                                            </button>
+                                                                        </div>
+                                                                    ))
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Right: Quick Refresh */}
                                             <button
                                                 type="button"
                                                 onClick={() => loadSessions()}
-                                                className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition"
+                                                title="Refresh conversations"
                                             >
-                                                Refresh
+                                                <RefreshCcw className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {sessions.length === 0 ? (
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">No prior chats yet.</p>
-                                        ) : (
-                                            sessions.map((session) => (
-                                                <div
-                                                    key={session.id}
-                                                    className={`group inline-flex items-center gap-1.5 rounded-full pl-3 pr-1.5 py-1 text-xs font-medium transition ${
-                                                        currentSessionId === session.id
-                                                            ? "bg-[#0052FF] text-white shadow-sm"
-                                                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                                                    }`}
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setCurrentSessionId(session.id);
-                                                            void loadHistory(session.id);
-                                                        }}
-                                                        className="truncate text-left max-w-[130px] sm:max-w-[180px]"
-                                                        title={session.title}
-                                                    >
-                                                        {session.title}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        disabled={deletingSessionId === session.id}
-                                                        onClick={(e) => handleDeleteSession(e, session.id)}
-                                                        className={`flex h-4 w-4 items-center justify-center rounded-full transition ${
-                                                            currentSessionId === session.id
-                                                                ? "text-white/70 hover:bg-white/20 hover:text-white"
-                                                                : "text-slate-400 hover:bg-slate-200 hover:text-red-600 dark:hover:bg-slate-700 dark:hover:text-red-400"
-                                                        }`}
-                                                        title="Delete this chat thread"
-                                                        aria-label={`Delete chat thread: ${session.title}`}
-                                                    >
-                                                        {deletingSessionId === session.id ? (
-                                                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                                                        ) : (
-                                                            <X className="h-3 w-3" />
-                                                        )}
-                                                    </button>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
+                                    );
+                                })()}
                                 <div className="flex-1 space-y-4 overflow-y-auto p-4">
                                     {messages.map((m) => (
                                         <motion.div
