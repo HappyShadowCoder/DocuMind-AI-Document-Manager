@@ -64,7 +64,6 @@ interface DisplayMessage {
 interface FileMeta {
     id: string;
     name: string;
-    path: string;
     processingStatus: ProcessingStatus;
     processingError: string | null;
     summary: string | null;
@@ -671,9 +670,9 @@ function PdfChatContent() {
                         ref={viewerRef}
                         className="flex flex-1 h-full w-full flex-col overflow-y-auto bg-slate-100 p-4 dark:bg-slate-900/40"
                     >
-                        {fileMeta?.path ? (
+                        {fileMeta ? (
                             <PdfViewer
-                                url={fileMeta.path}
+                                url={`/api/files/${fileMeta.id}/serve`}
                                 width={viewerWidth}
                                 initialPage={parseInt(searchParams.get("page") || "1", 10) || 1}
                             />
@@ -693,9 +692,9 @@ function PdfChatContent() {
                             activeMobileTab === "document" ? "flex flex-1 h-full w-full flex-col" : "hidden md:block"
                         }`}
                     >
-                        {fileMeta?.path ? (
+                        {fileMeta ? (
                             <PdfViewer
-                                url={fileMeta.path}
+                                url={`/api/files/${fileMeta.id}/serve`}
                                 width={viewerWidth}
                                 initialPage={parseInt(searchParams.get("page") || "1", 10) || 1}
                             />

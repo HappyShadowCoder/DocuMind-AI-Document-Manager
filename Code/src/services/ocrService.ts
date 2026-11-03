@@ -1,6 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { prisma } from "@/lib/prisma";
 import { PDFParse } from "pdf-parse";
-import { resolveStoredFilePath } from "@/lib/file-path";
 
 export interface PdfPageText {
   pageNumber: number;
@@ -44,9 +43,42 @@ function hasValidText(text: string): boolean {
   return normalizeText(text).length >= MIN_VALID_TEXT_LENGTH;
 }
 
-async function extractNativePdfText(filePath: string): Promise<PdfPageText[]> {
-  const absolutePath = resolveStoredFilePath(filePath);
-  const buffer = await readFile(absolutePath);
+/**
+ * Fetch the raw PDF buffer for a file.
+ * Tries the FileBlob table first (new DB-native storage).
+ * Falls back to the legacy filesystem path for files uploaded before the migration.
+ */
+async function getPdfBuffer(fileId: string): Promise<Buffer> {
+  // Primary: DB blob
+  const blob = await prisma.fileBlob.findUnique({
+    where: { fileId },
+    select: { data: true },
+  });
+
+  if (blob?.data) {
+    return blob.data as Buffer;
+  }
+
+  // Legacy fallback: read from filesystem using stored path
+  const fileRecord = await prisma.file.findUnique({
+    where: { id: fileId },
+    select: { path: true },
+  });
+
+  if (fileRecord?.path) {
+    const { readFile } = await import("node:fs/promises");
+    const { resolveStoredFilePath } = await import("@/lib/file-path");
+    const absolutePath = resolveStoredFilePath(fileRecord.path);
+    return readFile(absolutePath);
+  }
+
+  throw new Error(
+    `No file content found for file ${fileId}. The FileBlob is missing and no legacy path exists.`
+  );
+}
+
+async function extractNativePdfText(fileId: string): Promise<PdfPageText[]> {
+  const buffer = await getPdfBuffer(fileId);
   const parser = new PDFParse({ data: buffer });
 
   try {
@@ -105,7 +137,7 @@ async function renderPdfPageAsPng(page: any): Promise<Buffer> {
   return canvas.toBuffer("image/png");
 }
 
-async function extractTextWithOcr(filePath: string): Promise<PdfPageText[]> {
+async function extractTextWithOcr(fileId: string): Promise<PdfPageText[]> {
   const tesseract = await loadTesseract();
   if (!tesseract) {
     throw new Error(
@@ -114,8 +146,7 @@ async function extractTextWithOcr(filePath: string): Promise<PdfPageText[]> {
   }
 
   const pdfjsLib = await loadPdfJs();
-  const absolutePath = resolveStoredFilePath(filePath);
-  const buffer = await readFile(absolutePath);
+  const buffer = await getPdfBuffer(fileId);
   const data = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   const loadingTask = pdfjsLib.getDocument({ data, disableWorker: true });
   const pdfDocument = await loadingTask.promise;
@@ -158,8 +189,12 @@ async function extractTextWithOcr(filePath: string): Promise<PdfPageText[]> {
   }
 }
 
-export async function extractPdfPages(filePath: string): Promise<PdfExtractionResult> {
-  const nativePages = await extractNativePdfText(filePath);
+/**
+ * Extract pages from a PDF identified by its database file ID.
+ * Tries native text extraction first; falls back to OCR for scanned documents.
+ */
+export async function extractPdfPages(fileId: string): Promise<PdfExtractionResult> {
+  const nativePages = await extractNativePdfText(fileId);
   const nativeText = nativePages.map((page) => page.text).join(" ");
 
   if (nativePages.length > 0 && hasValidText(nativeText)) {
@@ -171,7 +206,7 @@ export async function extractPdfPages(filePath: string): Promise<PdfExtractionRe
   }
 
   console.log("Digital text missing or too short. Fallback to OCR starting...");
-  const ocrPages = await extractTextWithOcr(filePath);
+  const ocrPages = await extractTextWithOcr(fileId);
   const ocrText = ocrPages.map((page) => page.text).join(" ");
 
   if (!hasValidText(ocrText)) {

@@ -48,7 +48,8 @@ model File {
   name              String
   type              String
   sizeBytes         BigInt
-  path              String
+  /// Kept as optional for backward-compat during migration; use blob relation going forward
+  path              String?
   shared            Boolean          @default(false)
   accessLevel       AccessLevel      @default(all)
   ownerId           String
@@ -66,11 +67,22 @@ model File {
   chatMessages      ChatMessage[]
   chunks            DocumentChunk[]
   documentMetadata  DocumentMetadata?
+  blob              FileBlob?
   folder            Folder?          @relation(fields: [folderId], references: [id])
   owner             User             @relation("UserFiles", fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
   @@index([folderId])
+}
+
+/// Stores raw file bytes separately from File metadata so list queries stay fast
+model FileBlob {
+  id        String   @id @default(cuid())
+  fileId    String   @unique
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
 }
 
 model DocumentChunk {

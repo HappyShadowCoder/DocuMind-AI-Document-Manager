@@ -29,6 +29,11 @@ export type Folder = $Result.DefaultSelection<Prisma.$FolderPayload>
  */
 export type File = $Result.DefaultSelection<Prisma.$FilePayload>
 /**
+ * Model FileBlob
+ * Stores raw file bytes separately from File metadata so list queries stay fast
+ */
+export type FileBlob = $Result.DefaultSelection<Prisma.$FileBlobPayload>
+/**
  * Model DocumentChunk
  * 
  */
@@ -298,6 +303,16 @@ export class PrismaClient<
     * ```
     */
   get file(): Prisma.FileDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fileBlob`: Exposes CRUD operations for the **FileBlob** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FileBlobs
+    * const fileBlobs = await prisma.fileBlob.findMany()
+    * ```
+    */
+  get fileBlob(): Prisma.FileBlobDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.documentChunk`: Exposes CRUD operations for the **DocumentChunk** model.
@@ -798,6 +813,7 @@ export namespace Prisma {
     User: 'User',
     Folder: 'Folder',
     File: 'File',
+    FileBlob: 'FileBlob',
     DocumentChunk: 'DocumentChunk',
     ChatSession: 'ChatSession',
     ChatMessage: 'ChatMessage',
@@ -818,7 +834,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "folder" | "file" | "documentChunk" | "chatSession" | "chatMessage" | "documentMetadata" | "semanticCache"
+      modelProps: "user" | "folder" | "file" | "fileBlob" | "documentChunk" | "chatSession" | "chatMessage" | "documentMetadata" | "semanticCache"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1041,6 +1057,80 @@ export namespace Prisma {
           count: {
             args: Prisma.FileCountArgs<ExtArgs>
             result: $Utils.Optional<FileCountAggregateOutputType> | number
+          }
+        }
+      }
+      FileBlob: {
+        payload: Prisma.$FileBlobPayload<ExtArgs>
+        fields: Prisma.FileBlobFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FileBlobFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FileBlobFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          findFirst: {
+            args: Prisma.FileBlobFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FileBlobFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          findMany: {
+            args: Prisma.FileBlobFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>[]
+          }
+          create: {
+            args: Prisma.FileBlobCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          createMany: {
+            args: Prisma.FileBlobCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FileBlobCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>[]
+          }
+          delete: {
+            args: Prisma.FileBlobDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          update: {
+            args: Prisma.FileBlobUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          deleteMany: {
+            args: Prisma.FileBlobDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FileBlobUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileBlobUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>[]
+          }
+          upsert: {
+            args: Prisma.FileBlobUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileBlobPayload>
+          }
+          aggregate: {
+            args: Prisma.FileBlobAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFileBlob>
+          }
+          groupBy: {
+            args: Prisma.FileBlobGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FileBlobGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FileBlobCountArgs<ExtArgs>
+            result: $Utils.Optional<FileBlobCountAggregateOutputType> | number
           }
         }
       }
@@ -1508,6 +1598,7 @@ export namespace Prisma {
     user?: UserOmit
     folder?: FolderOmit
     file?: FileOmit
+    fileBlob?: FileBlobOmit
     documentChunk?: DocumentChunkOmit
     chatSession?: ChatSessionOmit
     chatMessage?: ChatMessageOmit
@@ -4403,7 +4494,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint
-    path: string
+    path: string | null
     shared: boolean
     accessLevel: $Enums.AccessLevel
     ownerId: string
@@ -4462,6 +4553,7 @@ export namespace Prisma {
     chatMessages?: boolean | File$chatMessagesArgs<ExtArgs>
     chunks?: boolean | File$chunksArgs<ExtArgs>
     documentMetadata?: boolean | File$documentMetadataArgs<ExtArgs>
+    blob?: boolean | File$blobArgs<ExtArgs>
     folder?: boolean | File$folderArgs<ExtArgs>
     owner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -4542,6 +4634,7 @@ export namespace Prisma {
     chatMessages?: boolean | File$chatMessagesArgs<ExtArgs>
     chunks?: boolean | File$chunksArgs<ExtArgs>
     documentMetadata?: boolean | File$documentMetadataArgs<ExtArgs>
+    blob?: boolean | File$blobArgs<ExtArgs>
     folder?: boolean | File$folderArgs<ExtArgs>
     owner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -4561,6 +4654,7 @@ export namespace Prisma {
       chatMessages: Prisma.$ChatMessagePayload<ExtArgs>[]
       chunks: Prisma.$DocumentChunkPayload<ExtArgs>[]
       documentMetadata: Prisma.$DocumentMetadataPayload<ExtArgs> | null
+      blob: Prisma.$FileBlobPayload<ExtArgs> | null
       folder: Prisma.$FolderPayload<ExtArgs> | null
       owner: Prisma.$UserPayload<ExtArgs>
     }
@@ -4569,7 +4663,10 @@ export namespace Prisma {
       name: string
       type: string
       sizeBytes: bigint
-      path: string
+      /**
+       * Kept as optional for backward-compat during migration; use blob relation going forward
+       */
+      path: string | null
       shared: boolean
       accessLevel: $Enums.AccessLevel
       ownerId: string
@@ -4981,6 +5078,7 @@ export namespace Prisma {
     chatMessages<T extends File$chatMessagesArgs<ExtArgs> = {}>(args?: Subset<T, File$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     chunks<T extends File$chunksArgs<ExtArgs> = {}>(args?: Subset<T, File$chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documentMetadata<T extends File$documentMetadataArgs<ExtArgs> = {}>(args?: Subset<T, File$documentMetadataArgs<ExtArgs>>): Prisma__DocumentMetadataClient<$Result.GetResult<Prisma.$DocumentMetadataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    blob<T extends File$blobArgs<ExtArgs> = {}>(args?: Subset<T, File$blobArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     folder<T extends File$folderArgs<ExtArgs> = {}>(args?: Subset<T, File$folderArgs<ExtArgs>>): Prisma__FolderClient<$Result.GetResult<Prisma.$FolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -5499,6 +5597,25 @@ export namespace Prisma {
   }
 
   /**
+   * File.blob
+   */
+  export type File$blobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    where?: FileBlobWhereInput
+  }
+
+  /**
    * File.folder
    */
   export type File$folderArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5533,6 +5650,1069 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: FileInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FileBlob
+   */
+
+  export type AggregateFileBlob = {
+    _count: FileBlobCountAggregateOutputType | null
+    _min: FileBlobMinAggregateOutputType | null
+    _max: FileBlobMaxAggregateOutputType | null
+  }
+
+  export type FileBlobMinAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    data: Bytes | null
+    mimeType: string | null
+    createdAt: Date | null
+  }
+
+  export type FileBlobMaxAggregateOutputType = {
+    id: string | null
+    fileId: string | null
+    data: Bytes | null
+    mimeType: string | null
+    createdAt: Date | null
+  }
+
+  export type FileBlobCountAggregateOutputType = {
+    id: number
+    fileId: number
+    data: number
+    mimeType: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type FileBlobMinAggregateInputType = {
+    id?: true
+    fileId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+  }
+
+  export type FileBlobMaxAggregateInputType = {
+    id?: true
+    fileId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+  }
+
+  export type FileBlobCountAggregateInputType = {
+    id?: true
+    fileId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type FileBlobAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileBlob to aggregate.
+     */
+    where?: FileBlobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileBlobs to fetch.
+     */
+    orderBy?: FileBlobOrderByWithRelationInput | FileBlobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FileBlobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileBlobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileBlobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FileBlobs
+    **/
+    _count?: true | FileBlobCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FileBlobMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FileBlobMaxAggregateInputType
+  }
+
+  export type GetFileBlobAggregateType<T extends FileBlobAggregateArgs> = {
+        [P in keyof T & keyof AggregateFileBlob]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFileBlob[P]>
+      : GetScalarType<T[P], AggregateFileBlob[P]>
+  }
+
+
+
+
+  export type FileBlobGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileBlobWhereInput
+    orderBy?: FileBlobOrderByWithAggregationInput | FileBlobOrderByWithAggregationInput[]
+    by: FileBlobScalarFieldEnum[] | FileBlobScalarFieldEnum
+    having?: FileBlobScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FileBlobCountAggregateInputType | true
+    _min?: FileBlobMinAggregateInputType
+    _max?: FileBlobMaxAggregateInputType
+  }
+
+  export type FileBlobGroupByOutputType = {
+    id: string
+    fileId: string
+    data: Bytes
+    mimeType: string
+    createdAt: Date
+    _count: FileBlobCountAggregateOutputType | null
+    _min: FileBlobMinAggregateOutputType | null
+    _max: FileBlobMaxAggregateOutputType | null
+  }
+
+  type GetFileBlobGroupByPayload<T extends FileBlobGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FileBlobGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FileBlobGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FileBlobGroupByOutputType[P]>
+            : GetScalarType<T[P], FileBlobGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FileBlobSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileBlob"]>
+
+  export type FileBlobSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileBlob"]>
+
+  export type FileBlobSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fileId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["fileBlob"]>
+
+  export type FileBlobSelectScalar = {
+    id?: boolean
+    fileId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+  }
+
+  export type FileBlobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fileId" | "data" | "mimeType" | "createdAt", ExtArgs["result"]["fileBlob"]>
+  export type FileBlobInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+  export type FileBlobIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+  export type FileBlobIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    file?: boolean | FileDefaultArgs<ExtArgs>
+  }
+
+  export type $FileBlobPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FileBlob"
+    objects: {
+      file: Prisma.$FilePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      fileId: string
+      data: Prisma.Bytes
+      mimeType: string
+      createdAt: Date
+    }, ExtArgs["result"]["fileBlob"]>
+    composites: {}
+  }
+
+  type FileBlobGetPayload<S extends boolean | null | undefined | FileBlobDefaultArgs> = $Result.GetResult<Prisma.$FileBlobPayload, S>
+
+  type FileBlobCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FileBlobFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FileBlobCountAggregateInputType | true
+    }
+
+  export interface FileBlobDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FileBlob'], meta: { name: 'FileBlob' } }
+    /**
+     * Find zero or one FileBlob that matches the filter.
+     * @param {FileBlobFindUniqueArgs} args - Arguments to find a FileBlob
+     * @example
+     * // Get one FileBlob
+     * const fileBlob = await prisma.fileBlob.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FileBlobFindUniqueArgs>(args: SelectSubset<T, FileBlobFindUniqueArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FileBlob that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FileBlobFindUniqueOrThrowArgs} args - Arguments to find a FileBlob
+     * @example
+     * // Get one FileBlob
+     * const fileBlob = await prisma.fileBlob.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FileBlobFindUniqueOrThrowArgs>(args: SelectSubset<T, FileBlobFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileBlob that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobFindFirstArgs} args - Arguments to find a FileBlob
+     * @example
+     * // Get one FileBlob
+     * const fileBlob = await prisma.fileBlob.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FileBlobFindFirstArgs>(args?: SelectSubset<T, FileBlobFindFirstArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FileBlob that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobFindFirstOrThrowArgs} args - Arguments to find a FileBlob
+     * @example
+     * // Get one FileBlob
+     * const fileBlob = await prisma.fileBlob.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FileBlobFindFirstOrThrowArgs>(args?: SelectSubset<T, FileBlobFindFirstOrThrowArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FileBlobs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FileBlobs
+     * const fileBlobs = await prisma.fileBlob.findMany()
+     * 
+     * // Get first 10 FileBlobs
+     * const fileBlobs = await prisma.fileBlob.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fileBlobWithIdOnly = await prisma.fileBlob.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FileBlobFindManyArgs>(args?: SelectSubset<T, FileBlobFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FileBlob.
+     * @param {FileBlobCreateArgs} args - Arguments to create a FileBlob.
+     * @example
+     * // Create one FileBlob
+     * const FileBlob = await prisma.fileBlob.create({
+     *   data: {
+     *     // ... data to create a FileBlob
+     *   }
+     * })
+     * 
+     */
+    create<T extends FileBlobCreateArgs>(args: SelectSubset<T, FileBlobCreateArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FileBlobs.
+     * @param {FileBlobCreateManyArgs} args - Arguments to create many FileBlobs.
+     * @example
+     * // Create many FileBlobs
+     * const fileBlob = await prisma.fileBlob.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FileBlobCreateManyArgs>(args?: SelectSubset<T, FileBlobCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FileBlobs and returns the data saved in the database.
+     * @param {FileBlobCreateManyAndReturnArgs} args - Arguments to create many FileBlobs.
+     * @example
+     * // Create many FileBlobs
+     * const fileBlob = await prisma.fileBlob.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FileBlobs and only return the `id`
+     * const fileBlobWithIdOnly = await prisma.fileBlob.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FileBlobCreateManyAndReturnArgs>(args?: SelectSubset<T, FileBlobCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FileBlob.
+     * @param {FileBlobDeleteArgs} args - Arguments to delete one FileBlob.
+     * @example
+     * // Delete one FileBlob
+     * const FileBlob = await prisma.fileBlob.delete({
+     *   where: {
+     *     // ... filter to delete one FileBlob
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FileBlobDeleteArgs>(args: SelectSubset<T, FileBlobDeleteArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FileBlob.
+     * @param {FileBlobUpdateArgs} args - Arguments to update one FileBlob.
+     * @example
+     * // Update one FileBlob
+     * const fileBlob = await prisma.fileBlob.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FileBlobUpdateArgs>(args: SelectSubset<T, FileBlobUpdateArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FileBlobs.
+     * @param {FileBlobDeleteManyArgs} args - Arguments to filter FileBlobs to delete.
+     * @example
+     * // Delete a few FileBlobs
+     * const { count } = await prisma.fileBlob.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FileBlobDeleteManyArgs>(args?: SelectSubset<T, FileBlobDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileBlobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FileBlobs
+     * const fileBlob = await prisma.fileBlob.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FileBlobUpdateManyArgs>(args: SelectSubset<T, FileBlobUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileBlobs and returns the data updated in the database.
+     * @param {FileBlobUpdateManyAndReturnArgs} args - Arguments to update many FileBlobs.
+     * @example
+     * // Update many FileBlobs
+     * const fileBlob = await prisma.fileBlob.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileBlobs and only return the `id`
+     * const fileBlobWithIdOnly = await prisma.fileBlob.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileBlobUpdateManyAndReturnArgs>(args: SelectSubset<T, FileBlobUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FileBlob.
+     * @param {FileBlobUpsertArgs} args - Arguments to update or create a FileBlob.
+     * @example
+     * // Update or create a FileBlob
+     * const fileBlob = await prisma.fileBlob.upsert({
+     *   create: {
+     *     // ... data to create a FileBlob
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FileBlob we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FileBlobUpsertArgs>(args: SelectSubset<T, FileBlobUpsertArgs<ExtArgs>>): Prisma__FileBlobClient<$Result.GetResult<Prisma.$FileBlobPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FileBlobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobCountArgs} args - Arguments to filter FileBlobs to count.
+     * @example
+     * // Count the number of FileBlobs
+     * const count = await prisma.fileBlob.count({
+     *   where: {
+     *     // ... the filter for the FileBlobs we want to count
+     *   }
+     * })
+    **/
+    count<T extends FileBlobCountArgs>(
+      args?: Subset<T, FileBlobCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FileBlobCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FileBlob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FileBlobAggregateArgs>(args: Subset<T, FileBlobAggregateArgs>): Prisma.PrismaPromise<GetFileBlobAggregateType<T>>
+
+    /**
+     * Group by FileBlob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FileBlobGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FileBlobGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FileBlobGroupByArgs['orderBy'] }
+        : { orderBy?: FileBlobGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FileBlobGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFileBlobGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FileBlob model
+   */
+  readonly fields: FileBlobFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FileBlob.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FileBlobClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    file<T extends FileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FileDefaultArgs<ExtArgs>>): Prisma__FileClient<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FileBlob model
+   */
+  interface FileBlobFieldRefs {
+    readonly id: FieldRef<"FileBlob", 'String'>
+    readonly fileId: FieldRef<"FileBlob", 'String'>
+    readonly data: FieldRef<"FileBlob", 'Bytes'>
+    readonly mimeType: FieldRef<"FileBlob", 'String'>
+    readonly createdAt: FieldRef<"FileBlob", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FileBlob findUnique
+   */
+  export type FileBlobFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter, which FileBlob to fetch.
+     */
+    where: FileBlobWhereUniqueInput
+  }
+
+  /**
+   * FileBlob findUniqueOrThrow
+   */
+  export type FileBlobFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter, which FileBlob to fetch.
+     */
+    where: FileBlobWhereUniqueInput
+  }
+
+  /**
+   * FileBlob findFirst
+   */
+  export type FileBlobFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter, which FileBlob to fetch.
+     */
+    where?: FileBlobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileBlobs to fetch.
+     */
+    orderBy?: FileBlobOrderByWithRelationInput | FileBlobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileBlobs.
+     */
+    cursor?: FileBlobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileBlobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileBlobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileBlobs.
+     */
+    distinct?: FileBlobScalarFieldEnum | FileBlobScalarFieldEnum[]
+  }
+
+  /**
+   * FileBlob findFirstOrThrow
+   */
+  export type FileBlobFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter, which FileBlob to fetch.
+     */
+    where?: FileBlobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileBlobs to fetch.
+     */
+    orderBy?: FileBlobOrderByWithRelationInput | FileBlobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FileBlobs.
+     */
+    cursor?: FileBlobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileBlobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileBlobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileBlobs.
+     */
+    distinct?: FileBlobScalarFieldEnum | FileBlobScalarFieldEnum[]
+  }
+
+  /**
+   * FileBlob findMany
+   */
+  export type FileBlobFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter, which FileBlobs to fetch.
+     */
+    where?: FileBlobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FileBlobs to fetch.
+     */
+    orderBy?: FileBlobOrderByWithRelationInput | FileBlobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FileBlobs.
+     */
+    cursor?: FileBlobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FileBlobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FileBlobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FileBlobs.
+     */
+    distinct?: FileBlobScalarFieldEnum | FileBlobScalarFieldEnum[]
+  }
+
+  /**
+   * FileBlob create
+   */
+  export type FileBlobCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FileBlob.
+     */
+    data: XOR<FileBlobCreateInput, FileBlobUncheckedCreateInput>
+  }
+
+  /**
+   * FileBlob createMany
+   */
+  export type FileBlobCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FileBlobs.
+     */
+    data: FileBlobCreateManyInput | FileBlobCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FileBlob createManyAndReturn
+   */
+  export type FileBlobCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * The data used to create many FileBlobs.
+     */
+    data: FileBlobCreateManyInput | FileBlobCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileBlob update
+   */
+  export type FileBlobUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FileBlob.
+     */
+    data: XOR<FileBlobUpdateInput, FileBlobUncheckedUpdateInput>
+    /**
+     * Choose, which FileBlob to update.
+     */
+    where: FileBlobWhereUniqueInput
+  }
+
+  /**
+   * FileBlob updateMany
+   */
+  export type FileBlobUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FileBlobs.
+     */
+    data: XOR<FileBlobUpdateManyMutationInput, FileBlobUncheckedUpdateManyInput>
+    /**
+     * Filter which FileBlobs to update
+     */
+    where?: FileBlobWhereInput
+    /**
+     * Limit how many FileBlobs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileBlob updateManyAndReturn
+   */
+  export type FileBlobUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * The data used to update FileBlobs.
+     */
+    data: XOR<FileBlobUpdateManyMutationInput, FileBlobUncheckedUpdateManyInput>
+    /**
+     * Filter which FileBlobs to update
+     */
+    where?: FileBlobWhereInput
+    /**
+     * Limit how many FileBlobs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FileBlob upsert
+   */
+  export type FileBlobUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FileBlob to update in case it exists.
+     */
+    where: FileBlobWhereUniqueInput
+    /**
+     * In case the FileBlob found by the `where` argument doesn't exist, create a new FileBlob with this data.
+     */
+    create: XOR<FileBlobCreateInput, FileBlobUncheckedCreateInput>
+    /**
+     * In case the FileBlob was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FileBlobUpdateInput, FileBlobUncheckedUpdateInput>
+  }
+
+  /**
+   * FileBlob delete
+   */
+  export type FileBlobDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
+    /**
+     * Filter which FileBlob to delete.
+     */
+    where: FileBlobWhereUniqueInput
+  }
+
+  /**
+   * FileBlob deleteMany
+   */
+  export type FileBlobDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FileBlobs to delete
+     */
+    where?: FileBlobWhereInput
+    /**
+     * Limit how many FileBlobs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileBlob without action
+   */
+  export type FileBlobDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileBlob
+     */
+    select?: FileBlobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileBlob
+     */
+    omit?: FileBlobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileBlobInclude<ExtArgs> | null
   }
 
 
@@ -10916,6 +12096,17 @@ export namespace Prisma {
   export type FileScalarFieldEnum = (typeof FileScalarFieldEnum)[keyof typeof FileScalarFieldEnum]
 
 
+  export const FileBlobScalarFieldEnum: {
+    id: 'id',
+    fileId: 'fileId',
+    data: 'data',
+    mimeType: 'mimeType',
+    createdAt: 'createdAt'
+  };
+
+  export type FileBlobScalarFieldEnum = (typeof FileBlobScalarFieldEnum)[keyof typeof FileBlobScalarFieldEnum]
+
+
   export const DocumentChunkScalarFieldEnum: {
     id: 'id',
     fileId: 'fileId',
@@ -11151,6 +12342,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes'
+   */
+  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes[]'
+   */
+  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -11404,7 +12609,7 @@ export namespace Prisma {
     name?: StringFilter<"File"> | string
     type?: StringFilter<"File"> | string
     sizeBytes?: BigIntFilter<"File"> | bigint | number
-    path?: StringFilter<"File"> | string
+    path?: StringNullableFilter<"File"> | string | null
     shared?: BoolFilter<"File"> | boolean
     accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
@@ -11422,6 +12627,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageListRelationFilter
     chunks?: DocumentChunkListRelationFilter
     documentMetadata?: XOR<DocumentMetadataNullableScalarRelationFilter, DocumentMetadataWhereInput> | null
+    blob?: XOR<FileBlobNullableScalarRelationFilter, FileBlobWhereInput> | null
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -11431,7 +12637,7 @@ export namespace Prisma {
     name?: SortOrder
     type?: SortOrder
     sizeBytes?: SortOrder
-    path?: SortOrder
+    path?: SortOrderInput | SortOrder
     shared?: SortOrder
     accessLevel?: SortOrder
     ownerId?: SortOrder
@@ -11449,6 +12655,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageOrderByRelationAggregateInput
     chunks?: DocumentChunkOrderByRelationAggregateInput
     documentMetadata?: DocumentMetadataOrderByWithRelationInput
+    blob?: FileBlobOrderByWithRelationInput
     folder?: FolderOrderByWithRelationInput
     owner?: UserOrderByWithRelationInput
   }
@@ -11461,7 +12668,7 @@ export namespace Prisma {
     name?: StringFilter<"File"> | string
     type?: StringFilter<"File"> | string
     sizeBytes?: BigIntFilter<"File"> | bigint | number
-    path?: StringFilter<"File"> | string
+    path?: StringNullableFilter<"File"> | string | null
     shared?: BoolFilter<"File"> | boolean
     accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
@@ -11479,6 +12686,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageListRelationFilter
     chunks?: DocumentChunkListRelationFilter
     documentMetadata?: XOR<DocumentMetadataNullableScalarRelationFilter, DocumentMetadataWhereInput> | null
+    blob?: XOR<FileBlobNullableScalarRelationFilter, FileBlobWhereInput> | null
     folder?: XOR<FolderNullableScalarRelationFilter, FolderWhereInput> | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -11488,7 +12696,7 @@ export namespace Prisma {
     name?: SortOrder
     type?: SortOrder
     sizeBytes?: SortOrder
-    path?: SortOrder
+    path?: SortOrderInput | SortOrder
     shared?: SortOrder
     accessLevel?: SortOrder
     ownerId?: SortOrder
@@ -11518,7 +12726,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"File"> | string
     type?: StringWithAggregatesFilter<"File"> | string
     sizeBytes?: BigIntWithAggregatesFilter<"File"> | bigint | number
-    path?: StringWithAggregatesFilter<"File"> | string
+    path?: StringNullableWithAggregatesFilter<"File"> | string | null
     shared?: BoolWithAggregatesFilter<"File"> | boolean
     accessLevel?: EnumAccessLevelWithAggregatesFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringWithAggregatesFilter<"File"> | string
@@ -11533,6 +12741,61 @@ export namespace Prisma {
     embeddingProvider?: EnumAiProviderNullableWithAggregatesFilter<"File"> | $Enums.AiProvider | null
     isScanned?: BoolWithAggregatesFilter<"File"> | boolean
     ocrEngineUsed?: StringNullableWithAggregatesFilter<"File"> | string | null
+  }
+
+  export type FileBlobWhereInput = {
+    AND?: FileBlobWhereInput | FileBlobWhereInput[]
+    OR?: FileBlobWhereInput[]
+    NOT?: FileBlobWhereInput | FileBlobWhereInput[]
+    id?: StringFilter<"FileBlob"> | string
+    fileId?: StringFilter<"FileBlob"> | string
+    data?: BytesFilter<"FileBlob"> | Bytes
+    mimeType?: StringFilter<"FileBlob"> | string
+    createdAt?: DateTimeFilter<"FileBlob"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+  }
+
+  export type FileBlobOrderByWithRelationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+    file?: FileOrderByWithRelationInput
+  }
+
+  export type FileBlobWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    fileId?: string
+    AND?: FileBlobWhereInput | FileBlobWhereInput[]
+    OR?: FileBlobWhereInput[]
+    NOT?: FileBlobWhereInput | FileBlobWhereInput[]
+    data?: BytesFilter<"FileBlob"> | Bytes
+    mimeType?: StringFilter<"FileBlob"> | string
+    createdAt?: DateTimeFilter<"FileBlob"> | Date | string
+    file?: XOR<FileScalarRelationFilter, FileWhereInput>
+  }, "id" | "fileId">
+
+  export type FileBlobOrderByWithAggregationInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+    _count?: FileBlobCountOrderByAggregateInput
+    _max?: FileBlobMaxOrderByAggregateInput
+    _min?: FileBlobMinOrderByAggregateInput
+  }
+
+  export type FileBlobScalarWhereWithAggregatesInput = {
+    AND?: FileBlobScalarWhereWithAggregatesInput | FileBlobScalarWhereWithAggregatesInput[]
+    OR?: FileBlobScalarWhereWithAggregatesInput[]
+    NOT?: FileBlobScalarWhereWithAggregatesInput | FileBlobScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FileBlob"> | string
+    fileId?: StringWithAggregatesFilter<"FileBlob"> | string
+    data?: BytesWithAggregatesFilter<"FileBlob"> | Bytes
+    mimeType?: StringWithAggregatesFilter<"FileBlob"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FileBlob"> | Date | string
   }
 
   export type DocumentChunkWhereInput = {
@@ -12100,7 +13363,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -12116,6 +13379,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -12125,7 +13389,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -12143,6 +13407,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileUpdateInput = {
@@ -12150,7 +13415,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12166,6 +13431,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -12175,7 +13441,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -12193,6 +13459,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileCreateManyInput = {
@@ -12200,7 +13467,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -12222,7 +13489,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12242,7 +13509,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -12257,6 +13524,61 @@ export namespace Prisma {
     embeddingProvider?: NullableEnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider | null
     isScanned?: BoolFieldUpdateOperationsInput | boolean
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FileBlobCreateInput = {
+    id?: string
+    data: Bytes
+    mimeType: string
+    createdAt?: Date | string
+    file: FileCreateNestedOneWithoutBlobInput
+  }
+
+  export type FileBlobUncheckedCreateInput = {
+    id?: string
+    fileId: string
+    data: Bytes
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type FileBlobUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    file?: FileUpdateOneRequiredWithoutBlobNestedInput
+  }
+
+  export type FileBlobUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileBlobCreateManyInput = {
+    id?: string
+    fileId: string
+    data: Bytes
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type FileBlobUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileBlobUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type DocumentChunkUpdateInput = {
@@ -12946,6 +14268,11 @@ export namespace Prisma {
     isNot?: DocumentMetadataWhereInput | null
   }
 
+  export type FileBlobNullableScalarRelationFilter = {
+    is?: FileBlobWhereInput | null
+    isNot?: FileBlobWhereInput | null
+  }
+
   export type ChatMessageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -13080,6 +14407,52 @@ export namespace Prisma {
     _max?: NestedEnumAiProviderNullableFilter<$PrismaModel>
   }
 
+  export type BytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
+  export type FileScalarRelationFilter = {
+    is?: FileWhereInput
+    isNot?: FileWhereInput
+  }
+
+  export type FileBlobCountOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FileBlobMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type FileBlobMinOrderByAggregateInput = {
+    id?: SortOrder
+    fileId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
   export type IntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -13089,11 +14462,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type FileScalarRelationFilter = {
-    is?: FileWhereInput
-    isNot?: FileWhereInput
   }
 
   export type DocumentChunkCountOrderByAggregateInput = {
@@ -13702,6 +15070,12 @@ export namespace Prisma {
     connect?: DocumentMetadataWhereUniqueInput
   }
 
+  export type FileBlobCreateNestedOneWithoutFileInput = {
+    create?: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+    connectOrCreate?: FileBlobCreateOrConnectWithoutFileInput
+    connect?: FileBlobWhereUniqueInput
+  }
+
   export type FolderCreateNestedOneWithoutFilesInput = {
     create?: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
     connectOrCreate?: FolderCreateOrConnectWithoutFilesInput
@@ -13729,6 +15103,12 @@ export namespace Prisma {
     create?: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
     connectOrCreate?: DocumentMetadataCreateOrConnectWithoutFileInput
     connect?: DocumentMetadataWhereUniqueInput
+  }
+
+  export type FileBlobUncheckedCreateNestedOneWithoutFileInput = {
+    create?: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+    connectOrCreate?: FileBlobCreateOrConnectWithoutFileInput
+    connect?: FileBlobWhereUniqueInput
   }
 
   export type EnumProcessingStatusFieldUpdateOperationsInput = {
@@ -13785,6 +15165,16 @@ export namespace Prisma {
     update?: XOR<XOR<DocumentMetadataUpdateToOneWithWhereWithoutFileInput, DocumentMetadataUpdateWithoutFileInput>, DocumentMetadataUncheckedUpdateWithoutFileInput>
   }
 
+  export type FileBlobUpdateOneWithoutFileNestedInput = {
+    create?: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+    connectOrCreate?: FileBlobCreateOrConnectWithoutFileInput
+    upsert?: FileBlobUpsertWithoutFileInput
+    disconnect?: FileBlobWhereInput | boolean
+    delete?: FileBlobWhereInput | boolean
+    connect?: FileBlobWhereUniqueInput
+    update?: XOR<XOR<FileBlobUpdateToOneWithWhereWithoutFileInput, FileBlobUpdateWithoutFileInput>, FileBlobUncheckedUpdateWithoutFileInput>
+  }
+
   export type FolderUpdateOneWithoutFilesNestedInput = {
     create?: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
     connectOrCreate?: FolderCreateOrConnectWithoutFilesInput
@@ -13835,6 +15225,34 @@ export namespace Prisma {
     delete?: DocumentMetadataWhereInput | boolean
     connect?: DocumentMetadataWhereUniqueInput
     update?: XOR<XOR<DocumentMetadataUpdateToOneWithWhereWithoutFileInput, DocumentMetadataUpdateWithoutFileInput>, DocumentMetadataUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileBlobUncheckedUpdateOneWithoutFileNestedInput = {
+    create?: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+    connectOrCreate?: FileBlobCreateOrConnectWithoutFileInput
+    upsert?: FileBlobUpsertWithoutFileInput
+    disconnect?: FileBlobWhereInput | boolean
+    delete?: FileBlobWhereInput | boolean
+    connect?: FileBlobWhereUniqueInput
+    update?: XOR<XOR<FileBlobUpdateToOneWithWhereWithoutFileInput, FileBlobUpdateWithoutFileInput>, FileBlobUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileCreateNestedOneWithoutBlobInput = {
+    create?: XOR<FileCreateWithoutBlobInput, FileUncheckedCreateWithoutBlobInput>
+    connectOrCreate?: FileCreateOrConnectWithoutBlobInput
+    connect?: FileWhereUniqueInput
+  }
+
+  export type BytesFieldUpdateOperationsInput = {
+    set?: Bytes
+  }
+
+  export type FileUpdateOneRequiredWithoutBlobNestedInput = {
+    create?: XOR<FileCreateWithoutBlobInput, FileUncheckedCreateWithoutBlobInput>
+    connectOrCreate?: FileCreateOrConnectWithoutBlobInput
+    upsert?: FileUpsertWithoutBlobInput
+    connect?: FileWhereUniqueInput
+    update?: XOR<XOR<FileUpdateToOneWithWhereWithoutBlobInput, FileUpdateWithoutBlobInput>, FileUncheckedUpdateWithoutBlobInput>
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -14261,6 +15679,23 @@ export namespace Prisma {
     _max?: NestedEnumAiProviderNullableFilter<$PrismaModel>
   }
 
+  export type NestedBytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
+  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -14383,7 +15818,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -14399,6 +15834,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
   }
 
@@ -14407,7 +15843,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     folderId?: string | null
@@ -14424,6 +15860,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutOwnerInput = {
@@ -14494,7 +15931,7 @@ export namespace Prisma {
     name?: StringFilter<"File"> | string
     type?: StringFilter<"File"> | string
     sizeBytes?: BigIntFilter<"File"> | bigint | number
-    path?: StringFilter<"File"> | string
+    path?: StringNullableFilter<"File"> | string | null
     shared?: BoolFilter<"File"> | boolean
     accessLevel?: EnumAccessLevelFilter<"File"> | $Enums.AccessLevel
     ownerId?: StringFilter<"File"> | string
@@ -14546,7 +15983,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -14562,6 +15999,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
 
@@ -14570,7 +16008,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -14587,6 +16025,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutFolderInput = {
@@ -14866,6 +16305,25 @@ export namespace Prisma {
     create: XOR<DocumentMetadataCreateWithoutFileInput, DocumentMetadataUncheckedCreateWithoutFileInput>
   }
 
+  export type FileBlobCreateWithoutFileInput = {
+    id?: string
+    data: Bytes
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type FileBlobUncheckedCreateWithoutFileInput = {
+    id?: string
+    data: Bytes
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type FileBlobCreateOrConnectWithoutFileInput = {
+    where: FileBlobWhereUniqueInput
+    create: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+  }
+
   export type FolderCreateWithoutFilesInput = {
     id?: string
     name: string
@@ -15021,6 +16479,31 @@ export namespace Prisma {
     rawJson?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type FileBlobUpsertWithoutFileInput = {
+    update: XOR<FileBlobUpdateWithoutFileInput, FileBlobUncheckedUpdateWithoutFileInput>
+    create: XOR<FileBlobCreateWithoutFileInput, FileBlobUncheckedCreateWithoutFileInput>
+    where?: FileBlobWhereInput
+  }
+
+  export type FileBlobUpdateToOneWithWhereWithoutFileInput = {
+    where?: FileBlobWhereInput
+    data: XOR<FileBlobUpdateWithoutFileInput, FileBlobUncheckedUpdateWithoutFileInput>
+  }
+
+  export type FileBlobUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileBlobUncheckedUpdateWithoutFileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FolderUpsertWithoutFilesInput = {
     update: XOR<FolderUpdateWithoutFilesInput, FolderUncheckedUpdateWithoutFilesInput>
     create: XOR<FolderCreateWithoutFilesInput, FolderUncheckedCreateWithoutFilesInput>
@@ -15097,12 +16580,128 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
+  export type FileCreateWithoutBlobInput = {
+    id?: string
+    name: string
+    type: string
+    sizeBytes: bigint | number
+    path?: string | null
+    shared?: boolean
+    accessLevel?: $Enums.AccessLevel
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    summary?: string | null
+    processedAt?: Date | string | null
+    chunkCount?: number
+    embeddingProvider?: $Enums.AiProvider | null
+    isScanned?: boolean
+    ocrEngineUsed?: string | null
+    chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
+    chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    folder?: FolderCreateNestedOneWithoutFilesInput
+    owner: UserCreateNestedOneWithoutFilesInput
+  }
+
+  export type FileUncheckedCreateWithoutBlobInput = {
+    id?: string
+    name: string
+    type: string
+    sizeBytes: bigint | number
+    path?: string | null
+    shared?: boolean
+    accessLevel?: $Enums.AccessLevel
+    ownerId: string
+    folderId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    summary?: string | null
+    processedAt?: Date | string | null
+    chunkCount?: number
+    embeddingProvider?: $Enums.AiProvider | null
+    isScanned?: boolean
+    ocrEngineUsed?: string | null
+    chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
+    chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+  }
+
+  export type FileCreateOrConnectWithoutBlobInput = {
+    where: FileWhereUniqueInput
+    create: XOR<FileCreateWithoutBlobInput, FileUncheckedCreateWithoutBlobInput>
+  }
+
+  export type FileUpsertWithoutBlobInput = {
+    update: XOR<FileUpdateWithoutBlobInput, FileUncheckedUpdateWithoutBlobInput>
+    create: XOR<FileCreateWithoutBlobInput, FileUncheckedCreateWithoutBlobInput>
+    where?: FileWhereInput
+  }
+
+  export type FileUpdateToOneWithWhereWithoutBlobInput = {
+    where?: FileWhereInput
+    data: XOR<FileUpdateWithoutBlobInput, FileUncheckedUpdateWithoutBlobInput>
+  }
+
+  export type FileUpdateWithoutBlobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
+    path?: NullableStringFieldUpdateOperationsInput | string | null
+    shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chunkCount?: IntFieldUpdateOperationsInput | number
+    embeddingProvider?: NullableEnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider | null
+    isScanned?: BoolFieldUpdateOperationsInput | boolean
+    ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
+    chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    folder?: FolderUpdateOneWithoutFilesNestedInput
+    owner?: UserUpdateOneRequiredWithoutFilesNestedInput
+  }
+
+  export type FileUncheckedUpdateWithoutBlobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
+    path?: NullableStringFieldUpdateOperationsInput | string | null
+    shared?: BoolFieldUpdateOperationsInput | boolean
+    accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
+    ownerId?: StringFieldUpdateOperationsInput | string
+    folderId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chunkCount?: IntFieldUpdateOperationsInput | number
+    embeddingProvider?: NullableEnumAiProviderFieldUpdateOperationsInput | $Enums.AiProvider | null
+    isScanned?: BoolFieldUpdateOperationsInput | boolean
+    ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
+    chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+  }
+
   export type FileCreateWithoutChunksInput = {
     id?: string
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -15117,6 +16716,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -15126,7 +16726,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -15143,6 +16743,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutChunksInput = {
@@ -15166,7 +16767,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15181,6 +16782,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -15190,7 +16792,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -15207,6 +16809,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type ChatMessageCreateWithoutSessionInput = {
@@ -15281,7 +16884,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -15296,6 +16899,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataCreateNestedOneWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -15305,7 +16909,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -15322,6 +16926,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
     documentMetadata?: DocumentMetadataUncheckedCreateNestedOneWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutChatMessagesInput = {
@@ -15374,7 +16979,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15389,6 +16994,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -15398,7 +17004,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -15415,6 +17021,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileCreateWithoutDocumentMetadataInput = {
@@ -15422,7 +17029,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     createdAt?: Date | string
@@ -15437,6 +17044,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkCreateNestedManyWithoutFileInput
+    blob?: FileBlobCreateNestedOneWithoutFileInput
     folder?: FolderCreateNestedOneWithoutFilesInput
     owner: UserCreateNestedOneWithoutFilesInput
   }
@@ -15446,7 +17054,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -15463,6 +17071,7 @@ export namespace Prisma {
     ocrEngineUsed?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutFileInput
     chunks?: DocumentChunkUncheckedCreateNestedManyWithoutFileInput
+    blob?: FileBlobUncheckedCreateNestedOneWithoutFileInput
   }
 
   export type FileCreateOrConnectWithoutDocumentMetadataInput = {
@@ -15486,7 +17095,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15501,6 +17110,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
@@ -15510,7 +17120,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -15527,6 +17137,7 @@ export namespace Prisma {
     ocrEngineUsed?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileCreateManyOwnerInput = {
@@ -15534,7 +17145,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     folderId?: string | null
@@ -15565,7 +17176,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15581,6 +17192,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     folder?: FolderUpdateOneWithoutFilesNestedInput
   }
 
@@ -15589,7 +17201,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15606,6 +17218,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileUncheckedUpdateManyWithoutOwnerInput = {
@@ -15613,7 +17226,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     folderId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15668,7 +17281,7 @@ export namespace Prisma {
     name: string
     type: string
     sizeBytes: bigint | number
-    path: string
+    path?: string | null
     shared?: boolean
     accessLevel?: $Enums.AccessLevel
     ownerId: string
@@ -15699,7 +17312,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15715,6 +17328,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUpdateOneWithoutFileNestedInput
     owner?: UserUpdateOneRequiredWithoutFilesNestedInput
   }
 
@@ -15723,7 +17337,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string
@@ -15740,6 +17354,7 @@ export namespace Prisma {
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutFileNestedInput
     chunks?: DocumentChunkUncheckedUpdateManyWithoutFileNestedInput
     documentMetadata?: DocumentMetadataUncheckedUpdateOneWithoutFileNestedInput
+    blob?: FileBlobUncheckedUpdateOneWithoutFileNestedInput
   }
 
   export type FileUncheckedUpdateManyWithoutFolderInput = {
@@ -15747,7 +17362,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     sizeBytes?: BigIntFieldUpdateOperationsInput | bigint | number
-    path?: StringFieldUpdateOperationsInput | string
+    path?: NullableStringFieldUpdateOperationsInput | string | null
     shared?: BoolFieldUpdateOperationsInput | boolean
     accessLevel?: EnumAccessLevelFieldUpdateOperationsInput | $Enums.AccessLevel
     ownerId?: StringFieldUpdateOperationsInput | string

@@ -167,6 +167,14 @@ exports.Prisma.FileScalarFieldEnum = {
   ocrEngineUsed: 'ocrEngineUsed'
 };
 
+exports.Prisma.FileBlobScalarFieldEnum = {
+  id: 'id',
+  fileId: 'fileId',
+  data: 'data',
+  mimeType: 'mimeType',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.DocumentChunkScalarFieldEnum = {
   id: 'id',
   fileId: 'fileId',
@@ -294,6 +302,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Folder: 'Folder',
   File: 'File',
+  FileBlob: 'FileBlob',
   DocumentChunk: 'DocumentChunk',
   ChatSession: 'ChatSession',
   ChatMessage: 'ChatMessage',

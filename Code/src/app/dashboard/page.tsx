@@ -732,7 +732,7 @@ function DashboardContent() {
                 name: uploaded.name,
                 type: normalizedType,
                 sizeBytes: uploaded.sizeBytes,
-                path: uploaded.path,
+                path: uploaded.path ?? `/api/files/${uploaded.id}/serve`,
                 updatedAt: uploaded.updatedAt,
                 owner: {
                   name: user?.fullName || user?.email || "You",
@@ -830,7 +830,8 @@ function DashboardContent() {
   const handleDownload = (file: FileItem) => {
     setToast(`Downloading ${file.name}…`);
     const anchor = document.createElement("a");
-    anchor.href = file.path;
+    // Use the auth-gated serve endpoint; for direct download, force Content-Disposition: attachment
+    anchor.href = `/api/files/${file.id}/serve?download=1`;
     anchor.download = file.name;
     document.body.appendChild(anchor);
     anchor.click();
@@ -1260,7 +1261,7 @@ function DashboardContent() {
             <div className="flex flex-1 items-center justify-center overflow-auto p-6 min-h-[300px] bg-slate-50 dark:bg-slate-950">
               {previewFile.type === "image" ? (
                 <img
-                  src={previewFile.path}
+                  src={`/api/files/${previewFile.id}/serve`}
                   alt={previewFile.name}
                   className="max-h-[60vh] max-w-full rounded-lg object-contain shadow-md"
                 />

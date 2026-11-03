@@ -197,7 +197,8 @@ export async function processPdfFile(fileId: string): Promise<void> {
 
   try {
     const settings = await getAiSettingsForUser(fileRecord.ownerId);
-    const extraction = await extractPdfPages(fileRecord.path);
+    // Pass fileId — ocrService now reads bytes from the FileBlob table (DB-native)
+    const extraction = await extractPdfPages(fileId);
     const pages = extraction.pages;
 
     if (pages.length === 0) {

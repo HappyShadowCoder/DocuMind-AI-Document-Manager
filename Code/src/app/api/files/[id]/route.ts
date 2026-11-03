@@ -1,12 +1,9 @@
 // app/api/files/[id]/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 import { prisma } from "@/lib/prisma";
 import { processPdfFile } from "@/lib/pdf-processing";
 import { verifyJwt } from "@/lib/auth";
-import { resolveStoredFilePath } from "@/lib/file-path";
 import { invalidateOnDocumentChange } from "@/lib/semantic-cache";
 
 // Helper function to safely serialize BigInt fields to numbers or strings
@@ -63,7 +60,13 @@ export async function GET(
 
     const safeFileRecord = sanitizeRecord(fileRecord);
 
-    return NextResponse.json({ file: safeFileRecord }, { status: 200 });
+    // Ensure consumers always get the auth-gated serve URL, not a raw filesystem path
+    const responseRecord = {
+      ...safeFileRecord,
+      path: `/api/files/${id}/serve`,
+    };
+
+    return NextResponse.json({ file: responseRecord }, { status: 200 });
   } catch (error: any) {
     console.error("=== EXPLICIT ROUTE ERROR ===");
     console.error(error);
@@ -178,21 +181,10 @@ export async function DELETE(
     // Capture folderId before deleting
     const folderId = fileRecord.folderId;
 
-    // 1. Delete physical file from disk (handles absolute or relative paths)
-    if (fileRecord.path) {
-      const absoluteFilePath = resolveStoredFilePath(fileRecord.path);
+    // FileBlob is deleted automatically by ON DELETE CASCADE from File.
+    // No fs.unlink needed — bytes live in PostgreSQL, not on disk.
 
-      try {
-        await fs.unlink(absoluteFilePath);
-      } catch (err: any) {
-        // Log warning if physical file was missing, but proceed with DB cleanup
-        if (err.code !== "ENOENT") {
-          console.warn(`Failed to delete physical file at ${absoluteFilePath}:`, err);
-        }
-      }
-    }
-
-    // 2. Execute explicit database transaction to clean up all related models
+    // Execute database transaction to clean up all related models
     await prisma.$transaction([
       // Delete related chat sessions (FILE-scoped)
       prisma.chatSession.deleteMany({
