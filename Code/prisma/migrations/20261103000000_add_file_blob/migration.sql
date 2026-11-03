@@ -18,3 +18,4 @@ CREATE TABLE "FileBlob" (
 
 -- 2. Make File.path optional (existing rows keep their values; new uploads set path = NULL)
 ALTER TABLE "File" ALTER COLUMN "path" DROP NOT NULL;
+

@@ -28,6 +28,7 @@ import {
     Scale,
     Hash,
     Zap,
+    Trash2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -133,6 +134,8 @@ function PdfChatContent() {
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+    const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+    const [isClearingAll, setIsClearingAll] = useState(false);
     const [input, setInput] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [activeMobileTab, setActiveMobileTab] = useState<"document" | "chat">("chat");
@@ -251,6 +254,49 @@ function PdfChatContent() {
                 }))
         );
     }, []);
+
+    const handleDeleteSession = useCallback(async (e: React.MouseEvent, sessionId: string) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this chat thread and its messages?")) return;
+        setDeletingSessionId(sessionId);
+        try {
+            const res = await fetch(`/api/files/${fileId}/sessions?sessionId=${sessionId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (res.ok) {
+                if (currentSessionId === sessionId) {
+                    setCurrentSessionId(null);
+                    setMessages([]);
+                }
+                await loadSessions();
+            }
+        } catch (err) {
+            console.error("Failed to delete chat session:", err);
+        } finally {
+            setDeletingSessionId(null);
+        }
+    }, [fileId, currentSessionId, loadSessions]);
+
+    const handleClearAllSessions = useCallback(async () => {
+        if (!window.confirm("Are you sure you want to delete all chat history for this document? This cannot be undone.")) return;
+        setIsClearingAll(true);
+        try {
+            const res = await fetch(`/api/files/${fileId}/sessions?all=true`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (res.ok) {
+                setCurrentSessionId(null);
+                setMessages([]);
+                await loadSessions();
+            }
+        } catch (err) {
+            console.error("Failed to delete all sessions:", err);
+        } finally {
+            setIsClearingAll(false);
+        }
+    }, [fileId, loadSessions]);
 
     const ensureProcessed = useCallback(
         async (meta: FileMeta) => {
@@ -746,30 +792,75 @@ function PdfChatContent() {
                                                 <p className="text-xs text-slate-500 dark:text-slate-400">Switch threads or start fresh</p>
                                             </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => loadSessions()}
-                                            className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
-                                        >
-                                            Refresh
-                                        </button>
+                                        <div className="flex items-center gap-1.5">
+                                            {sessions.length > 0 && (
+                                                <button
+                                                    type="button"
+                                                    disabled={isClearingAll}
+                                                    onClick={handleClearAllSessions}
+                                                    className="flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/50 px-2.5 py-2 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-500/20 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-900/30 disabled:opacity-50"
+                                                    title="Delete all chat history for this document"
+                                                >
+                                                    {isClearingAll ? (
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    )}
+                                                    <span className="hidden sm:inline">Clear all</span>
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => loadSessions()}
+                                                className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                            >
+                                                Refresh
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                         {sessions.length === 0 ? (
                                             <p className="text-xs text-slate-500 dark:text-slate-400">No prior chats yet.</p>
                                         ) : (
                                             sessions.map((session) => (
-                                                <button
+                                                <div
                                                     key={session.id}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setCurrentSessionId(session.id);
-                                                        void loadHistory(session.id);
-                                                    }}
-                                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${currentSessionId === session.id ? "bg-[#0052FF] text-white" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"}`}
+                                                    className={`group inline-flex items-center gap-1.5 rounded-full pl-3 pr-1.5 py-1 text-xs font-medium transition ${
+                                                        currentSessionId === session.id
+                                                            ? "bg-[#0052FF] text-white shadow-sm"
+                                                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                                                    }`}
                                                 >
-                                                    {session.title}
-                                                </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCurrentSessionId(session.id);
+                                                            void loadHistory(session.id);
+                                                        }}
+                                                        className="truncate text-left max-w-[130px] sm:max-w-[180px]"
+                                                        title={session.title}
+                                                    >
+                                                        {session.title}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        disabled={deletingSessionId === session.id}
+                                                        onClick={(e) => handleDeleteSession(e, session.id)}
+                                                        className={`flex h-4 w-4 items-center justify-center rounded-full transition ${
+                                                            currentSessionId === session.id
+                                                                ? "text-white/70 hover:bg-white/20 hover:text-white"
+                                                                : "text-slate-400 hover:bg-slate-200 hover:text-red-600 dark:hover:bg-slate-700 dark:hover:text-red-400"
+                                                        }`}
+                                                        title="Delete this chat thread"
+                                                        aria-label={`Delete chat thread: ${session.title}`}
+                                                    >
+                                                        {deletingSessionId === session.id ? (
+                                                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                                                        ) : (
+                                                            <X className="h-3 w-3" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             ))
                                         )}
                                     </div>

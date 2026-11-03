@@ -53,3 +53,64 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to rename session." }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: fileId } = await context.params;
+    if (!fileId) {
+      return NextResponse.json({ error: "Missing file id." }, { status: 400 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get("sessionId");
+    const deleteAll = searchParams.get("all") === "true";
+
+    if (deleteAll) {
+      // Delete all chat messages and sessions for this file
+      await prisma.$transaction([
+        prisma.chatMessage.deleteMany({
+          where: { fileId },
+        }),
+        prisma.chatSession.deleteMany({
+          where: { entityType: "FILE", entityId: fileId },
+        }),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        message: "All chat sessions deleted successfully.",
+      });
+    }
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: "Missing sessionId parameter or all=true flag." },
+        { status: 400 }
+      );
+    }
+
+    // Delete specific session and its messages
+    await prisma.$transaction([
+      prisma.chatMessage.deleteMany({
+        where: { sessionId },
+      }),
+      prisma.chatSession.deleteMany({
+        where: { id: sessionId, entityType: "FILE", entityId: fileId },
+      }),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      message: "Chat session deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Failed to delete chat session(s):", error);
+    return NextResponse.json(
+      { error: "Failed to delete chat session." },
+      { status: 500 }
+    );
+  }
+}

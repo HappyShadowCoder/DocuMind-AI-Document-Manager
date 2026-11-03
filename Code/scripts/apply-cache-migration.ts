@@ -53,3 +53,4 @@ main().catch((err) => {
   console.error("Failed to apply migration:", err);
   process.exit(1);
 });
+
