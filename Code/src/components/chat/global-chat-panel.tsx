@@ -867,11 +867,11 @@ export default function GlobalChatPanel({ user }: GlobalChatPanelProps) {
             <button
               type="button"
               onClick={() => setAiSettingsOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300"
-              title="Click to configure AI Engine (Ollama / OpenAI)"
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-300"
+              title="DocuMind Local AI Engine (100% Offline via Ollama)"
             >
-              <Cpu className="h-3.5 w-3.5" />
-              <span>{aiProvider === "openai" ? "OpenAI (Cloud)" : "Ollama (Offline)"}</span>
+              <Cpu className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Ollama (Offline)</span>
             </button>
 
             {user?.role === "admin" ? (

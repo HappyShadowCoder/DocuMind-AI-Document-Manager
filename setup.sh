@@ -113,12 +113,13 @@ if [ "$DB_READY" = true ]; then
   (cd Code && npm run db:seed || true)
 fi
 
-# 7. Check Optional Ollama AI Server
+# 7. Check Local Ollama AI Server (100% Offline)
 if curl -s http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
-  echo "[✓] Ollama local AI server is running on http://127.0.0.1:11434."
+  echo "[✓] Local Ollama AI server is active on http://127.0.0.1:11434."
 else
-  echo "[i] Note: Ollama is not detected on http://127.0.0.1:11434."
-  echo "    (You can use Ollama or configure an OpenAI API key in the DocuMind UI settings)."
+  echo "[!] Note: Ollama is not detected on http://127.0.0.1:11434."
+  echo "    Start Ollama on your machine with: ollama run llama3.1:8b"
+  echo "    And pull embeddings: ollama pull nomic-embed-text"
 fi
 
 echo ""

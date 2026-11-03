@@ -11,8 +11,8 @@
 //      similarity for semantically similar questions.
 //   3. Cache hits stream the stored answer back in chunks so the UI
 //      experience is identical to a real LLM response.
-//   4. The cache is scoped per AI provider (Ollama / OpenAI) so switching
-//      providers never returns an answer from the wrong model.
+//   4. The cache is scoped per model and document fingerprint to prevent
+//      stale or invalid cross-session leakage.
 //   5. Conversation-aware: callers pass recentTurns count; if ≥ 2 prior
 //      turns exist we skip the cache to avoid context-dependent confusions.
 

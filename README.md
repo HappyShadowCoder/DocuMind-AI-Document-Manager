@@ -19,7 +19,7 @@ Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL 16 + pgvector
 - **pgvector Cosine Search**: Employs an IVFFlat-indexed cosine similarity search (`vector_cosine_ops`) over 768-dimensional question embeddings with an adaptive `0.28` threshold.
 - **Dynamic Document Fingerprinting**: Cache entries are tagged with a SHA-256 fingerprint of the visible document set (`fileId:updatedAt`). Adding, editing, or deleting files automatically invalidates stale entries without race conditions.
 - **Fail-Open Resilience**: Cache lookup failures gracefully fall back to live AI generation — ensuring chat never throws a 500 error.
-- **Provider Isolation**: Caches Ollama and OpenAI answers separately under `aiProvider` to prevent cross-model leakage.
+- **Model Fingerprint Scoping**: Caches answers under local model parameters and document fingerprints to prevent stale or cross-model leakage.
 - **Persistent Cache Badges**: Responses retrieved from the cache permanently show the green **⚡ Semantic Cache Hit • Instant** badge, even across page reloads and session switches.
 - **Admin Management API**: Endpoints to monitor hit counts, inspect top cached questions, and execute automated cleanup (`/api/admin/cache`).
 
@@ -28,9 +28,9 @@ Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL 16 + pgvector
 - **Compact Thread Switcher**: Single-row modern header with a dedicated **`[+ New Chat]`** button and an interactive **Thread Selector Popover**.
 - **Thread History & Management**: View relative timestamps (*"Just now"*, *"10m ago"*, *"Yesterday"*), switch between threads instantly, delete individual chat threads, or **"Clear all"** history with one click.
 
-### 🤖 Dual AI Engine Support
-- **Local & Offline (Default)**: Powered by [Ollama](https://ollama.com/) with `llama3.1:8b` and `nomic-embed-text` (768 dimensions). Zero cloud dependency and fully private.
-- **Cloud (Opt-in)**: Powered by OpenAI with `gpt-4o-mini` and `text-embedding-3-small` (normalized to 768 dimensions).
+### 🤖 100% Offline Local AI Architecture
+- **Air-Gapped & Fully Private**: Powered locally by [Ollama](https://ollama.com/) with `llama3.1:8b` for reasoning and `nomic-embed-text` (768 dimensions) for vector search.
+- **Zero Cloud Exposure**: External cloud integrations (including OpenAI) are disabled. Documents, vectors, and chat prompts never leave your local hardware.
 - **Concurrency Limiter**: Admin-configurable active slot limiter that protects local hardware from resource exhaustion under multi-user load.
 
 ### 📜 FIR & Legal Document Intelligence
@@ -151,7 +151,7 @@ cd Code && npx tsx scripts/migrate-files-to-db.ts
 │   │   │   ├── chat/                   # Global chat panel, thinking block & stats card
 │   │   │   └── settings/               # AI engine settings modal
 │   │   ├── lib/
-│   │   │   ├── ai.ts                   # Unified Ollama / OpenAI embeddings & completions
+│   │   │   ├── ai.ts                   # 100% Offline Ollama embeddings & completions
 │   │   │   ├── chat-title.ts           # Smart semantic title generator
 │   │   │   ├── semantic-cache.ts       # Semantic caching engine & fingerprinting
 │   │   │   ├── pdf-processing.ts       # RAG retrieval, chunking & vector search
@@ -178,4 +178,3 @@ Adjust semantic cache behavior in `Code/.env`:
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama service endpoint |
 | `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | Local embedding model (768 dims) |
 | `OLLAMA_CHAT_MODEL` | `llama3.1:8b` | Local chat completion model |
-| `OPENAI_API_KEY` | *(optional)* | OpenAI API key for cloud engine |

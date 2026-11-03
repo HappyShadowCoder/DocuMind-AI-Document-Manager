@@ -1,20 +1,15 @@
 // lib/ai.ts
 //
-// Central place that talks to whichever AI engine the user has selected:
-//   - "ollama" (default, local, offline) — nomic-embed-text + llama3/mistral
-//   - "openai" (cloud, opt-in)           — text-embedding-3-small + gpt-4o-mini
-//
-// Both providers are normalized to the SAME embedding dimensionality (768) so
-// a single `vector(768)` column in Postgres/pgvector works for either engine.
-
-import { prisma } from "@/lib/prisma";
+// 100% Offline, Local-First AI Engine for DocuMind:
+// Powered exclusively by Ollama (nomic-embed-text for embeddings + llama3.1:8b for chat & analysis).
+// Zero cloud calls, zero external API keys, 100% private and air-gapped.
 
 export const EMBEDDING_DIM = 768;
 
 export type AiProviderName = "ollama" | "openai";
 
 export interface AiSettings {
-  provider: AiProviderName;
+  provider: "ollama";
   openAiApiKey?: string | null;
 }
 
@@ -27,50 +22,20 @@ const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
 const OLLAMA_EMBED_MODEL = process.env.OLLAMA_EMBED_MODEL || "nomic-embed-text";
 const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL || "llama3.1:8b";
 
-const OPENAI_EMBED_MODEL = process.env.OPENAI_EMBED_MODEL || "text-embedding-3-small";
-const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
-
 // ---------------------------------------------------------------------------
-// Settings resolution
+// Settings resolution (Offline Ollama only)
 // ---------------------------------------------------------------------------
 
 /**
- * Loads the given user's AI engine preference from the database and
- * validates it.
+ * Returns the offline local Ollama engine configuration.
+ * All external cloud integrations have been disabled for complete on-premise privacy.
  */
-export async function getAiSettingsForUser(userId: string): Promise<AiSettings> {
-  if (!userId) {
-    return { provider: "ollama", openAiApiKey: null };
-  }
-
-  try {
-    const user = (await prisma.user.findUnique({
-      where: { id: userId },
-    })) as Record<string, unknown> | null;
-
-    if (!user) {
-      return { provider: "ollama", openAiApiKey: null };
-    }
-
-    const aiProvider = (user.aiProvider as AiProviderName) || "ollama";
-    const openAiApiKey =
-      (user.openAiApiKey as string | null) || process.env.OPENAI_API_KEY || null;
-
-    if (aiProvider === "openai" && !openAiApiKey) {
-      throw new Error(
-        "Cloud (OpenAI) is selected in Settings but no OpenAI API key has been saved. Add a key in Settings or switch back to Offline (Ollama)."
-      );
-    }
-
-    return { provider: aiProvider, openAiApiKey };
-  } catch (err: any) {
-    if (err.message?.includes("OpenAI API key")) throw err;
-    return { provider: "ollama", openAiApiKey: null };
-  }
+export async function getAiSettingsForUser(_userId?: string): Promise<AiSettings> {
+  return { provider: "ollama", openAiApiKey: null };
 }
 
 // ---------------------------------------------------------------------------
-// Small concurrency limiter (no extra dependency)
+// Small concurrency limiter
 // ---------------------------------------------------------------------------
 
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
@@ -90,15 +55,11 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T,
 }
 
 // ---------------------------------------------------------------------------
-// Embeddings
+// Embeddings (Offline Local Ollama)
 // ---------------------------------------------------------------------------
 
-export async function embedTexts(texts: string[], settings: AiSettings): Promise<number[][]> {
+export async function embedTexts(texts: string[], _settings?: AiSettings): Promise<number[][]> {
   if (texts.length === 0) return [];
-
-  if (settings.provider === "openai") {
-    return embedWithOpenAI(texts, settings.openAiApiKey!);
-  }
   return embedWithOllama(texts);
 }
 
@@ -113,7 +74,7 @@ async function embedWithOllama(texts: string[]): Promise<number[][]> {
       });
     } catch (error: any) {
       throw new Error(
-        `Failed to connect to Ollama at ${OLLAMA_BASE_URL}: ${error?.message || "Connection refused"}. Make sure Ollama is running on your host machine.`
+        `Failed to connect to local Ollama at ${OLLAMA_BASE_URL}: ${error?.message || "Connection refused"}. Make sure Ollama is running locally (e.g. 'ollama run ${OLLAMA_CHAT_MODEL}').`
       );
     }
 
@@ -130,55 +91,16 @@ async function embedWithOllama(texts: string[]): Promise<number[][]> {
   });
 }
 
-async function embedWithOpenAI(texts: string[], apiKey: string): Promise<number[][]> {
-  const BATCH_SIZE = 96;
-  const batches: string[][] = [];
-  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    batches.push(texts.slice(i, i + BATCH_SIZE));
-  }
-
-  const results: number[][] = [];
-  for (const batch of batches) {
-    const res = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: OPENAI_EMBED_MODEL,
-        input: batch,
-        dimensions: EMBEDDING_DIM,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`OpenAI embeddings request failed (${res.status}): ${body || res.statusText}`);
-    }
-
-    const data = (await res.json()) as { data: { embedding: number[]; index: number }[] };
-    const ordered = [...data.data].sort((a, b) => a.index - b.index);
-    for (const item of ordered) results.push(item.embedding);
-  }
-
-  return results;
-}
-
 // ---------------------------------------------------------------------------
-// Chat completion (streaming)
+// Chat completion (Offline Local Ollama Streaming)
 // ---------------------------------------------------------------------------
 
 export async function* streamChatCompletion(
   messages: ChatTurn[],
-  settings: AiSettings,
+  _settings?: AiSettings,
   signal?: AbortSignal
 ): AsyncGenerator<string> {
-  if (settings.provider === "openai") {
-    yield* streamOpenAiChat(messages, settings.openAiApiKey!, signal);
-  } else {
-    yield* streamOllamaChat(messages, signal);
-  }
+  yield* streamOllamaChat(messages, signal);
 }
 
 async function* streamOllamaChat(messages: ChatTurn[], signal?: AbortSignal): AsyncGenerator<string> {
@@ -208,7 +130,7 @@ async function* streamOllamaChat(messages: ChatTurn[], signal?: AbortSignal): As
       return;
     }
     throw new Error(
-      `Failed to connect to Ollama at ${OLLAMA_BASE_URL}: ${error?.message || "Connection refused"}. Make sure Ollama is running on your host machine.`
+      `Failed to connect to local Ollama at ${OLLAMA_BASE_URL}: ${error?.message || "Connection refused"}. Make sure Ollama is running locally on your machine.`
     );
   }
 
@@ -283,100 +205,8 @@ async function* streamOllamaChat(messages: ChatTurn[], signal?: AbortSignal): As
   }
 }
 
-async function* streamOpenAiChat(
-  messages: ChatTurn[],
-  apiKey: string,
-  signal?: AbortSignal
-): AsyncGenerator<string> {
-  if (signal?.aborted) return;
-  let res: Response;
-  try {
-    res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      signal,
-      body: JSON.stringify({
-        model: OPENAI_CHAT_MODEL,
-        messages,
-        stream: true,
-        temperature: 0.2,
-      }),
-    });
-  } catch (error: any) {
-    if (signal?.aborted || error?.name === "AbortError") {
-      return;
-    }
-    throw error;
-  }
-
-  if (!res.ok || !res.body) {
-    const body = await res.text().catch(() => "");
-    let errorMsg = `OpenAI chat request failed (${res.status}): ${body || res.statusText}`;
-    try {
-      const parsed = JSON.parse(body);
-      if (parsed?.error?.message) {
-        errorMsg = `OpenAI error (${res.status}): ${parsed.error.message}`;
-      }
-    } catch {}
-    throw new Error(errorMsg);
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  try {
-    while (true) {
-      if (signal?.aborted) {
-        await reader.cancel().catch(() => {});
-        return;
-      }
-
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      let newlineIndex: number;
-      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-        if (signal?.aborted) {
-          await reader.cancel().catch(() => {});
-          return;
-        }
-
-        const line = buffer.slice(0, newlineIndex).trim();
-        buffer = buffer.slice(newlineIndex + 1);
-        if (!line.startsWith("data:")) continue;
-
-        const payload = line.slice(5).trim();
-        if (payload === "[DONE]") return;
-        if (!payload) continue;
-
-        try {
-          const parsed = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[] };
-          const delta = parsed.choices?.[0]?.delta?.content;
-          if (delta) yield delta;
-        } catch {
-          // Ignore malformed keep-alive lines.
-        }
-      }
-    }
-  } catch (err: any) {
-    if (signal?.aborted || err?.name === "AbortError") {
-      return;
-    }
-    throw err;
-  } finally {
-    try {
-      reader.releaseLock();
-    } catch {}
-  }
-}
-
 /** Convenience wrapper for non-streaming use (e.g. summarization). */
-export async function completeChat(messages: ChatTurn[], settings: AiSettings): Promise<string> {
+export async function completeChat(messages: ChatTurn[], settings?: AiSettings): Promise<string> {
   let full = "";
   for await (const delta of streamChatCompletion(messages, settings)) {
     full += delta;
