@@ -58,3 +58,4 @@ export function generateChatTitle(query: string): string {
   const lastSpace = truncated.lastIndexOf(" ");
   return (lastSpace > 24 ? truncated.slice(0, lastSpace) : truncated) + "…";
 }
+

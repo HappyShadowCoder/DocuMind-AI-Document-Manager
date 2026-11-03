@@ -141,12 +141,12 @@ export async function POST(
 
     let chatSession = requestedSessionId
       ? await prisma.chatSession.findFirst({
-          where: {
-            id: requestedSessionId,
-            entityType: "FILE",
-            entityId: fileId,
-          },
-        })
+        where: {
+          id: requestedSessionId,
+          entityType: "FILE",
+          entityId: fileId,
+        },
+      })
       : null;
 
     if (!chatSession) {
@@ -286,8 +286,8 @@ export async function POST(
 
     // Pass the metadata context into your builder function
     const chatMessages = buildPdfChatMessages(
-      fileMetaContext, 
-      contextText, 
+      fileMetaContext,
+      contextText,
       userMessageText,
       recentMessages
     );
@@ -371,14 +371,14 @@ export async function POST(
                 fileId,
                 docFingerprint,
                 settings
-              ).catch(() => {});
+              ).catch(() => { });
             }
           }
 
           if (!isCancelled) {
             try {
               controller.close();
-            } catch {}
+            } catch { }
           }
         } catch (err: any) {
           if (isCancelled || abortController.signal.aborted || err?.name === "AbortError") {
@@ -388,7 +388,7 @@ export async function POST(
             if (!isCancelled) {
               try {
                 controller.error(err);
-              } catch {}
+              } catch { }
             }
           }
         } finally {

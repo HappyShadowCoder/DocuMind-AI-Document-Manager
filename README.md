@@ -1,21 +1,32 @@
 # DocuMind — AI Document Intelligence Platform
 
-DocuMind is an AI-powered document intelligence and management platform designed for deep legal and FIR analysis, multi-document semantic search, OCR extraction, and high-performance retrieval-augmented generation (RAG).
+DocuMind is an enterprise-grade AI-powered document intelligence and management platform designed for deep legal and FIR analysis, multi-document semantic search, OCR extraction, high-performance retrieval-augmented generation (RAG), and zero-disk database file storage.
 
-Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL + pgvector**, **Prisma ORM**, and **Motion (Framer Motion)**.
+Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL 16 + pgvector**, **Prisma ORM**, and **Motion (Framer Motion)**.
 
 ---
 
 ## 🌟 Key Features
 
-### ⚡ Semantic AI Caching
-- **Sub-100ms Instant Responses**: Questions that are semantically identical or closely rephrased bypass the LLM pipeline and stream directly from the vector cache.
-- **pgvector Cosine Search**: Employs an IVFFlat-indexed cosine similarity search (`vector_cosine_ops`) over 768-dimensional question embeddings.
+### 🗄️ Hybrid Database Storage & Auth-Gated Streaming
+- **Zero Local Disk Exposure**: Uploaded files (PDFs, images, etc.) are stored as binary data (`BYTEA`) directly in PostgreSQL via a dedicated `FileBlob` table.
+- **Secure Auth-Gated Streaming (`/api/files/[id]/serve`)**: Static public URLs in `public/uploads/` are completely eliminated. Every document view or download requires a valid JWT cookie and undergoes role/ownership access checks.
+- **Atomic Transactions**: File records and raw binary blobs are created together in a single `prisma.$transaction`.
+- **Cascading Deletions**: Deleting a file instantly and cleanly cascades to remove its binary blob, FIR metadata, vector embeddings, and chat sessions without leaving orphaned files on disk.
+
+### ⚡ Semantic AI Caching (pgvector)
+- **Sub-50ms Instant Responses**: Questions that are semantically identical or closely rephrased bypass the LLM pipeline and stream directly from the vector cache.
+- **pgvector Cosine Search**: Employs an IVFFlat-indexed cosine similarity search (`vector_cosine_ops`) over 768-dimensional question embeddings with an adaptive `0.28` threshold.
 - **Dynamic Document Fingerprinting**: Cache entries are tagged with a SHA-256 fingerprint of the visible document set (`fileId:updatedAt`). Adding, editing, or deleting files automatically invalidates stale entries without race conditions.
-- **Zero LLM Slot Consumption**: Cache hits bypass the concurrency limiter, preserving local GPU/CPU compute for unique queries.
-- **Conversation Context Awareness**: Bypasses the cache when a chat session has prior turns ($\ge 2$ messages) to ensure context-dependent follow-up questions remain accurate.
+- **Fail-Open Resilience**: Cache lookup failures gracefully fall back to live AI generation — ensuring chat never throws a 500 error.
 - **Provider Isolation**: Caches Ollama and OpenAI answers separately under `aiProvider` to prevent cross-model leakage.
-- **Admin Management API**: Endpoints to monitor hit counts, view top cached questions, and execute automated cleanup (`/api/admin/cache`).
+- **Persistent Cache Badges**: Responses retrieved from the cache permanently show the green **⚡ Semantic Cache Hit • Instant** badge, even across page reloads and session switches.
+- **Admin Management API**: Endpoints to monitor hit counts, inspect top cached questions, and execute automated cleanup (`/api/admin/cache`).
+
+### 💬 Intelligent Chat Threads & Sleek History Popover
+- **Smart Semantic Title Generator**: Automatic intent classification produces polished thread names like *"Document Overview"*, *"Acts & Legal Sections"*, *"FIR Details"*, and *"Property Loss & Damages"* instead of awkward sentence fragments.
+- **Compact Thread Switcher**: Single-row modern header with a dedicated **`[+ New Chat]`** button and an interactive **Thread Selector Popover**.
+- **Thread History & Management**: View relative timestamps (*"Just now"*, *"10m ago"*, *"Yesterday"*), switch between threads instantly, delete individual chat threads, or **"Clear all"** history with one click.
 
 ### 🤖 Dual AI Engine Support
 - **Local & Offline (Default)**: Powered by [Ollama](https://ollama.com/) with `llama3.1:8b` and `nomic-embed-text` (768 dimensions). Zero cloud dependency and fully private.
@@ -26,9 +37,9 @@ Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL + pgvector**,
 - **Automated Metadata Extraction**: Extracts FIR Numbers, Registration Dates, Districts, Police Stations, Property Loss amounts, and Zero FIR references during ingestion.
 - **IPC & BNS Dual Knowledge**: Handles both legacy Indian Penal Code (IPC) and modern Bharatiya Nyaya Sanhita (BNS 2023) provisions with subsection resolution.
 - **Multi-Scope AI Chat**:
-  - **Global Chat**: Query across all permitted documents in the entire repository with role-based access control (Admin vs. Standard User).
+  - **Single PDF Chat**: Side-by-side PDF viewer with page-level grounding and clickable citation tags.
   - **Folder Chat**: Synthesize information across multiple PDFs grouped inside a folder.
-  - **Single PDF Chat**: Page-level grounding with clickable citation tags that navigate directly to referenced pages.
+  - **Global Chat**: Query across all permitted documents in the entire repository with role-based access control.
 - **Interactive `/stats` Police Dashboard**: Generates comprehensive crime distributions, police station caseloads, and property loss summaries with interactive UI cards.
 
 ### 👁️ OCR & Scanned Document Ingestion
@@ -36,7 +47,6 @@ Built with **Next.js 16 (App Router)**, **React 19**, **PostgreSQL + pgvector**,
 
 ### ✨ Smooth Motion Animations
 - Integrated with `framer-motion` for fluid message entrances, responsive empty-state prompt buttons, and collapsible thought accordions (`<ThinkingBlock>`).
-- Live animated `⚡ Semantic Cache Hit` indicators on instant responses.
 
 ---
 
@@ -90,6 +100,20 @@ This launches a PostgreSQL 16 container with the `pgvector` extension enabled on
 
 ---
 
+## 🔄 Database Migration Scripts
+
+DocuMind includes standalone migration and maintenance scripts in `Code/scripts/`:
+
+```bash
+# Apply Semantic Cache vector table & indexes
+cd Code && npx tsx scripts/apply-cache-migration.ts
+
+# Migrate legacy disk files (public/uploads/) into PostgreSQL FileBlob
+cd Code && npx tsx scripts/migrate-files-to-db.ts
+```
+
+---
+
 ## 🔐 Credentials & Default Ports
 
 - **Web Application**: [http://localhost:3000](http://localhost:3000)
@@ -105,11 +129,12 @@ This launches a PostgreSQL 16 container with the `pgvector` extension enabled on
 ```
 ├── Code/                               # Main Next.js application
 │   ├── prisma/
-│   │   ├── migrations/                 # Schema migrations including pgvector & SemanticCache
-│   │   ├── schema.prisma               # Prisma models (User, File, DocumentChunk, SemanticCache, etc.)
+│   │   ├── migrations/                 # Schema migrations (pgvector, SemanticCache, FileBlob)
+│   │   ├── schema.prisma               # Prisma models (User, File, FileBlob, DocumentChunk, SemanticCache, etc.)
 │   │   └── seed.ts                     # Database seeder
-│   ├── public/
-│   │   └── uploads/                    # Physical uploaded PDF documents
+│   ├── scripts/
+│   │   ├── apply-cache-migration.ts    # Standalone script to apply semantic cache migration
+│   │   └── migrate-files-to-db.ts      # One-shot migration from disk uploads to DB FileBlob
 │   ├── src/
 │   │   ├── app/                        # Next.js App Router routes & API endpoints
 │   │   │   ├── (auth)/login/           # User authentication
@@ -118,6 +143,8 @@ This launches a PostgreSQL 16 container with the `pgvector` extension enabled on
 │   │   │   │   ├── admin/cache/        # Semantic cache inspection & maintenance API
 │   │   │   │   ├── chat/global/        # Global repository chat endpoint
 │   │   │   │   ├── files/[id]/chat/    # Single document chat endpoint
+│   │   │   │   ├── files/[id]/serve/   # Auth-gated document streaming endpoint
+│   │   │   │   ├── files/[id]/sessions/# Chat session management (delete / clear all)
 │   │   │   │   └── folders/[id]/chat/  # Folder multi-document chat endpoint
 │   │   │   └── dashboard/              # Document management, PDF viewer & folder views
 │   │   ├── components/                 # React UI components
@@ -125,6 +152,7 @@ This launches a PostgreSQL 16 container with the `pgvector` extension enabled on
 │   │   │   └── settings/               # AI engine settings modal
 │   │   ├── lib/
 │   │   │   ├── ai.ts                   # Unified Ollama / OpenAI embeddings & completions
+│   │   │   ├── chat-title.ts           # Smart semantic title generator
 │   │   │   ├── semantic-cache.ts       # Semantic caching engine & fingerprinting
 │   │   │   ├── pdf-processing.ts       # RAG retrieval, chunking & vector search
 │   │   │   └── police-stats.ts         # FIR statistics aggregation engine
@@ -145,7 +173,7 @@ Adjust semantic cache behavior in `Code/.env`:
 
 | Environment Variable | Default | Description |
 |---|---|---|
-| `SEMANTIC_CACHE_THRESHOLD` | `0.15` | Cosine distance cutoff for cache hits (lower = stricter match) |
+| `SEMANTIC_CACHE_THRESHOLD` | `0.28` | Cosine distance cutoff for cache hits (allows natural question rephrasing) |
 | `SEMANTIC_CACHE_MAX_AGE_DAYS` | `30` | Age in days before zero-hit cache rows are pruned |
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama service endpoint |
 | `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | Local embedding model (768 dims) |
