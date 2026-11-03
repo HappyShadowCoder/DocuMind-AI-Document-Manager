@@ -13,13 +13,25 @@
  * The script is idempotent — files that already have a FileBlob row are skipped.
  */
 
+import path from "node:path";
+import dotenv from "dotenv";
+
+// Load environment variables (.env and .env.local)
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
+
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import path from "node:path";
-import { PrismaClient } from "../src/generated/prisma";
 import { randomUUID } from "node:crypto";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../src/generated/prisma";
 
-const prisma = new PrismaClient();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 /** Guess MIME type from file extension. */
 function guessMimeType(fileName: string, fileType: string): string {
@@ -57,6 +69,10 @@ function resolveUploadsPath(storedPath: string): string {
 
 async function main() {
   console.log("=== DocuMind: Migrate files from disk → PostgreSQL FileBlob ===\n");
+
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set in the environment or .env file.");
+  }
 
   // Query all files that still have a path (legacy disk files)
   const files = await prisma.file.findMany({
@@ -131,9 +147,14 @@ async function main() {
   }
 
   await prisma.$disconnect();
+  await pool.end();
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("Migration script crashed:", err);
+  try {
+    await prisma.$disconnect();
+    await pool.end();
+  } catch {}
   process.exit(1);
 });
