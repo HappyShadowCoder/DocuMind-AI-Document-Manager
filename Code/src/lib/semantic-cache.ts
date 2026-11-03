@@ -117,66 +117,72 @@ export async function lookupSemanticCache(
   // Don't serve cached answers for context-dependent follow-up questions
   if (recentTurns >= 2) return null;
 
-  const provider = settings.provider;
+  try {
+    const provider = settings.provider;
 
-  // --- Fast path: exact question hash ---
-  const questionHash = createHash("sha256")
-    .update(question.toLowerCase().trim())
-    .digest("hex");
+    // --- Fast path: exact question hash ---
+    const questionHash = createHash("sha256")
+      .update(question.toLowerCase().trim())
+      .digest("hex");
 
-  const exact = await prisma.$queryRaw<
-    Array<{ id: string; answerText: string; sourcePages: string[] }>
-  >`
-    SELECT id, "answerText", "sourcePages"
-    FROM "SemanticCache"
-    WHERE "scopeType" = ${scopeType}::"CacheScope"
-      AND "scopeId"        = ${scopeId}
-      AND "docFingerprint" = ${docFingerprint}
-      AND "questionHash"   = ${questionHash}
-      AND "aiProvider"     = ${provider}::"AiProvider"
-    LIMIT 1
-  `;
+    const exact = await prisma.$queryRaw<
+      Array<{ id: string; answerText: string; sourcePages: string[] }>
+    >`
+      SELECT id, "answerText", "sourcePages"
+      FROM "SemanticCache"
+      WHERE "scopeType" = ${scopeType}::"CacheScope"
+        AND "scopeId"        = ${scopeId}
+        AND "docFingerprint" = ${docFingerprint}
+        AND "questionHash"   = ${questionHash}
+        AND "aiProvider"     = ${provider}::"AiProvider"
+      LIMIT 1
+    `;
 
-  if (exact.length > 0) {
-    const hit = exact[0];
-    // Bump hit count asynchronously (non-blocking)
-    prisma.semanticCache
-      .update({ where: { id: hit.id }, data: { hitCount: { increment: 1 } } })
-      .catch(() => {});
-    return { answerText: hit.answerText, sourcePages: hit.sourcePages, entryId: hit.id };
+    if (exact.length > 0) {
+      const hit = exact[0];
+      // Bump hit count asynchronously (non-blocking)
+      prisma.semanticCache
+        .update({ where: { id: hit.id }, data: { hitCount: { increment: 1 } } })
+        .catch(() => {});
+      return { answerText: hit.answerText, sourcePages: hit.sourcePages, entryId: hit.id };
+    }
+
+    // --- Semantic path: vector similarity search ---
+    const vectorString = `[${embedding.join(",")}]`;
+
+    const similar = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        answerText: string;
+        sourcePages: string[];
+        distance: number;
+      }>
+    >`
+      SELECT id, "answerText", "sourcePages",
+             ("questionEmbedding" <=> ${vectorString}::vector) AS distance
+      FROM "SemanticCache"
+      WHERE "scopeType"      = ${scopeType}::"CacheScope"
+        AND "scopeId"        = ${scopeId}
+        AND "docFingerprint" = ${docFingerprint}
+        AND "aiProvider"     = ${provider}::"AiProvider"
+      ORDER BY "questionEmbedding" <=> ${vectorString}::vector
+      LIMIT 1
+    `;
+
+    if (similar.length > 0 && similar[0].distance <= SIMILARITY_THRESHOLD) {
+      const hit = similar[0];
+      prisma.semanticCache
+        .update({ where: { id: hit.id }, data: { hitCount: { increment: 1 } } })
+        .catch(() => {});
+      return { answerText: hit.answerText, sourcePages: hit.sourcePages, entryId: hit.id };
+    }
+
+    return null;
+  } catch (err) {
+    // Non-fatal — cache lookup failure should gracefully fall back to live generation
+    console.warn("[SemanticCache] Lookup failed, falling back to live generation:", err);
+    return null;
   }
-
-  // --- Semantic path: vector similarity search ---
-  const vectorString = `[${embedding.join(",")}]`;
-
-  const similar = await prisma.$queryRaw<
-    Array<{
-      id: string;
-      answerText: string;
-      sourcePages: string[];
-      distance: number;
-    }>
-  >`
-    SELECT id, "answerText", "sourcePages",
-           ("questionEmbedding" <=> ${vectorString}::vector) AS distance
-    FROM "SemanticCache"
-    WHERE "scopeType"      = ${scopeType}::"CacheScope"
-      AND "scopeId"        = ${scopeId}
-      AND "docFingerprint" = ${docFingerprint}
-      AND "aiProvider"     = ${provider}::"AiProvider"
-    ORDER BY "questionEmbedding" <=> ${vectorString}::vector
-    LIMIT 1
-  `;
-
-  if (similar.length > 0 && similar[0].distance <= SIMILARITY_THRESHOLD) {
-    const hit = similar[0];
-    prisma.semanticCache
-      .update({ where: { id: hit.id }, data: { hitCount: { increment: 1 } } })
-      .catch(() => {});
-    return { answerText: hit.answerText, sourcePages: hit.sourcePages, entryId: hit.id };
-  }
-
-  return null;
 }
 
 // ---------------------------------------------------------------------------
