@@ -939,6 +939,43 @@ export async function retrieveGlobalDocumentContext(
     }
   }
 
+  // 5b. DETECT SPECIFIC YEAR FILTER (e.g. "2026", "and 2026?", "from 2025", "year 2024")
+  const yearMatch = query.match(/\b(20\d{2})\b/);
+  const targetYear = yearMatch ? yearMatch[1] : null;
+  const isYearSpecificQuery = !!targetYear && (
+    qLower.includes("year") ||
+    qLower.includes("fir") ||
+    qLower.includes("and ") ||
+    qLower.includes("from ") ||
+    qLower.includes("in ") ||
+    /^\s*(?:and\s+)?20\d{2}\??\s*$/i.test(query.trim())
+  );
+
+  if (isYearSpecificQuery && targetYear && candidateFileIds.length === fileIds.length) {
+    const yearMatchedFiles = accessibleFiles.filter((file) => {
+      const meta = file.documentMetadata;
+      const dateStr = meta?.firDate ? meta.firDate.toISOString().slice(0, 4) : "";
+      const firNum = meta?.firNumber || "";
+      const fileName = file.name;
+      return (
+        dateStr === targetYear ||
+        firNum.includes(targetYear) ||
+        fileName.includes(targetYear)
+      );
+    });
+
+    if (yearMatchedFiles.length > 0) {
+      candidateFileIds = yearMatchedFiles.map((f) => f.id);
+    } else {
+      return {
+        contextText: "",
+        sourceFiles: [],
+        filesInventory: [],
+        totalAccessibleCount: accessibleFiles.length,
+      };
+    }
+  }
+
   // 6. DETECT LEGAL SECTION SEARCH
   const potentialSectionTokens = (
     query.match(/\b\d{2,4}[A-Za-z]?(?:\([0-9a-zA-Z-]+\))?\b/g) || []
@@ -1001,20 +1038,31 @@ export async function retrieveGlobalDocumentContext(
       : filesInventory;
 
   // Retrieve relevant chunks only from candidateFileIds
-  const [queryEmbedding] = await embedTexts([query], settings);
-  const vectorString = `[${queryEmbedding.join(",")}]`;
+  let selectedChunks: Array<{ content: string; pageNumber: number; fileId: string }> = [];
+  try {
+    const [queryEmbedding] = await embedTexts([query], settings);
+    const vectorString = `[${queryEmbedding.join(",")}]`;
 
-  const selectedChunks = await prisma.$queryRaw<Array<{
-    content: string;
-    pageNumber: number;
-    fileId: string;
-  }>>`
-    SELECT "content", "pageNumber", "fileId"
-    FROM "DocumentChunk"
-    WHERE "fileId" = ANY(${candidateFileIds}::text[])
-    ORDER BY "embedding" <=> ${vectorString}::vector
-    LIMIT 10
-  `;
+    selectedChunks = await prisma.$queryRaw<Array<{
+      content: string;
+      pageNumber: number;
+      fileId: string;
+    }>>`
+      SELECT "content", "pageNumber", "fileId"
+      FROM "DocumentChunk"
+      WHERE "fileId" = ANY(${candidateFileIds}::text[])
+      ORDER BY "embedding" <=> ${vectorString}::vector
+      LIMIT 10
+    `;
+  } catch (err) {
+    console.warn("Vector search failed or AI provider offline, falling back to candidate chunks:", err);
+    selectedChunks = await prisma.documentChunk.findMany({
+      where: { fileId: { in: candidateFileIds } },
+      select: { content: true, pageNumber: true, fileId: true },
+      take: 10,
+      orderBy: [{ fileId: "asc" }, { pageNumber: "asc" }],
+    });
+  }
 
   // Group chunks by fileId to mention each document once with combined pages
   const chunksByFile = new Map<string, Array<{ pageNumber: number; content: string }>>();
@@ -1036,11 +1084,17 @@ export async function retrieveGlobalDocumentContext(
     })
     .join("\n\n====================\n\n");
 
-  const sourceFiles = selectedChunks.map((chunk) => ({
-    id: chunk.fileId,
-    name: fileNameById.get(chunk.fileId) ?? "Document",
-    pageNumber: chunk.pageNumber,
-  }));
+  const sourceFilesMap = new Map<string, { id: string; name: string; pageNumber: number }>();
+  for (const chunk of selectedChunks) {
+    if (!sourceFilesMap.has(chunk.fileId)) {
+      sourceFilesMap.set(chunk.fileId, {
+        id: chunk.fileId,
+        name: fileNameById.get(chunk.fileId) ?? "Document",
+        pageNumber: chunk.pageNumber,
+      });
+    }
+  }
+  const sourceFiles = Array.from(sourceFilesMap.values());
 
   return {
     contextText,

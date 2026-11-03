@@ -4,7 +4,9 @@ dotenv.config();
 
 import { execFileSync } from "node:child_process";
 import path from "node:path";
+import fs from "node:fs";
 import bcrypt from "bcryptjs";
+import { Pool } from "pg";
 
 function escapeSql(value: string): string {
   return value.replace(/'/g, "''");
@@ -91,6 +93,36 @@ async function main() {
 
   runSql(sql);
   console.log("Seeded admin and test users.");
+
+  // Seed FileBlobs if table is empty and file_blobs.json exists
+  const blobsJsonPath = path.resolve(__dirname, "file_blobs.json");
+  if (fs.existsSync(blobsJsonPath) && process.env.DATABASE_URL) {
+    try {
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      const countRes = await pool.query('SELECT count(*) FROM "FileBlob"');
+      const blobCount = parseInt(countRes.rows[0].count, 10);
+      if (blobCount === 0) {
+        console.log("Seeding FileBlobs from file_blobs.json...");
+        const raw = fs.readFileSync(blobsJsonPath, "utf8");
+        const blobs = JSON.parse(raw);
+        for (const b of blobs) {
+          const buffer = Buffer.from(b.dataBase64, "base64");
+          await pool.query(
+            `INSERT INTO "FileBlob" (id, "fileId", data, "mimeType", "createdAt")
+             VALUES (gen_random_uuid()::text, $1, $2, $3, NOW())
+             ON CONFLICT ("fileId") DO NOTHING`,
+            [b.fileId, buffer, b.mimeType]
+          );
+        }
+        console.log(`Seeded ${blobs.length} FileBlobs successfully.`);
+      } else {
+        console.log(`FileBlob already has ${blobCount} records.`);
+      }
+      await pool.end();
+    } catch (err: any) {
+      console.warn("Notice: FileBlob seeding skipped or encountered error:", err.message);
+    }
+  }
 }
 
 main().catch((error) => {

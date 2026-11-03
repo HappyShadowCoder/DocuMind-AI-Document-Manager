@@ -106,6 +106,9 @@ if [ "$DB_READY" = true ]; then
   echo "[*] Synchronizing database schema..."
   (cd Code && npx prisma db push --skip-generate --accept-data-loss || true)
 
+  echo "[*] Applying semantic cache vector tables..."
+  (cd Code && npx tsx scripts/apply-cache-migration.ts || true)
+
   echo "[*] Seeding default administrator and test accounts..."
   (cd Code && npm run db:seed || true)
 fi

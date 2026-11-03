@@ -52,6 +52,7 @@ echo [*] Generating Prisma Client...
 cd Code
 call npx prisma generate
 call npx prisma db push --skip-generate --accept-data-loss
+call npx tsx scripts/apply-cache-migration.ts
 call npm run db:seed
 cd ..
 

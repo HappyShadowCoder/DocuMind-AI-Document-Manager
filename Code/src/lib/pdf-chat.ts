@@ -664,6 +664,44 @@ STRICT INCLUSION & EXCLUSION RULES:
 - Every genuine matching document gets EXACTLY ONE row in the table, combining all its relevant pages.`;
   }
 
+  const yearMatch = userQuestion.match(/\b(20\d{2})\b/);
+  const requestedYear = yearMatch ? yearMatch[1] : null;
+  const isYearSpecificQuery = !!requestedYear && (
+    qLower.includes("year") ||
+    qLower.includes("fir") ||
+    qLower.includes("and ") ||
+    qLower.includes("from ") ||
+    qLower.includes("in ") ||
+    /^\s*(?:and\s+)?20\d{2}\??\s*$/i.test(userQuestion.trim())
+  );
+
+  if (isYearSpecificQuery && requestedYear && !isZeroFirQuery && !isFirearmsQuery && !isPropertyLossQuery) {
+    const yearFiles = filesInventory.filter((f) => {
+      const d = f.firDate ? f.firDate.slice(0, 4) : "";
+      const num = f.firNumber || "";
+      const name = f.fileName || "";
+      return d === requestedYear || num.includes(requestedYear) || name.includes(requestedYear);
+    });
+
+    const yearGuidance = `\n\nCRITICAL DIRECTIVE FOR YEAR ${requestedYear} QUERIES:
+The user is specifically asking about FIRs from the year ${requestedYear}.
+The verified inventory contains EXACTLY ${yearFiles.length} unique FIR(s) from the year ${requestedYear}:
+${yearFiles
+  .map(
+    (f) =>
+      `- Document: ${f.fileName} (FIR No: ${f.firNumber || "N/A"}, Date: ${f.firDate || "N/A"}, PS: ${f.policeStation || "N/A"})`
+  )
+  .join("\n")}
+
+STRICT INSTRUCTIONS:
+1. State clearly: "There are ${yearFiles.length} FIRs from the year ${requestedYear}."
+2. The table MUST contain EXACTLY ONE row per unique document (${yearFiles.length} rows total).
+3. ABSOLUTELY NEVER create multiple rows for different pages of the same document or repeat the same document multiple times!
+4. ONLY include genuine FIRs from ${requestedYear}.`;
+
+    queryGuidance = queryGuidance ? `${queryGuidance}\n${yearGuidance}` : yearGuidance;
+  }
+
   const systemPrompt = `You are the Global AI FIR & Document Intelligence Assistant for DocuMind.${queryGuidance ? "\n" + queryGuidance : ""}
 You have access to ${accessibleFilesCount} permitted document(s) in this repository.${inventorySummary}
 

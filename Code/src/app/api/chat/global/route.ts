@@ -428,14 +428,12 @@ export async function POST(request: NextRequest) {
 
             // 1. Chunks from sourceFiles whose document name or base name appears in the reply
             for (const s of sourceFiles) {
+              if (seenFileIds.has(s.id)) continue;
               const fileName = s.name.toLowerCase();
               const baseName = fileName.replace(/\.pdf$/i, "");
               if (replyLower.includes(fileName) || replyLower.includes(baseName)) {
-                const tag = `${s.id}|${s.name}|${s.pageNumber}`;
-                if (!relevantSources.includes(tag)) {
-                  relevantSources.push(tag);
-                  seenFileIds.add(s.id);
-                }
+                relevantSources.push(`${s.id}|${s.name}|${s.pageNumber}`);
+                seenFileIds.add(s.id);
               }
             }
 
