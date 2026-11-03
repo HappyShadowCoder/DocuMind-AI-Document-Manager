@@ -455,7 +455,8 @@ export default function GlobalChatPanel({ user }: GlobalChatPanelProps) {
       // Check if session ID and dynamic Title was returned
       const returnedSessionId = res.headers.get("X-Session-Id");
       const returnedSessionTitle = res.headers.get("X-Session-Title");
-      const isCacheHit = res.headers.get("X-Cache") === "HIT";
+      const cacheHeader = res.headers.get("X-Cache") || res.headers.get("x-cache");
+      const isCacheHit = cacheHeader?.toUpperCase() === "HIT";
       const targetSessionId = returnedSessionId || activeSessionId;
 
       if (returnedSessionId) {

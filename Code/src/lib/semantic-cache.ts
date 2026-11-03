@@ -24,9 +24,11 @@ import { embedTexts, type AiSettings } from "@/lib/ai";
 // Configuration
 // ---------------------------------------------------------------------------
 
-/** Cosine-distance threshold for a semantic cache hit (lower = stricter). */
+/** Cosine-distance threshold for a semantic cache hit (lower = stricter).
+ * 0.28 accommodates natural question rephrasings (e.g. "What is this document about?" vs "tell me about this document").
+ */
 const SIMILARITY_THRESHOLD =
-  parseFloat(process.env.SEMANTIC_CACHE_THRESHOLD || "") || 0.15;
+  parseFloat(process.env.SEMANTIC_CACHE_THRESHOLD || "") || 0.28;
 
 /** Days after which zero-hit entries are purged by cleanupStaleCache(). */
 const MAX_AGE_DAYS =

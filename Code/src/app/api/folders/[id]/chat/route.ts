@@ -257,7 +257,7 @@ function generateChatTitle(query: string): string {
           sessionId: chatSession.id,
           role: "assistant",
           content: cacheHit.answerText,
-          sources: cacheHit.sourcePages,
+          sources: [...cacheHit.sourcePages, "__CACHED__"],
         },
       });
       await prisma.chatSession.update({
@@ -286,6 +286,7 @@ function generateChatTitle(query: string): string {
           "Transfer-Encoding": "chunked",
           "X-Session-Id": chatSession.id,
           "X-Cache": "HIT",
+          "Access-Control-Expose-Headers": "X-Cache, X-Session-Id",
         },
       });
     }

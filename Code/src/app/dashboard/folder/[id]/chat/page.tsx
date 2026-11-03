@@ -231,7 +231,8 @@ export default function FolderChatPage() {
         throw new Error(errorData.error || "Failed to communicate with the AI.");
       }
 
-      const isCacheHit = res.headers.get("X-Cache") === "HIT";
+      const cacheHeader = res.headers.get("X-Cache") || res.headers.get("x-cache");
+      const isCacheHit = cacheHeader?.toUpperCase() === "HIT";
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let incremental = "";

@@ -50,6 +50,7 @@ interface ChatMessageRow {
     id: string;
     role: "user" | "assistant" | "system";
     content: string;
+    sources?: string[];
     createdAt?: string;
 }
 
@@ -251,6 +252,7 @@ function PdfChatContent() {
                     role: m.role as "user" | "assistant",
                     content: visiblePortion(m.content),
                     sources: extractSources(m.content),
+                    isCached: Array.isArray(m.sources) && m.sources.includes("__CACHED__"),
                 }))
         );
     }, []);
@@ -402,7 +404,8 @@ function PdfChatContent() {
                 throw new Error(data.error || "The assistant failed to respond.");
             }
 
-            const isCacheHit = res.headers.get("X-Cache") === "HIT";
+            const cacheHeader = res.headers.get("X-Cache") || res.headers.get("x-cache");
+            const isCacheHit = cacheHeader?.toUpperCase() === "HIT";
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
             let raw = "";
